@@ -1,0 +1,103 @@
+Init
+----
+
+Create a new Minimal Code project, with starter content
+
+Create a new level, using the template 'Default' (maybe add some lights)
+Save as main.umap
+
+Project settings:
+   * Maps&modes
+      * Set default maps to main.umap (all 3)
+   * Input: console key = home
+   * Physics: max delta time = 1 (we use fixed dt, get this out of the way)
+
+Create shortcuts:
+   * standalone: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -game -log -UseFixedTimeStep
+   * client: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" 127.0.0.1 -game -log -UseFixedTimeStep
+   * server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -server -game -log -UseFixedTimeStep
+   * listen server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" main?listen -game -log -UseFixedTimeStep
+
+
+
+
+Use fixed dt
+------------
+
+In your GameMode, do:
+   1 Set fixed dt in constructor: FApp::SetFixedDeltaTime( 1.f / 60.f )<br />
+     (in 4.4, you use the command line option -UseFixedTimeStep to enable fixed time stepping!)
+   1 (already done as we started from the Minimal Code template: Set all GameModes to MyGameMode in config)
+
+In MyGameMode::Tick(), implement manual fps capping (use code from UEngine::UpdateTimeAndHandleMaxTickRate())
+
+Set the framerate in Project Preferences ('desired framerate' might still affect something?)
+
+Check that launch shortcuts have the -UseFixedTimeStep flag set
+
+
+Create the ragdoll
+------------------
+
+Migrate from Content Examples: SkeletalMesh'/Game/ExampleContent/AnimationDemo/Meshes/Owen.Owen'
+
+Create BP from Owen -> RagdollControl/OwenBP
+
+Set Skeletal mesh component properties:
+   * Simulate physics: on
+   * Collision presets: PhysicsActor
+
+Place him in the world
+
+
+Create a C++ access point
+-------------------------
+
+Create the ControlledRagdoll C++ class extending Actor, reparent OwenBP to it
+   * reparenting does not become saved automatically, you need to save the asset directly in the BP editor
+
+Re-enable ticking in the constructor: (needs a full restart)
+	PrimaryActorTick.bCanEverTick = true;
+	(//PrimaryActorTick.bStartWithTickEnabled = true;)
+	(//PrimaryActorTick.bAllowTickOnDedicatedServer = true;)
+
+
+Enable and access PhysX
+-----------------------
+
+Enable ragdoll physics on dedicated server. In PostInitializeComponents(), do:
+   * this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
+   * this->SkeletalMeshComponent->SetSimulatePhysics( true );
+
+
+RagdollController45.Build.cs, add PhysX to the following:
+   * PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysX" });
+   * PublicIncludePaths.AddRange(new string[] { "Engine/Source/ThirdParty/PhysX/PhysX-3.3/include" });
+(see https://answers.unrealengine.com/questions/70019/how-to-include-the-header-file-from-a-plugin.html)
+
+Source files
+   * #include <extensions/PxD6Joint.h>
+      * this->SkeletalMeshComponent->Constraints[joint]->ConstraintData->getTwist() ...
+
+
+Replication
+-----------
+
+Activate replication
+   * Activate actor and movement replication for OwenBP via editor, tick "always relevant", "net update frequency" to 1000 so as to effectively update on each tick
+   * Implement AControlledRagdoll::GetLifetimeReplicatedProps() (call the DOREPLIFETIME macro for whatever you want to replicate, remember to call Super!)
+      * #include "Net/UnrealNetwork.h"
+
+
+Joint state readout
+-------------------
+
+this->SkeletalMeshComponent->Constraints[joint]->JointName;
+this->SkeletalMeshComponent->Constraints[joint]->ConstraintData->getTwist(), ...;
+
+
+Applying joint forces
+---------------------
+
+For testing
+   * World Settings -> Override World Gravity = on (ie, gravity off)
