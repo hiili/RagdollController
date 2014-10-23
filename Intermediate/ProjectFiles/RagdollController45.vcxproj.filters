@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\RagdollController45.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{121CC2B3-59F6-4C41-9005-F572D54ED348}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\RagdollController45.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\RagdollController45Editor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Config">
+      <UniqueIdentifier>{7044A3D4-F895-43C9-BC15-92BC8761FE54}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\RagdollController45">
+      <UniqueIdentifier>{99495C26-491F-4A74-A635-5A01393A773E}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\RagdollController45\ControlledRagdoll.cpp">
+      <Filter>Source\RagdollController45</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController45\ControlledRagdoll.h">
+      <Filter>Source\RagdollController45</Filter>
+    </ClInclude>
+    <None Include="..\..\Source\RagdollController45\RagdollController45.Build.cs">
+      <Filter>Source\RagdollController45</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\RagdollController45\RagdollController45.cpp">
+      <Filter>Source\RagdollController45</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController45\RagdollController45.h">
+      <Filter>Source\RagdollController45</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController45\RagdollController45GameMode.cpp">
+      <Filter>Source\RagdollController45</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController45\RagdollController45GameMode.h">
+      <Filter>Source\RagdollController45</Filter>
+    </ClInclude>
+    <Filter Include="Source\RagdollController45\Resources">
+      <UniqueIdentifier>{2F2ABC24-6637-4AE3-A3DB-1BF914E5DE50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RagdollController45\Resources\Windows">
+      <UniqueIdentifier>{F492A174-4E96-43FF-BA31-CB7BD646827F}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\RagdollController45\Resources\Windows\RagdollController45.ico">
+      <Filter>Source\RagdollController45\Resources\Windows</Filter>
+    </None>
+    <ResourceCompile Include="..\..\Source\RagdollController45\Resources\Windows\RagdollController45.rc">
+      <Filter>Source\RagdollController45\Resources\Windows</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Source\RagdollController45\ScopeGuard.h">
+      <Filter>Source\RagdollController45</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
