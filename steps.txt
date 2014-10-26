@@ -12,7 +12,7 @@ Project settings:
    * Input: console key = home
    * Physics: max delta time = 1 (we use fixed dt, get this out of the way)
 
-Create shortcuts:
+Create shortcuts: (maybe add the -debug flag, in case of using DebugGame builds)
    * standalone: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -game -log -UseFixedTimeStep
    * client: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" 127.0.0.1 -game -log -UseFixedTimeStep
    * server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -server -game -log -UseFixedTimeStep
@@ -84,7 +84,7 @@ Replication
 -----------
 
 Activate replication
-   * Activate actor and movement replication for OwenBP via editor, tick "always relevant", "net update frequency" to 1000 so as to effectively update on each tick
+   * Activate actor and movement replication for OwenBP via editor, tick "always relevant", "net update frequency" to 200 so as to effectively update on each tick at least up to 120 fps
    * Implement AControlledRagdoll::GetLifetimeReplicatedProps() (call the DOREPLIFETIME macro for whatever you want to replicate, remember to call Super!)
       * #include "Net/UnrealNetwork.h"
 

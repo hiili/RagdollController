@@ -4,6 +4,7 @@
 #include "ControlledRagdoll.h"
 
 #include "Net/UnrealNetwork.h"
+#include "GenericPlatform/GenericPlatformProperties.h"
 
 #include <extensions/PxD6Joint.h>
 #include <PxRigidBody.h>
@@ -27,8 +28,8 @@ void AControlledRagdoll::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> &
 {
 	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
 
-	DOREPLIFETIME( AControlledRagdoll, PxBoneTransforms );
-	//DOREPLIFETIME( AControlledRagdoll, foo );
+	DOREPLIFETIME( AControlledRagdoll, BoneStates );
+	DOREPLIFETIME( AControlledRagdoll, IsServerLittleEndian );
 }
 
 
@@ -62,16 +63,42 @@ void AControlledRagdoll::PostInitializeComponents()
 	}
 
 
-	/* enable physics on dedicated server */
-
-	if( this->SkeletalMeshComponent )
+	if( this->Role >= ROLE_Authority )
 	{
-		this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
-		this->SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are enabled also via editor!
+
+		/* We are standalone or a server */
+		
+		// Store server platform endianness to a replicated flag
+		this->IsServerLittleEndian = FGenericPlatformProperties::IsLittleEndian();
+
+		// make sure that physics simulation is enabled also on a dedicated server
+		if( this->SkeletalMeshComponent )
+		{
+			this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
+			this->SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are enabled also via editor!
+		}
+		else
+		{
+			UE_LOG( LogTemp, Error, TEXT( "(%s) Failed to enable SkeletalMeshComponent physics on dedicated server!" ), TEXT( __FUNCTION__ ) );
+		}
+
 	}
 	else
 	{
-		UE_LOG( LogTemp, Error, TEXT( "(%s) Failed to enable SkeletalMeshComponent physics on dedicated server!" ), TEXT( __FUNCTION__ ) );
+
+		/* We are a network client, assume spectator role (although UE spectator mode is not used explicitly at the moment) */
+
+		// Set the skeletal mesh to kinematic mode, so as to track exactly the pose stream received from the server (we do not want any local physics interactions or simulation)
+		if( this->SkeletalMeshComponent )
+		{
+			// cannot do this, as UE appears to be using internally a different the coordinate system for kinematic skeletons!
+			//this->SkeletalMeshComponent->SetSimulatePhysics( false );
+		}
+		else
+		{
+			UE_LOG( LogTemp, Error, TEXT( "(%s) Failed to switch SkeletalMeshComponent to kinematic mode on a network client!" ), TEXT( __FUNCTION__ ) );
+		}
+
 	}
 
 
@@ -87,8 +114,6 @@ void AControlledRagdoll::PostInitializeComponents()
 void AControlledRagdoll::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UE_LOG( LogTemp, Error, TEXT( "(%s) C++ BEGIN PLAY" ), TEXT( __FUNCTION__ ) );
 }
 
 
@@ -101,45 +126,15 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	refreshDynamicJointData();
 
 	
-	//UE_LOG( LogTemp, Error, TEXT( "(%s) tick" ), TEXT( __FUNCTION__ ) );
+	// If network client, then apply the received pose from the server and return
 	if( this->Role < ROLE_Authority )
 	{
-		int numBodies = this->PxBoneTransforms.Num();
-		if( numBodies != this->SkeletalMeshComponent->Bodies.Num() )
-		{
-			UE_LOG( LogTemp, Error, TEXT( "(%s) FAIL!!!!!!!!!!!!!!!!!!!!" ), TEXT( __FUNCTION__ ) );
-			return;
-		}
-
-		
-		for( int body = 0; body < numBodies; ++body )
-		{
-			physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
-			if( !pxBody ) return;
-
-			pxBody->setGlobalPose( this->PxBoneTransforms[body].GetPxTransform() );
-		}
-		
-
+		receivePose();
 		return;
 	}
 
-	int numBodies = this->SkeletalMeshComponent->Bodies.Num();
-	this->PxBoneTransforms.SetNum( numBodies );
-	
-	for( int body = 0; body < numBodies; ++body )
-	{
-		physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
-		if( !pxBody ) return;
-
-		this->PxBoneTransforms[body].GetPxTransform() = pxBody->getGlobalPose();
-	}
-	
-
-
-
-
-
+	// Standalone or server: store pose so that it can be replicated to client(s)
+	sendPose();
 
 
 
@@ -264,4 +259,70 @@ void AControlledRagdoll::refreshDynamicJointData()
 	// all good, release the error cleanup scope guard and return
 	sgError.release();
 	return;
+}
+
+
+
+
+void AControlledRagdoll::sendPose()
+{
+	// check the number of bones and resize the BoneStates array
+	int numBodies = this->SkeletalMeshComponent->Bodies.Num();
+	this->BoneStates.SetNum( numBodies );
+
+	// loop through bones and write out state data
+	for( int body = 0; body < numBodies; ++body )
+	{
+		physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
+		if( !pxBody )
+		{
+			UE_LOG( LogTemp, Error, TEXT( "(%s) GetPxRididDynamic() failed for body %d!" ), TEXT( __FUNCTION__ ), body );
+			return;
+		}
+
+		// Replicate pose, skip velocities
+		// (PhysX ignores the velocities if the pose is set during the same tick. Also, we do not want any client-side prediction but just exact replication.)
+		this->BoneStates[body].GetPxTransform() = pxBody->getGlobalPose();
+		//this->BoneStates[body].GetPxLinearVelocity() = pxBody->getLinearVelocity();
+		//this->BoneStates[body].GetPxAngularVelocity() = pxBody->getAngularVelocity();
+	}
+}
+
+
+
+
+void AControlledRagdoll::receivePose()
+{
+	int numBodies = this->BoneStates.Num();
+
+	// Verify that the skeletal meshes have the same number of bones (for example, one might not be initialized yet)
+	if( numBodies != this->SkeletalMeshComponent->Bodies.Num() )
+	{
+		UE_LOG( LogTemp, Error, TEXT( "(%s) Number of bones do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
+		return;
+	}
+
+	// Check that endianness and word sizes match
+	if( this->IsServerLittleEndian != FGenericPlatformProperties::IsLittleEndian()
+		|| (this->BoneStates.Num() > 0 && !this->BoneStates[0].DoDataSizesMatch()) )
+	{
+		UE_LOG( LogTemp, Error, TEXT( "(%s) Endianity or bone state data sizes do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
+		return;
+	}
+
+	// Loop through bones and apply received replication data to each
+	for( int body = 0; body < numBodies; ++body )
+	{
+		physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
+		if( !pxBody )
+		{
+			UE_LOG( LogTemp, Error, TEXT( "(%s) GetPxRididDynamic() failed for body %d!" ), TEXT( __FUNCTION__ ), body );
+			return;
+		}
+
+		// Replicate pose, skip velocities (see sendPose())
+		pxBody->setGlobalPose( this->BoneStates[body].GetPxTransform() );
+		//pxBody->setLinearVelocity( this->BoneStates[body].GetPxLinearVelocity() );
+		//pxBody->setAngularVelocity( this->BoneStates[body].GetPxAngularVelocity() );
+	}
 }

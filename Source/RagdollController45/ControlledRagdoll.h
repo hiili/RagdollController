@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 
 #include <PxTransform.h>
+#include <PxVec3.h>
 
 #include <array>
 using std::array;
@@ -46,28 +47,60 @@ struct JointState
 
 
 USTRUCT()
-struct FPxTransform {
-
+struct FBoneState {
 	GENERATED_USTRUCT_BODY()
 
-private:  // todo make it a UCLASS?
+
+private:
 
 	UPROPERTY()
-	TArray<int8> Data;
+	TArray<int8> TransformData;
+
+	UPROPERTY()
+	TArray<int8> LinearVelocityData;
+
+	UPROPERTY()
+	TArray<int8> AngularVelocityData;
+
 
 public:
 
-	FPxTransform()
+	FBoneState()
 	{
-		Data.SetNumZeroed( sizeof(physx::PxTransform) );
+		TransformData.SetNumZeroed( sizeof(physx::PxTransform) );
+		LinearVelocityData.SetNumZeroed( sizeof(physx::PxVec3) );
+		AngularVelocityData.SetNumZeroed( sizeof(physx::PxVec3) );
 	}
+
+
+	/** Verifies that the size of the data fields match the size of the local PhysX objects. In general, word size of the platform might affect this (although the current contents of this struct probably aren't affected). */
+	bool DoDataSizesMatch()
+	{
+		return
+			TransformData.Num() == sizeof(physx::PxTransform) &&
+			LinearVelocityData.Num() == sizeof(physx::PxVec3) &&
+			AngularVelocityData.Num() == sizeof(physx::PxVec3);
+	}
+
 
 	physx::PxTransform & GetPxTransform()
 	{
-		return reinterpret_cast<physx::PxTransform &>( Data[0] );
+		return reinterpret_cast<physx::PxTransform &>(TransformData[0]);
+	}
+
+	physx::PxVec3 & GetPxLinearVelocity()
+	{
+		return reinterpret_cast<physx::PxVec3 &>(LinearVelocityData[0]);
+	}
+
+	physx::PxVec3 & GetPxAngularVelocity()
+	{
+		return reinterpret_cast<physx::PxVec3 &>(AngularVelocityData[0]);
 	}
 
 };
+
+
 
 
 /**
@@ -78,24 +111,34 @@ class RAGDOLLCONTROLLER45_API AControlledRagdoll : public AActor
 {
 	GENERATED_UCLASS_BODY()
 
+
 protected:
 
-	// The SkeletalMeshComponent of the actor to be controlled
+	/** The SkeletalMeshComponent of the actor to be controlled. */
 	USkeletalMeshComponent * SkeletalMeshComponent;
 
 
-	/** Joint names of the actor's SkeletalMeshComponent. When initialized, then JointNames.Num() == SkeletonState.Num() */
+	/** Joint names of the actor's SkeletalMeshComponent. When initialized, then JointNames.Num() == SkeletonState.Num(). */
 	TArray<FName> JointNames;
 
-	/** Data for all joints and associated bodies of the actor's SkeletalMeshComponent. Refresh errors are signaled by emptying the array: test validity with SkeletonState.Num() != 0 */
+	/** Data for all joints and associated bodies of the actor's SkeletalMeshComponent. Refresh errors are signaled by emptying the array: test validity with SkeletonState.Num() != 0. */
 	TArray<JointState> JointStates;
 
+	/** Data for all bodies of the SkeletalMeshComponent, for server-to-client pose replication. */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Replicated, Category = RagdollController )
-	TArray<FPxTransform> PxBoneTransforms;
+	TArray<FBoneState> BoneStates;
 
 
-	//UPROPERTY( EditAnywhere, BlueprintReadWrite, Replicated, Category = RagdollController )
-	TArray<float> foo;
+	/** True if the server runs on a little endian platform. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Replicated, Category = RagdollController )
+	bool IsServerLittleEndian;
+
+
+	/** Store pose into the replicated BoneStates array. */
+	void sendPose();
+
+	/** Apply replicated pose from the BoneStates array. */
+	void receivePose();
 
 
 public:
@@ -105,7 +148,7 @@ public:
 	virtual void Tick( float deltaSeconds ) override;
 
 
-	/** Refresh all caches for static joint data. */
+	/** Refresh all static joint data structs. */
 	void refreshStaticJointData();
 
 	/** Refresh all dynamic joint data structs. */
