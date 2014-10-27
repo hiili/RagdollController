@@ -297,10 +297,10 @@ void AControlledRagdoll::recomputeNetUpdateFrequency( float gameDeltaTime )
 
 void AControlledRagdoll::sendPose()
 {
-	// cap update rate by SENDPOSE_MAX_FREQUENCY
-	//double currentTime = FPlatformTime::Seconds();
-	//if( currentTime - this->lastSendPoseTime < 1.f / SENDPOSE_MAX_FREQUENCY ) return;
-	//this->lastSendPoseTime = currentTime;
+	// cap update rate by 2 * NET_UPDATE_FREQUENCY (UE level replication intervals are not accurate, have a safety margin so as to not miss any replications)
+	double currentTime = FPlatformTime::Seconds();
+	if( currentTime - this->lastSendPoseTime < 1.f / (2.f * NET_UPDATE_FREQUENCY) ) return;
+	this->lastSendPoseTime = currentTime;
 
 	// check the number of bones and resize the BoneStates array
 	int numBodies = this->SkeletalMeshComponent->Bodies.Num();
