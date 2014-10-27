@@ -3,6 +3,8 @@
 #include "RagdollController45.h"
 #include "ControlledRagdoll.h"
 
+#include "RagdollController45GameMode.h"
+
 #include "Net/UnrealNetwork.h"
 #include "GenericPlatform/GenericPlatformProperties.h"
 
@@ -14,8 +16,15 @@
 #include "ScopeGuard.h"
 
 
+/** Target real time value for AActor::NetUpdateFrequency (the nominal value must be corrected by the wall clock vs game time fps difference). */
+#define NET_UPDATE_FREQUENCY 60.f
+
+
+
+
 AControlledRagdoll::AControlledRagdoll(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP)
+	: Super(PCIP),
+	lastSendPoseTime( -INFINITY )
 {
 	// enable ticking
 	PrimaryActorTick.bCanEverTick = true;
@@ -102,7 +111,7 @@ void AControlledRagdoll::PostInitializeComponents()
 	}
 
 
-	/* refresh joint data caches */
+	/* Read and store dynamic data from joints */
 
 	refreshStaticJointData();
 
@@ -123,9 +132,6 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 {
 	Super::Tick( deltaSeconds );
 
-	refreshDynamicJointData();
-
-	
 	// If network client, then apply the received pose from the server and return
 	if( this->Role < ROLE_Authority )
 	{
@@ -133,7 +139,16 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 		return;
 	}
 
-	// Standalone or server: store pose so that it can be replicated to client(s)
+
+	/* We are standalone or a server */
+	
+	// Read and store dynamic data from joints
+	refreshDynamicJointData();
+
+	// Adjust net update frequency based on the current wall clock vs game time fps difference
+	recomputeNetUpdateFrequency( deltaSeconds );
+
+	// Store pose so that it can be replicated to client(s)
 	sendPose();
 
 
@@ -264,8 +279,29 @@ void AControlledRagdoll::refreshDynamicJointData()
 
 
 
+void AControlledRagdoll::recomputeNetUpdateFrequency( float gameDeltaTime )
+{
+	// get a pointer to our GameMode instance
+	ARagdollController45GameMode * gm = Cast<ARagdollController45GameMode>( GetWorld()->GetAuthGameMode() );
+	if( !gm ) return;   // probably not authority..
+
+	// compute how fast the simulation is running with respect to wall clock time
+	float currentSpeedMultiplier = gm->currentAverageFps / (1.f / gameDeltaTime);
+
+	// apply to AActor::NetUpdateFrequency
+	this->NetUpdateFrequency = NET_UPDATE_FREQUENCY / currentSpeedMultiplier;
+}
+
+
+
+
 void AControlledRagdoll::sendPose()
 {
+	// cap update rate by SENDPOSE_MAX_FREQUENCY
+	//double currentTime = FPlatformTime::Seconds();
+	//if( currentTime - this->lastSendPoseTime < 1.f / SENDPOSE_MAX_FREQUENCY ) return;
+	//this->lastSendPoseTime = currentTime;
+
 	// check the number of bones and resize the BoneStates array
 	int numBodies = this->SkeletalMeshComponent->Bodies.Num();
 	this->BoneStates.SetNum( numBodies );

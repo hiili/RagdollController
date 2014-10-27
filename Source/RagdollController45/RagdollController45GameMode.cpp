@@ -9,6 +9,9 @@
 // constant frame rate
 #define FIXED_FPS 60.f
 
+// framerate logging: averaging window size (set to 0 to disable logging)
+#define ESTIMATE_FRAMERATE_SAMPLES 100
+
 
 ARagdollController45GameMode::ARagdollController45GameMode(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
@@ -26,7 +29,10 @@ void ARagdollController45GameMode::Tick( float DeltaSeconds )
 
 	// cap fps here, as the -UseFixedTimeStep commannd line option disables built-in framerate control in UEngine::UpdateTimeAndHandleMaxTickRate(),
 	// and we can't override that method as it is not virtual.
-	HandleMaxTickRate( FIXED_FPS );
+	//HandleMaxTickRate( FIXED_FPS );
+
+	// estimate the current average frame rate
+	estimateAverageFrameRate();
 }
 
 
@@ -113,4 +119,29 @@ void ARagdollController45GameMode::HandleMaxTickRate( const float MaxTickRate )
 
 	// update LastTime
 	LastTime = CurrentTime + WaitTime;
+}
+
+
+
+
+void ARagdollController45GameMode::estimateAverageFrameRate()
+{
+	// fps estimation disabled?
+	if( ESTIMATE_FRAMERATE_SAMPLES == 0 ) return;
+
+	static double lastTime = FPlatformTime::Seconds();
+	static int ticksLeft = ESTIMATE_FRAMERATE_SAMPLES;
+
+	--ticksLeft;
+	if( ticksLeft == 0 ) {
+
+		double currentTime = FPlatformTime::Seconds();
+		this->currentAverageFps = ESTIMATE_FRAMERATE_SAMPLES / (currentTime - lastTime);
+
+		UE_LOG( LogTemp, Log, TEXT( "Current average frame rate: %g" ), this->currentAverageFps );
+
+		lastTime = currentTime;
+		ticksLeft = ESTIMATE_FRAMERATE_SAMPLES;
+
+	}
 }

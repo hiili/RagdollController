@@ -80,11 +80,22 @@ Source files
       * this->SkeletalMeshComponent->Constraints[joint]->ConstraintData->getTwist() ...
 
 
+Uncap dedicated server fps
+--------------------------
+
+UGameEngine::GetMaxTickRate() clamps NetServerMaxTickRate to [10,120], hard-coded.
+
+Solution: Subclass from UGameEngine and override GetMaxTickRate()
+  - Make the game use your class by adding this to DefaultEngine.ini: [/Script/Engine.Engine] ... GameEngine=/Script/YourModuleName.YourGameEngine
+  - See https://wiki.unrealengine.com/Create_Custom_engine_classes_for_your_game_module
+
+
 Replication
 -----------
 
 Activate replication
-   * Activate actor and movement replication for OwenBP via editor, tick "always relevant", "net update frequency" to 200 so as to effectively update on each tick at least up to 120 fps
+   * Activate actor and movement replication for OwenBP via editor, tick "always relevant", "net update frequency" to 1000000000 so as to effectively disable it<br />
+     (it depends on simulation time, not on wall clock time -> badly distorted if using a constant step size on a fast, uncapped server)
    * Implement AControlledRagdoll::GetLifetimeReplicatedProps() (call the DOREPLIFETIME macro for whatever you want to replicate, remember to call Super!)
       * #include "Net/UnrealNetwork.h"
 
