@@ -1,0 +1,4 @@
+Investigate why the effect of AddTorque diminishes as the fixed dt is lowered toward 50 fps
+   * Why 50 fps? Is it maybe that when the fixed dt approaches the real frame time when the issue occurs?
+   * A hunch: AddTorque probably does some adjusting of the force based on the dt. It might be unintentionally using the real dt (wall clock) at some places and the fixed game dt at other places?
+   
