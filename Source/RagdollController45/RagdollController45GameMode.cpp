@@ -9,8 +9,10 @@
 // constant frame rate
 #define FIXED_FPS 60.f
 
-// framerate logging: averaging window size (set to 0 to disable logging)
+// frame rate logging: averaging window size (set to 0 to disable logging)
 #define ESTIMATE_FRAMERATE_SAMPLES 100
+
+
 
 
 ARagdollController45GameMode::ARagdollController45GameMode(const class FPostConstructInitializeProperties& PCIP)

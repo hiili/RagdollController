@@ -5,8 +5,8 @@
 
 #include "RagdollController45GameMode.h"
 
-#include "Net/UnrealNetwork.h"
-#include "GenericPlatform/GenericPlatformProperties.h"
+#include <Net/UnrealNetwork.h>
+#include <GenericPlatform/GenericPlatformProperties.h>
 
 #include <extensions/PxD6Joint.h>
 #include <PxRigidBody.h>
