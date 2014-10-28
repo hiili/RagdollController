@@ -86,8 +86,12 @@ Uncap dedicated server fps
 UGameEngine::GetMaxTickRate() clamps NetServerMaxTickRate to [10,120], hard-coded.
 
 Solution: Subclass from UGameEngine and override GetMaxTickRate()
-  - Make the game use your class by adding this to DefaultEngine.ini: [/Script/Engine.Engine] ... GameEngine=/Script/YourModuleName.YourGameEngine
-  - See https://wiki.unrealengine.com/Create_Custom_engine_classes_for_your_game_module
+   * Make the game use your class by adding this to DefaultEngine.ini: [/Script/Engine.Engine] ... GameEngine=/Script/YourModuleName.YourGameEngine
+   * See https://wiki.unrealengine.com/Create_Custom_engine_classes_for_your_game_module
+
+Notes
+   * Rama's Blueprint library has functions for disabling and enabling rendering. check the performance with those?<br />
+     If this works, then do we need a dedicated server approach anymore? Maybe for running on linux clusters, in case that we cannot launch a standalone game on linux without display?
 
 
 Replication
@@ -112,3 +116,92 @@ Applying joint forces
 
 For testing
    * World Settings -> Override World Gravity = on (ie, gravity off)
+
+
+
+
+
+
+
+
+----------
+
+
+
+
+Appendix A: Fixed dt and fps capping in UE4.2
+----------
+
+...aaand -UseFixedTimeStep ruins the framerate capping! Thus, setting the frame rate in Project Config is of no use.
+   * The bug is in UEngine::UpdateTimeAndHandleMaxTickRate(), where a fixed dt leads to a completely different execution path that does not contain any fps control code.
+   * Subclassing from UEngine and overriding UpdateTimeAndHandleMaxTickRate() won't work, as this is not a virtual method. (checked in source, but not actually tested)
+   * t.OverrideFPS console command could be used, except that it is not available in the non-debug version (packaged as 'shipping') (see UEngine::UpdateTimeAndHandleMaxTickRate())
+   * Solution: cap the fps manually (this way you could also control the server's tick rate!)
+      * In the level blueprint: nope, BP does not seem to have functions for suspending the entire engine for a moment (without doing a busy loop), nor functions to get wall clock time
+        However: there actually are such functions, and Rama's Blueprint function library has also some! And you could expose custom c++ functions to your blueprints.
+          Expose c++ functions to a regular BP: just extend the base class in c++ and add the proper UPROPERTY flags.
+          Expose c++ functions to a level blueprint: extend the ALevelScriptActor class, see https://wiki.unrealengine.com/Solus_C%2B%2B_Tutorials
+      * In MyGameMode.cpp: just copy the code from UEngine::UpdateTimeAndHandleMaxTickRate()
+
+
+
+
+Appendix B: Step sizes and network configuration
+----------
+
+Step sizes and network configuration
+   * We are using a constant step size in the game (you need to launch the game from one of the shortcuts)
+   * Prepare for slow motion replays
+      * Option 1:
+         * Run the engine always at a short dt (eg, 1/120 or 1/240), which would permit directly slowing down stuff
+         * Need to run the game on a server, and then have a client resample stuff for the actual on-screen fps
+         * Pros
+            * 'Native' high fps, slomo achievable without changing anything in the game (no risk of changed behavior)
+            * Easy to switch between interactive (real-time) speed and max-speed (uncapped) simulation
+              (the server can simply remove the fps cap whenever the client disconnects)
+            * Client can run and render with dynamic fps, i.e., rendering speed is disconnected from the simulation speed
+         * Cons
+            * Complex, requires a client-server setup every time something needs to be run
+            * Game logic runs unnecessarily often (you could add an 'on every nth' tick filter to your blueprints, though..)
+            * Engine logic runs unnecessarily often (for a scene with just Owen (not sleeping) and no physics sub-stepping, engine logic time vs. physx time is around 90% - 10%!)
+      * Option 2:
+         * Run the engine at dt = 1/60 and render synchronously (locked fps), use physics sub-stepping for accuracy
+         * Pros
+            * Much simpler: no need for client-server hassle
+         * Cons
+            * Limited slomo (2x @ 30 fps), unless:
+               * The dt is changed. Con: might change behavior, even if the dt change is countered in the physics sub-stepping iteration count.
+               * You do some playback interpolation. Con: Perceived collision behavior becomes inaccurate, although this might not be a problem with modest resampling ratios around 1:2 or 1:4.
+   * Game engine target fps: 
+      * Max slow-motion factor depends on the engine fps
+      * 120 fps -> 4x slow-motion @ 30 fps
+
+
+
+
+Appendix C: Ragdoll pose replication
+----------
+
+This one seems tricky. Tried so far:
+
+Actor: Blueprinted Owen, inherited from Actor.h. Owen as the root component, type SkeletalMeshComponent, physics enabled (tried also disabled and doing the auth switching below the other way around).
+
+Construction script
+   * On server, create a timer that fires the PullHeadUp function on every 2 seconds (adds vertical force to head)
+   * On client, Set Simulate Physics of the Owen component: off (if doing the other way around, then need to also Wake Rigid Body the component)
+
+Defaults:
+   * Replication: on   (causes the actor to be replicated)
+   * Replicate movement: on   (causes the root transform of the actor to be replicated)
+      * With a listen server, this works fine: the root transform updates from the server to the client(s)<br />
+        (while the ragdoll pose itself does not replicate. but the root movement causes jittering to the physics. to be expected..)
+      * With a dedicated server, we get the following warning logged around four times a second or so,
+        and the ragdoll gets a rather random-looking movement impulse on each error (no replication events of any kind seem to occur between the errors, the local ragdoll simulation just runs):<br />
+        LogNet:Warning: FRepLayout::UpdateChangelistHistory: History overflow, forcing history dump Owen_C
+
+Setting 'Set Is Replicated' of the Owen component to true in the construction script does not affect anything, regardless of whether client physics simulation of the Owen component is on or off.
+
+Conclusion after much more experimenting:
+   * SkeletalMeshComponent pose is not replicated by UE, you have to do it by yourself.
+   * Current solution: do it on the PhysX level. Note that setting the global pose causes PhysX to ignore any velocities set during the same tick!
+   * Replication seems tricky on UE level: there are no transform setters for the FBodyInstances. One path could be to do the pose replication via the animation system, replicate the velocities directly to PhysX, and use physics blending to merge these: PhysX would simulate the ragdoll based on the velocities while the animation system would constantly blend in absolute pose corrections -> we have smoothly blended client side prediction, plus more or less proper kinematic interaction with other simulated actors.
