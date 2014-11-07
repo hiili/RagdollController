@@ -4,7 +4,7 @@
 	<ItemGroup>
 		<None Include="..\..\RagdollController45.uproject" />
 		<Filter Include="Source">
-			<UniqueIdentifier>{6C643796-E6C3-4FE9-B616-275219A434BC}</UniqueIdentifier>
+			<UniqueIdentifier>{7C46FEA5-AE29-4834-A585-D4E6B3A6B077}</UniqueIdentifier>
 		</Filter>
 		<None Include="..\..\Source\RagdollController45.Target.cs">
 			<Filter>Source</Filter>
@@ -13,7 +13,7 @@
 			<Filter>Source</Filter>
 		</None >
 		<Filter Include="Config">
-			<UniqueIdentifier>{9861440C-523F-4CB8-9E62-91AC609D283F}</UniqueIdentifier>
+			<UniqueIdentifier>{E026C18F-9009-48B8-A5F6-9BD79290AAAA}</UniqueIdentifier>
 		</Filter>
 		<None Include="..\..\Config\DefaultEditor.ini">
 			<Filter>Config</Filter>
@@ -25,7 +25,7 @@
 			<Filter>Config</Filter>
 		</None >
 		<Filter Include="Source\RagdollController45">
-			<UniqueIdentifier>{6DBEF7CE-5FDA-4919-881F-5CB3472C0F3A}</UniqueIdentifier>
+			<UniqueIdentifier>{F0BA2BBD-3913-4F8D-AAC3-0FD3611D0BF9}</UniqueIdentifier>
 		</Filter>
 		<ClCompile Include="..\..\Source\RagdollController45\ControlledRagdoll.cpp">
 			<Filter>Source\RagdollController45</Filter>
@@ -54,14 +54,20 @@
 		<ClInclude Include="..\..\Source\RagdollController45\RagdollController45GameMode.h">
 			<Filter>Source\RagdollController45</Filter>
 		</ClInclude >
+		<ClCompile Include="..\..\Source\RagdollController45\RemoteControlInterface.cpp">
+			<Filter>Source\RagdollController45</Filter>
+		</ClCompile >
+		<ClInclude Include="..\..\Source\RagdollController45\RemoteControlInterface.h">
+			<Filter>Source\RagdollController45</Filter>
+		</ClInclude >
 		<ClInclude Include="..\..\Source\RagdollController45\ScopeGuard.h">
 			<Filter>Source\RagdollController45</Filter>
 		</ClInclude >
 		<Filter Include="Source\RagdollController45\Resources">
-			<UniqueIdentifier>{F3886C05-33B2-4570-A844-C20D8D19DACA}</UniqueIdentifier>
+			<UniqueIdentifier>{EC79A1AE-019F-4119-9791-302D9577A70B}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source\RagdollController45\Resources\Windows">
-			<UniqueIdentifier>{F6339823-B59A-44F3-AF61-B6C272786410}</UniqueIdentifier>
+			<UniqueIdentifier>{F3506CF6-9DBA-4811-BADE-4EDD631C6830}</UniqueIdentifier>
 		</Filter>
 		<None Include="..\..\Source\RagdollController45\Resources\Windows\RagdollController45.ico">
 			<Filter>Source\RagdollController45\Resources\Windows</Filter>
