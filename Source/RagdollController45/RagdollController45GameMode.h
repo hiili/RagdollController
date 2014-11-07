@@ -29,6 +29,8 @@ public:
 	/** Estimate of the current average frame rate (averaging window length is controlled by ESTIMATE_FRAMERATE_SAMPLES) */
 	float currentAverageFps;
 
+
+	virtual void InitGame( const FString & MapName, const FString & Options, FString & ErrorMessage ) override;
 	void Tick( float DeltaSeconds ) override;
 
 };

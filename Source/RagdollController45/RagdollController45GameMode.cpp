@@ -18,6 +18,15 @@
 ARagdollController45GameMode::ARagdollController45GameMode(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
+}
+
+
+
+
+void ARagdollController45GameMode::InitGame( const FString & MapName, const FString & Options, FString & ErrorMessage )
+{
+	Super::InitGame( MapName, Options, ErrorMessage );
+
 	// set the fixed dt (remember to use the -UseFixedTimeStep command line option!)
 	FApp::SetFixedDeltaTime( 1.f / FIXED_FPS );
 }
