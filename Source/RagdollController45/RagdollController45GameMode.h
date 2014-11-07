@@ -24,6 +24,9 @@ class RAGDOLLCONTROLLER45_API ARagdollController45GameMode : public AGameMode
 	void estimateAverageFrameRate();
 
 
+protected:
+
+
 public:
 
 	/** Estimate of the current average frame rate (averaging window length is controlled by ESTIMATE_FRAMERATE_SAMPLES) */

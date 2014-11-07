@@ -16,6 +16,7 @@ class RAGDOLLCONTROLLER45_API UMyGameEngine : public UGameEngine
 
 public:
 
+	/** Override the dedicated server hard-coded tick rate cap. */
 	virtual float GetMaxTickRate( float DeltaTime, bool bAllowFrameRateSmoothing = true ) override;
 	
 };
