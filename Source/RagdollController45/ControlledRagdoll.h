@@ -8,7 +8,6 @@
 #include <PxVec3.h>
 
 #include <array>
-using std::array;
 
 #include "ControlledRagdoll.generated.h"
 
@@ -25,19 +24,19 @@ struct JointState
 	FConstraintInstance * Constraint;
 
 	/** Pointers to the two bodies connected by the joint */
-	array<FBodyInstance *, 2> Bodies;
+	std::array<FBodyInstance *, 2> Bodies;
 	
 	/** Bone indices for the two bodies connected by the joint */
-	array<int32, 2> BoneInds;
+	std::array<int32, 2> BoneInds;
 
 	/** Rotations of the reference frames of the joint with respect to the two bodies connected by the joint */
-	array<FQuat, 2> RefFrameRotations;
+	std::array<FQuat, 2> RefFrameRotations;
 
 
 	// dynamic data (updated during Tick)
 
 	/** Rotations of the connected bones (in global coordinates) */
-	array<FQuat, 2> BoneGlobalRotations;
+	std::array<FQuat, 2> BoneGlobalRotations;
 
 	/** PhysX joint rotation. The pitch, roll and yaw dimensions correspond to twist, swing1 and swing2 fields of the PhysX joint, respectively. */
 	FRotator Rotation;
