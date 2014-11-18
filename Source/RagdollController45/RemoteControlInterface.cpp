@@ -8,7 +8,7 @@
 //#include <TcpSocketBuilder.h>
 
 #include <string>
-using std::string;
+#include <algorithm>
 
 #include "ScopeGuard.h"
 
@@ -16,6 +16,9 @@ using std::string;
 // remote control interface address (format: n, n, n, n) and port
 #define RCI_ADDRESS 0, 0, 0, 0
 #define RCI_PORT 7770
+
+// size of the buffer for incoming dispatch command lines
+#define LINE_BUFFER_SIZE 256
 
 
 
@@ -34,11 +37,19 @@ void ARemoteControlInterface::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	CreateListenSocket();
+}
+
+
+
+
+void ARemoteControlInterface::CreateListenSocket()
+{
 	// init the error cleanup scope guard
 	auto sgError = MakeScopeGuard( [this](){
-		UE_LOG( LogTemp, Error, TEXT( "(%s) Scope guard 'sgError' triggered!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogTemp, Error, TEXT( "(%s) RCI: Failed to create the listen socket!" ), TEXT( __FUNCTION__ ) );
 
-		// reset everything if any errors
+		// reset everything on errors
 		this->ListenSocket = 0;
 	} );
 
@@ -46,6 +57,7 @@ void ARemoteControlInterface::PostInitializeComponents()
 	FIPv4Endpoint endpoint( FIPv4Address(RCI_ADDRESS), RCI_PORT );
 	this->ListenSocket = TSharedPtr<FSocket>( FTcpSocketBuilder( "Remote control interface main listener" )
 		.AsReusable()
+		.AsNonBlocking()
 		.BoundToEndpoint( endpoint )
 		.Listening( 256 )
 		.Build() );
@@ -68,6 +80,15 @@ void ARemoteControlInterface::Tick( float deltaSeconds )
 {
 	Super::Tick( deltaSeconds );
 
+	CheckForNewConnections();
+	ManagePendingConnections();
+}
+
+
+
+
+void ARemoteControlInterface::CheckForNewConnections()
+{
 	// check that we have a listen socket
 	if( !this->ListenSocket.IsValid() ) return;
 
@@ -86,21 +107,82 @@ void ARemoteControlInterface::Tick( float deltaSeconds )
 		}
 		UE_LOG( LogTemp, Error, TEXT( "RCI: Incoming connection accepted." ) );
 
-		//this->PendingSockets.Add( TSharedPtr<FSocket>( connectionSocket ) );
-
-		uint32 bytesPending;
-		int32 bytesRead;
-		uint8 buffer[256];
-		buffer[0] = 'A';
-		while( buffer[0] != 'X' )
-		{
-			bool ok = connectionSocket->HasPendingData( bytesPending );
-			UE_LOG( LogTemp, Error, TEXT( "HasPendingData ok = %d, num = %d" ), ok, bytesPending );
-
-			ok = connectionSocket->Recv( buffer, 10, bytesRead, ESocketReceiveFlags::None );
-			UE_LOG( LogTemp, Error, TEXT( "  Recv ok = %d, num = %d, data = %c" ), ok, bytesRead, TCHAR(buffer[0]) );
-			for( int x = 0; x < 100000000; ++x );
-		}
+		this->PendingSockets.Add( TSharedPtr<FSocket>( connectionSocket ) );
 
 	}
+}
+
+
+
+
+void ARemoteControlInterface::ManagePendingConnections()
+{
+	// iterate over our pending connections
+	for( auto iterPendingSocket = this->PendingSockets.CreateIterator(); iterPendingSocket; ++iterPendingSocket )
+	{
+		char lineBuffer[LINE_BUFFER_SIZE];
+		bool success;
+		uint32 bytesPending;
+		int32 bytesRead;
+
+
+		/* see if we have received a full command line */
+
+		// if no new data, then continue iterating
+		if( !(*iterPendingSocket)->HasPendingData( bytesPending ) ) continue;
+
+		// peek data
+		success = (*iterPendingSocket)->Recv( (uint8 *)lineBuffer, std::min<int>( LINE_BUFFER_SIZE, bytesPending ), bytesRead, ESocketReceiveFlags::Peek );
+
+		// if failed or buffer overflowed, then close the socket
+		if( !success || bytesRead == LINE_BUFFER_SIZE )
+		{
+			UE_LOG( LogTemp, Error, TEXT( "RCI: Pending connection read error or line buffer overflow! Closing the socket." ) );
+
+			this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
+			break;   // play safe and don't touch the iterator anymore
+		}
+
+		// if no new data, then continue iterating
+		if( bytesRead == 0 ) continue;
+
+		// convert the buffer into a C++ string 
+		std::string commandLine( lineBuffer, bytesRead );
+
+		// look for an LF, continue iterating if not found
+		std::size_t posLF = commandLine.find_first_of( '\n' );
+		if( posLF == std::string::npos ) continue;
+
+
+		/* we have a full command line -> remove it from the socket stream, and remove the socket from the pending buffer and dispatch it */
+
+		// remove the command line from the socket stream (on failure, kill the socket and break)
+		success = (*iterPendingSocket)->Recv( (uint8 *)lineBuffer, posLF + 1, bytesRead, ESocketReceiveFlags::None );
+		if( !success || bytesRead != posLF + 1 )
+		{
+			UE_LOG( LogTemp, Error, TEXT( "RCI: Pending connection read error! Closing the socket." ) );
+
+			this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
+			break;   // play safe and don't touch the iterator anymore
+		}
+
+		// cut the command line at LF (cut away also the LF)
+		commandLine.erase( posLF );
+
+		// dispatch the connection and remove the socket from the pending buffer
+		DispatchSocket( commandLine, *iterPendingSocket );
+		this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
+
+		// play safe and don't touch the iterator anymore
+		break;
+
+	}
+}
+
+
+
+
+void ARemoteControlInterface::DispatchSocket( const std::string & command, TSharedPtr<FSocket> socket )
+{
+	UE_LOG( LogTemp, Error, TEXT( "RCI: HAVE DISPATCH COMMAND: %s" ), *FString( command.c_str() ) );
 }

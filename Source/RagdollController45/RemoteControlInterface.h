@@ -6,6 +6,8 @@
 
 #include <SharedPointer.h>
 
+#include <string>
+
 #include "RemoteControlInterface.generated.h"
 
 class FSocket;
@@ -23,15 +25,28 @@ class RAGDOLLCONTROLLER45_API ARemoteControlInterface : public AActor
 
 	
 protected:
-
+	
 	/** Main listen socket */
 	TSharedPtr<FSocket> ListenSocket;
 
-	/** Connection sockets that have not yet been dispatched */
-	//TArray< TSharedPtr<FSocket> > PendingSockets;
+	/** Connection sockets that have not yet been dispatched. Currently, there are no cleanup mechanisms for stalled connections. */
+	TArray< TSharedPtr<FSocket> > PendingSockets;
 
 	/** Effective receive buffer size of the listen socket */
 	int32 RCIReceiveBufferSize;
+	
+
+	/** Create the main listen socket. */
+	void CreateListenSocket();
+
+	/** Check the listen socket for new incoming connection attempts. Accept and add them to pending connections. */
+	void CheckForNewConnections();
+
+	/** Check if any of the PendingSockets have received the necessary information for doing a dispatch. */
+	void ManagePendingConnections();
+
+	/** Try to dispatch the socket according to the command. Close and discard the socket upon errors. */
+	void DispatchSocket( const std::string & command, TSharedPtr<FSocket> socket );
 
 
 public:
