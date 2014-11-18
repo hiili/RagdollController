@@ -100,6 +100,7 @@ Replication
 Activate replication
    * Activate actor and movement replication for OwenBP via editor, tick "always relevant", "net update frequency" to 1000000000 so as to effectively disable it<br />
      (it depends on simulation time, not on wall clock time -> badly distorted if using a constant step size on a fast, uncapped server)
+   * Crank up network speed limits: [/Script/Engine.Player] ConfiguredInternetSpeed, ConfiguredLanSpeed, [/Script/OnlineSubsystemUtils.IpNetDriver] MaxClientRate, MaxInternetClientRate, ... (only one was relevant, but which one?)
    * Implement AControlledRagdoll::GetLifetimeReplicatedProps() (call the DOREPLIFETIME macro for whatever you want to replicate, remember to call Super!)
       * #include "Net/UnrealNetwork.h"
 
