@@ -3,8 +3,6 @@ Investigate why the effect of AddTorque diminishes as the fixed dt is lowered to
    * A hunch: AddTorque probably does some adjusting of the force based on the dt. It might be unintentionally using the real dt (wall clock) at some places and the fixed game dt at other places?
 
 
-implement binary compatibility in sendpose and receivepose: have a replicated float hold the server's interpreted value of 0xdeadbeef and compare it in client's receivepose.
-
 implement a wrapper for FSocket (StreamSocket?), so as to have line-based formatted communication for FSockets.
    * then use this in RCI
    * then use this is void AControlledRagdoll::communicateWithRemoteController()

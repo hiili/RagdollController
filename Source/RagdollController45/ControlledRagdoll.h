@@ -142,9 +142,10 @@ protected:
 	TArray<FBoneState> BoneStates;
 
 
-	/** True if the server runs on a little endian platform. */
+	/** Server's float interpretation of 0xdeadbeef, for checking float representation compatilibity (eg, float endianness). Assume that UE replicates
+	* floats always correctly. */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Replicated, Category = RagdollController )
-	bool IsServerLittleEndian;
+	float ServerInterpretationOfDeadbeef;
 
 	
 	/** If a remote controller is connected, then send pose data and receive joint motor command data. */

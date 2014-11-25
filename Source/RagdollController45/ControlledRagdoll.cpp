@@ -16,6 +16,9 @@
 #include "ScopeGuard.h"
 #include "Utility.h"
 
+#include <cstring>
+#include <cmath>
+
 
 /** Target real time value for AActor::NetUpdateFrequency (the nominal value must be corrected by the wall clock vs game time fps difference). */
 #define NET_UPDATE_FREQUENCY 60.f
@@ -40,7 +43,7 @@ void AControlledRagdoll::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> &
 	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
 
 	DOREPLIFETIME( AControlledRagdoll, BoneStates );
-	DOREPLIFETIME( AControlledRagdoll, IsServerLittleEndian );
+	DOREPLIFETIME( AControlledRagdoll, ServerInterpretationOfDeadbeef );
 }
 
 
@@ -82,8 +85,8 @@ void AControlledRagdoll::PostInitializeComponents()
 
 		/* We are standalone or a server */
 		
-		// Store server platform endianness to a replicated flag
-		this->IsServerLittleEndian = FGenericPlatformProperties::IsLittleEndian();
+		// Store server's interpretation of 0xdeadbeef to a replicated float
+		std::strncpy( (char *)&this->ServerInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(this->ServerInterpretationOfDeadbeef) );
 
 		// make sure that physics simulation is enabled also on a dedicated server
 		if( this->SkeletalMeshComponent )
@@ -356,11 +359,13 @@ void AControlledRagdoll::receivePose()
 		return;
 	}
 
-	// Check that endianness and floating point precision settings (float vs. double) match. Warning: binary compatibility is not verified!
-	if( this->IsServerLittleEndian != FGenericPlatformProperties::IsLittleEndian()
+	// Check for float binary compatilibity (eg endianness) and that the PhysX data sizes match. Assume that UE replicates floats always correctly.
+	float ourInterpretationOfDeadbeef;
+	std::strncpy( (char *)&ourInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(ourInterpretationOfDeadbeef) );
+	if( std::abs( (this->ServerInterpretationOfDeadbeef / ourInterpretationOfDeadbeef) - 1.f ) > 1e-6f
 		|| (this->BoneStates.Num() > 0 && !this->BoneStates[0].DoDataSizesMatch()) )
 	{
-		UE_LOG( LogTemp, Error, TEXT( "(%s) Endianity or bone state data sizes do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogTemp, Error, TEXT( "(%s) Floats are not binary compatible or bone state data sizes do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
 		return;
 	}
 
