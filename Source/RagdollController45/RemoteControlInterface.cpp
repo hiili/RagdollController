@@ -48,8 +48,13 @@ void ARemoteControlInterface::PostInitializeComponents()
 	// clean up the actor name
 	Utility::UObjectNameCleanup( *this );
 
-	// create the main listen socket
-	CreateListenSocket();
+	// if authority, then create the main listen socket
+	if( this->Role >= ROLE_Authority )
+	{
+		CreateListenSocket();
+	} else {
+		UE_LOG( LogRcRci, Warning, TEXT( "(%s) Not authority: listen socket not created." ), TEXT( __FUNCTION__ ) );
+	}
 }
 
 
@@ -68,7 +73,7 @@ void ARemoteControlInterface::CreateListenSocket()
 	// create a listen socket
 	FIPv4Endpoint endpoint( FIPv4Address(RCI_ADDRESS), RCI_PORT );
 	this->ListenSocket = TSharedPtr<FSocket>( FTcpSocketBuilder( "Remote control interface main listener" )
-		.AsReusable()
+		//.AsReusable()
 		.AsNonBlocking()
 		.BoundToEndpoint( endpoint )
 		.Listening( 256 )
