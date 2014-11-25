@@ -46,7 +46,13 @@ protected:
 	void ManagePendingConnections();
 
 	/** Try to dispatch the socket according to the command. Close and discard the socket upon errors. */
-	void DispatchSocket( const std::string & command, TSharedPtr<FSocket> socket );
+	void DispatchSocket( std::string command, TSharedPtr<FSocket> socket );
+
+
+	/* commands */
+
+	/** Connect to an actor */
+	void CmdConnect( std::string args, TSharedPtr<FSocket> socket );
 
 
 public:

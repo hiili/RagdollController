@@ -1,3 +1,6 @@
+Non-code steps (editor, config files, ...)
+
+
 Init
 ----
 
@@ -47,7 +50,7 @@ Set Skeletal mesh component properties:
    * Simulate physics: on
    * Collision presets: PhysicsActor
 
-Place him in the world
+Place him in the world, rename to Owen
 
 
 Create a C++ access point
@@ -105,11 +108,17 @@ Activate replication
       * #include "Net/UnrealNetwork.h"
 
 
-Joint state readout
--------------------
+Remote control
+--------------
 
-this->SkeletalMeshComponent->Constraints[joint]->JointName;
-this->SkeletalMeshComponent->Constraints[joint]->ConstraintData->getTwist(), ...;
+Add a Remote Control Interface actor to the scene.
+   * Cannot find the class in the Class Viewer? You must ALWAYS start the editor via the shortcuts that contain the -debug flag properly!
+
+
+
+
+
+
 
 
 Applying joint forces

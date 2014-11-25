@@ -14,6 +14,7 @@
 #include <PxTransform.h>
 
 #include "ScopeGuard.h"
+#include "Utility.h"
 
 
 /** Target real time value for AActor::NetUpdateFrequency (the nominal value must be corrected by the wall clock vs game time fps difference). */
@@ -24,6 +25,7 @@
 
 AControlledRagdoll::AControlledRagdoll(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP),
+	IRemoteControllable( this ),
 	lastSendPoseTime( -INFINITY )
 {
 	// enable ticking
@@ -47,6 +49,9 @@ void AControlledRagdoll::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> &
 void AControlledRagdoll::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	// clean up the actor name
+	Utility::UObjectNameCleanup( *this );
 
 
 	/* init SkeletalMeshComponent: scan all components and choose the first USkeletalMeshComponent */
@@ -111,8 +116,7 @@ void AControlledRagdoll::PostInitializeComponents()
 	}
 
 
-	/* Read and store dynamic data from joints */
-
+	// Read and store dynamic data from joints
 	refreshStaticJointData();
 
 }
@@ -144,6 +148,9 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	
 	// Read and store dynamic data from joints
 	refreshDynamicJointData();
+
+	// Communicate with the remote controller, if connected
+	communicateWithRemoteController();
 
 	// Adjust net update frequency based on the current wall clock vs game time fps difference
 	recomputeNetUpdateFrequency( deltaSeconds );
@@ -279,6 +286,17 @@ void AControlledRagdoll::refreshDynamicJointData()
 
 
 
+void AControlledRagdoll::communicateWithRemoteController()
+{
+	// no-op if no remote controller
+	if( !this->IRemoteControllable::RemoteControlSocket.IsValid() ) return;
+
+	// ...
+}
+
+
+
+
 void AControlledRagdoll::recomputeNetUpdateFrequency( float gameDeltaTime )
 {
 	// get a pointer to our GameMode instance
@@ -338,7 +356,7 @@ void AControlledRagdoll::receivePose()
 		return;
 	}
 
-	// Check that endianness and word sizes match
+	// Check that endianness and floating point precision settings (float vs. double) match. Warning: binary compatibility is not verified!
 	if( this->IsServerLittleEndian != FGenericPlatformProperties::IsLittleEndian()
 		|| (this->BoneStates.Num() > 0 && !this->BoneStates[0].DoDataSizesMatch()) )
 	{

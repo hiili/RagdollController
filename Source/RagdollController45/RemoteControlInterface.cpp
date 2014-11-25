@@ -3,19 +3,27 @@
 #include "RagdollController45.h"
 #include "RemoteControlInterface.h"
 
+#include "RemoteControllable.h"
+
 #include <Networking.h>
-//#include <TcpListener.h>
-//#include <TcpSocketBuilder.h>
 
 #include <string>
 #include <algorithm>
 
 #include "ScopeGuard.h"
+#include "Utility.h"
 
 
 // remote control interface address (format: n, n, n, n) and port
 #define RCI_ADDRESS 0, 0, 0, 0
 #define RCI_PORT 7770
+
+// handshake string: the remote client should send this in the beginning of the initial LF-terminated command line
+#define RCI_HANDSHAKE_STRING "RagdollController RCI: "
+#define RCI_HANDSHAKE_ACK_STRING "OK"
+
+// command strings
+#define RCI_COMMAND_CONNECT "CONNECT "
 
 // size of the buffer for incoming dispatch command lines
 #define LINE_BUFFER_SIZE 256
@@ -37,6 +45,10 @@ void ARemoteControlInterface::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	// clean up the actor name
+	Utility::UObjectNameCleanup( *this );
+
+	// create the main listen socket
 	CreateListenSocket();
 }
 
@@ -47,7 +59,7 @@ void ARemoteControlInterface::CreateListenSocket()
 {
 	// init the error cleanup scope guard
 	auto sgError = MakeScopeGuard( [this](){
-		UE_LOG( LogTemp, Error, TEXT( "(%s) RCI: Failed to create the listen socket!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRcRci, Error, TEXT( "(%s) Failed to create the listen socket!" ), TEXT( __FUNCTION__ ) );
 
 		// reset everything on errors
 		this->ListenSocket = 0;
@@ -69,7 +81,7 @@ void ARemoteControlInterface::CreateListenSocket()
 	if( !this->ListenSocket->SetReceiveBufferSize( 1000000, this->RCIReceiveBufferSize ) ) return;
 
 	// all ok, release the error cleanup scope guard
-	UE_LOG( LogTemp, Error, TEXT("RCI: Listen socket created successfully.") );
+	UE_LOG( LogRcRci, Log, TEXT("(%s) Listen socket created successfully."), TEXT( __FUNCTION__ ) );
 	sgError.release();
 }
 
@@ -102,10 +114,10 @@ void ARemoteControlInterface::CheckForNewConnections()
 		// check whether we succeeded
 		if( !connectionSocket )
 		{
-			UE_LOG( LogTemp, Error, TEXT( "RCI: Incoming connection attempt, accept failed!" ) );
+			UE_LOG( LogRcRci, Error, TEXT( "(%s) Incoming connection attempt, accept failed!" ), TEXT( __FUNCTION__ ) );
 			continue;
 		}
-		UE_LOG( LogTemp, Error, TEXT( "RCI: Incoming connection accepted." ) );
+		UE_LOG( LogRcRci, Log, TEXT( "(%s) Incoming connection accepted." ), TEXT( __FUNCTION__ ) );
 
 		this->PendingSockets.Add( TSharedPtr<FSocket>( connectionSocket ) );
 
@@ -137,7 +149,7 @@ void ARemoteControlInterface::ManagePendingConnections()
 		// if failed or buffer overflowed, then close the socket
 		if( !success || bytesRead == LINE_BUFFER_SIZE )
 		{
-			UE_LOG( LogTemp, Error, TEXT( "RCI: Pending connection read error or line buffer overflow! Closing the socket." ) );
+			UE_LOG( LogRcRci, Error, TEXT( "(%s) Pending connection read error or line buffer overflow! Closing the socket." ), TEXT( __FUNCTION__ ) );
 
 			this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
 			break;   // play safe and don't touch the iterator anymore
@@ -149,8 +161,8 @@ void ARemoteControlInterface::ManagePendingConnections()
 		// convert the buffer into a C++ string 
 		std::string commandLine( lineBuffer, bytesRead );
 
-		// look for an LF, continue iterating if not found
-		std::size_t posLF = commandLine.find_first_of( '\n' );
+		// look for an CR or LF, continue iterating if not found
+		std::size_t posLF = commandLine.find_first_of( "\r\n" );
 		if( posLF == std::string::npos ) continue;
 
 
@@ -160,7 +172,7 @@ void ARemoteControlInterface::ManagePendingConnections()
 		success = (*iterPendingSocket)->Recv( (uint8 *)lineBuffer, posLF + 1, bytesRead, ESocketReceiveFlags::None );
 		if( !success || bytesRead != posLF + 1 )
 		{
-			UE_LOG( LogTemp, Error, TEXT( "RCI: Pending connection read error! Closing the socket." ) );
+			UE_LOG( LogRcRci, Error, TEXT( "(%s) Pending connection read error! Closing the socket." ), TEXT( __FUNCTION__ ) );
 
 			this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
 			break;   // play safe and don't touch the iterator anymore
@@ -169,7 +181,7 @@ void ARemoteControlInterface::ManagePendingConnections()
 		// cut the command line at LF (cut away also the LF)
 		commandLine.erase( posLF );
 
-		// dispatch the connection and remove the socket from the pending buffer
+		// try to dispatch the connection, then remove the socket from the pending buffer
 		DispatchSocket( commandLine, *iterPendingSocket );
 		this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
 
@@ -182,7 +194,64 @@ void ARemoteControlInterface::ManagePendingConnections()
 
 
 
-void ARemoteControlInterface::DispatchSocket( const std::string & command, TSharedPtr<FSocket> socket )
+void ARemoteControlInterface::DispatchSocket( std::string command, TSharedPtr<FSocket> socket )
 {
-	UE_LOG( LogTemp, Error, TEXT( "RCI: HAVE DISPATCH COMMAND: %s" ), *FString( command.c_str() ) );
+	// verify and remove handshake
+	if( command.find( RCI_HANDSHAKE_STRING ) != 0 )
+	{
+		UE_LOG( LogRcRci, Error, TEXT( "(%s) Invalid handshake string: %s" ), TEXT( __FUNCTION__ ), *FString( command.c_str() ) );
+		return;
+	}
+	command.erase( 0, std::strlen( RCI_HANDSHAKE_STRING ) );
+
+	// switch on command
+	if( command.find( RCI_COMMAND_CONNECT ) == 0 )
+	{
+		CmdConnect( command.substr( std::strlen( RCI_COMMAND_CONNECT ) ), socket );
+	}
+	else
+	{
+		UE_LOG( LogRcRci, Error, TEXT( "(%s) Invalid command: %s" ), TEXT( __FUNCTION__ ), *FString( command.c_str() ) );
+	}
+}
+
+
+
+
+void ARemoteControlInterface::CmdConnect( std::string args, TSharedPtr<FSocket> socket )
+{
+	// find the target actor based on its FName
+	for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
+	{
+		if( iter->GetName() == FString( args.c_str() ) )
+		{
+			/* target actor found */
+
+			UE_LOG( LogRcRci, Log, TEXT( "(%s) Target actor found, forwarding the connection. Target: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+
+			// check that the actor is RemoteControllable
+			IRemoteControllable * target = InterfaceCast<IRemoteControllable>( *iter );
+			if( !target )
+			{
+				// no: log and stop
+				UE_LOG( LogRcRci, Error, TEXT( "(%s) Target actor is not RemoteControllable! Target: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+				return;
+			}
+
+			// send ack to socket
+			int32 bytesSent;
+			socket->Send( (const uint8 *)(RCI_HANDSHAKE_ACK_STRING "\n"), std::strlen( RCI_HANDSHAKE_ACK_STRING "\n" ), bytesSent );
+			if( bytesSent != std::strlen( RCI_HANDSHAKE_ACK_STRING "\n" ) )
+			{
+				UE_LOG( LogRcRci, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+				return;
+			}
+
+			// forward the connection and return
+			target->ConnectWith( socket );
+			return;
+		}
+	}
+
+	UE_LOG( LogRcRci, Error, TEXT( "(%s) Target actor not found: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 }

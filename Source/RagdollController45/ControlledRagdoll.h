@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "RemoteControllable.h"
 
 #include <PxTransform.h>
 #include <PxVec3.h>
@@ -46,7 +47,7 @@ struct JointState
 
 
 /**
-* Replication-ready struct for holding the state of a single bone. Velocity information is currently commented out as it is currently not being used (PhysX
+* Replication-ready struct for holding the state of a single bone. Velocity information is commented out as it is not currently being used (PhysX
 * seems to ignore set velocity if the pose is being set during the same tick; see AControlledRagdoll::sendPose).
 */
 USTRUCT()
@@ -113,7 +114,9 @@ public:
  * 
  */
 UCLASS()
-class RAGDOLLCONTROLLER45_API AControlledRagdoll : public AActor
+class RAGDOLLCONTROLLER45_API AControlledRagdoll :
+	public AActor,
+	public IRemoteControllable
 {
 	GENERATED_UCLASS_BODY()
 
@@ -144,6 +147,9 @@ protected:
 	bool IsServerLittleEndian;
 
 	
+	/** If a remote controller is connected, then send pose data and receive joint motor command data. */
+	void communicateWithRemoteController();
+
 	/**
 	* Recompute net update frequency, using the current frame rate estimate from our game mode instance. When using fixed time steps, this needs to be adjusted
 	* for our real fps as UE interprets the AActor::NetUpdateFrequency parameter based on game time, not wall clock time.
