@@ -8,15 +8,7 @@
 
 
 
-TSharedPtr<LineFSocket> LineFSocket::Build( FSocket * plainSocket )
-{
-	return TSharedPtr<LineFSocket>( new LineFSocket( TSharedPtr<FSocket>( plainSocket ) ) );
-}
-
-
-
-
-LineFSocket::LineFSocket( TSharedPtr<FSocket> socket ) :
+LineFSocket::LineFSocket( const TSharedPtr<FSocket> & socket ) :
 	Socket( socket )
 {}
 

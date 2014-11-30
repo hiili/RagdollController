@@ -127,7 +127,7 @@ void ARemoteControlInterface::CheckForNewConnections()
 		UE_LOG( LogRcRci, Log, TEXT( "(%s) Incoming connection accepted." ), TEXT( __FUNCTION__ ) );
 
 		// wrap the socket into a LineFSocket and store it to PendingSockets (check goodness later)
-		this->PendingSockets.Add( LineFSocket::Build( connectionSocket ) );
+		this->PendingSockets.Add( TSharedPtr<LineFSocket>( new LineFSocket( TSharedPtr<FSocket>( connectionSocket ) ) ) );
 
 	}
 }
@@ -168,7 +168,7 @@ void ARemoteControlInterface::ManagePendingConnections()
 
 
 
-void ARemoteControlInterface::DispatchSocket( std::string command, TSharedPtr<LineFSocket> socket )
+void ARemoteControlInterface::DispatchSocket( std::string command, const TSharedPtr<LineFSocket> & socket )
 {
 	// verify and remove handshake
 	if( command.find( RCI_HANDSHAKE_STRING ) != 0 )
@@ -192,7 +192,7 @@ void ARemoteControlInterface::DispatchSocket( std::string command, TSharedPtr<Li
 
 
 
-void ARemoteControlInterface::CmdConnect( std::string args, TSharedPtr<LineFSocket> socket )
+void ARemoteControlInterface::CmdConnect( std::string args, const TSharedPtr<LineFSocket> & socket )
 {
 	// find the target actor based on its FName
 	for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )

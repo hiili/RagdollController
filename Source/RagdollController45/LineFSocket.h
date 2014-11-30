@@ -45,15 +45,10 @@ public:
 
 
 	/**
-	* Constructs a new LineFSocket wrapper around the provided plain FSocket and takes the ownership of it. plainSocket can be null, in which case the resulting
-	* object will be in an invalid state (IsGood() == false).
-	*/
-	static TSharedPtr<LineFSocket> Build( FSocket * plainSocket );
-
-	/**
 	* Constructs a new LineFSocket wrapper around the provided FSocket and shares its ownership via the provided shared pointer.
+	* The socket argument can be null, in which case the resulting object will be in an invalid state (IsGood() == false).
 	*/
-	LineFSocket( TSharedPtr<FSocket> socket );
+	LineFSocket( const TSharedPtr<FSocket> & socket );
 
 
 	/** Check whether we have a socket and that it is connected and all-ok. */

@@ -37,6 +37,6 @@ public:
 
 	IRemoteControllable( AActor * newThisActor );
 
-	virtual void ConnectWith( TSharedPtr<LineFSocket> socket );
+	virtual void ConnectWith( const TSharedPtr<LineFSocket> & socket );
 
 };
