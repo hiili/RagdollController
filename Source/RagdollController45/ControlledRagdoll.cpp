@@ -4,6 +4,8 @@
 #include "ControlledRagdoll.h"
 
 #include "RagdollController45GameMode.h"
+#include "ScopeGuard.h"
+#include "Utility.h"
 
 #include <Net/UnrealNetwork.h>
 #include <GenericPlatform/GenericPlatformProperties.h>
@@ -12,9 +14,6 @@
 #include <PxRigidBody.h>
 #include <PxRigidDynamic.h>
 #include <PxTransform.h>
-
-#include "ScopeGuard.h"
-#include "Utility.h"
 
 #include <cstring>
 #include <cmath>
@@ -359,7 +358,7 @@ void AControlledRagdoll::receivePose()
 		return;
 	}
 
-	// Check for float binary compatilibity (eg endianness) and that the PhysX data sizes match. Assume that UE replicates floats always correctly.
+	// Check for float binary compatibility (eg endianness) and that the PhysX data sizes match. Assume that UE replicates floats always correctly.
 	float ourInterpretationOfDeadbeef;
 	std::strncpy( (char *)&ourInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(ourInterpretationOfDeadbeef) );
 	if( std::abs( (this->ServerInterpretationOfDeadbeef / ourInterpretationOfDeadbeef) - 1.f ) > 1e-6f

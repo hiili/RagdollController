@@ -6,3 +6,5 @@ Investigate why the effect of AddTorque diminishes as the fixed dt is lowered to
 implement a wrapper for FSocket (StreamSocket?), so as to have line-based formatted communication for FSockets.
    * then use this in RCI
    * then use this is void AControlledRagdoll::communicateWithRemoteController()
+
+drop the this-> convention, see https://stackoverflow.com/questions/1228161/why-use-prefixes-on-member-variables-in-c-classes and https://stackoverflow.com/questions/111605/what-kind-of-prefix-do-you-use-for-member-variables

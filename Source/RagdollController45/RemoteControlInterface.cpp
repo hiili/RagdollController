@@ -5,20 +5,21 @@
 
 #include "RemoteControllable.h"
 
+#include "ScopeGuard.h"
+#include "Utility.h"
+
 #include <Networking.h>
+#include <SharedPointer.h>
 
 #include <string>
 #include <algorithm>
-
-#include "ScopeGuard.h"
-#include "Utility.h"
 
 
 // remote control interface address (format: n, n, n, n) and port
 #define RCI_ADDRESS 0, 0, 0, 0
 #define RCI_PORT 7770
 
-// handshake string: the remote client should send this in the beginning of the initial LF-terminated command line
+// handshake string: the remote client should send this in the beginning of the initial command line
 #define RCI_HANDSHAKE_STRING "RagdollController RCI: "
 #define RCI_HANDSHAKE_ACK_STRING "OK"
 

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <SharedPointer.h>
+
 #include "RemoteControllable.generated.h"
 
 
