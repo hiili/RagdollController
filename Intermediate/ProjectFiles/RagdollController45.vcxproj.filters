@@ -82,12 +82,18 @@
     <ClCompile Include="..\..\Source\RagdollController45\Utility.cpp">
       <Filter>Source\RagdollController45</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController45\LineFSocket.cpp">
+      <Filter>Source\RagdollController45</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\RagdollController45\RemoteControllable.h">
       <Filter>Source\RagdollController45</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\RagdollController45\Utility.h">
+      <Filter>Source\RagdollController45</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController45\LineFSocket.h">
       <Filter>Source\RagdollController45</Filter>
     </ClInclude>
   </ItemGroup>

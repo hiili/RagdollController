@@ -5,6 +5,7 @@
 
 #include "RemoteControllable.h"
 
+#include "LineFSocket.h"
 #include "ScopeGuard.h"
 #include "Utility.h"
 
@@ -125,7 +126,8 @@ void ARemoteControlInterface::CheckForNewConnections()
 		}
 		UE_LOG( LogRcRci, Log, TEXT( "(%s) Incoming connection accepted." ), TEXT( __FUNCTION__ ) );
 
-		this->PendingSockets.Add( TSharedPtr<FSocket>( connectionSocket ) );
+		// wrap the socket into a LineFSocket and store it to PendingSockets (check goodness later)
+		this->PendingSockets.Add( LineFSocket::Build( connectionSocket ) );
 
 	}
 }
@@ -138,57 +140,23 @@ void ARemoteControlInterface::ManagePendingConnections()
 	// iterate over our pending connections
 	for( auto iterPendingSocket = this->PendingSockets.CreateIterator(); iterPendingSocket; ++iterPendingSocket )
 	{
-		char lineBuffer[LINE_BUFFER_SIZE];
-		bool success;
-		uint32 bytesPending;
-		int32 bytesRead;
-
-
-		/* see if we have received a full command line */
-
-		// if no new data, then continue iterating
-		if( !(*iterPendingSocket)->HasPendingData( bytesPending ) ) continue;
-
-		// peek data
-		success = (*iterPendingSocket)->Recv( (uint8 *)lineBuffer, std::min<int>( LINE_BUFFER_SIZE, bytesPending ), bytesRead, ESocketReceiveFlags::Peek );
-
-		// if failed or buffer overflowed, then close the socket
-		if( !success || bytesRead == LINE_BUFFER_SIZE )
+		// try to get a full command line, continue with next if fail (also drop bad connections)
+		if( !(*iterPendingSocket)->GetLine() )
 		{
-			UE_LOG( LogRcRci, Error, TEXT( "(%s) Pending connection read error or line buffer overflow! Closing the socket." ), TEXT( __FUNCTION__ ) );
+			// bad connection? drop it
+			if( !(*iterPendingSocket)->IsGood() )
+			{
+				UE_LOG( LogRcRci, Error, TEXT( "(%s) Pending connection read error! Closing the socket." ), TEXT( __FUNCTION__ ) );
 
-			this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
-			break;   // play safe and don't touch the iterator anymore
+				this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
+				break;   // play safe and don't touch the iterator anymore
+			}
+
+			continue;
 		}
 
-		// if no new data, then continue iterating
-		if( bytesRead == 0 ) continue;
-
-		// convert the buffer into a C++ string 
-		std::string commandLine( lineBuffer, bytesRead );
-
-		// look for an CR or LF, continue iterating if not found
-		std::size_t posLF = commandLine.find_first_of( "\r\n" );
-		if( posLF == std::string::npos ) continue;
-
-
-		/* we have a full command line -> remove it from the socket stream, and remove the socket from the pending buffer and dispatch it */
-
-		// remove the command line from the socket stream (on failure, kill the socket and break)
-		success = (*iterPendingSocket)->Recv( (uint8 *)lineBuffer, posLF + 1, bytesRead, ESocketReceiveFlags::None );
-		if( !success || bytesRead != posLF + 1 )
-		{
-			UE_LOG( LogRcRci, Error, TEXT( "(%s) Pending connection read error! Closing the socket." ), TEXT( __FUNCTION__ ) );
-
-			this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
-			break;   // play safe and don't touch the iterator anymore
-		}
-
-		// cut the command line at LF (cut away also the LF)
-		commandLine.erase( posLF );
-
-		// try to dispatch the connection, then remove the socket from the pending buffer
-		DispatchSocket( commandLine, *iterPendingSocket );
+		// try to dispatch the connection, then remove the socket from the pending sockets list
+		DispatchSocket( (*iterPendingSocket)->Line, *iterPendingSocket );
 		this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
 
 		// play safe and don't touch the iterator anymore
@@ -200,7 +168,7 @@ void ARemoteControlInterface::ManagePendingConnections()
 
 
 
-void ARemoteControlInterface::DispatchSocket( std::string command, TSharedPtr<FSocket> socket )
+void ARemoteControlInterface::DispatchSocket( std::string command, TSharedPtr<LineFSocket> socket )
 {
 	// verify and remove handshake
 	if( command.find( RCI_HANDSHAKE_STRING ) != 0 )
@@ -224,7 +192,7 @@ void ARemoteControlInterface::DispatchSocket( std::string command, TSharedPtr<FS
 
 
 
-void ARemoteControlInterface::CmdConnect( std::string args, TSharedPtr<FSocket> socket )
+void ARemoteControlInterface::CmdConnect( std::string args, TSharedPtr<LineFSocket> socket )
 {
 	// find the target actor based on its FName
 	for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
@@ -239,16 +207,15 @@ void ARemoteControlInterface::CmdConnect( std::string args, TSharedPtr<FSocket> 
 			IRemoteControllable * target = InterfaceCast<IRemoteControllable>( *iter );
 			if( !target )
 			{
-				// no: log and stop
+				// no: log and let the connection drop
 				UE_LOG( LogRcRci, Error, TEXT( "(%s) Target actor is not RemoteControllable! Target: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 				return;
 			}
 
 			// send ack to socket
-			int32 bytesSent;
-			socket->Send( (const uint8 *)(RCI_HANDSHAKE_ACK_STRING "\n"), std::strlen( RCI_HANDSHAKE_ACK_STRING "\n" ), bytesSent );
-			if( bytesSent != std::strlen( RCI_HANDSHAKE_ACK_STRING "\n" ) )
+			if( !socket->PutLine( RCI_HANDSHAKE_ACK_STRING ) )
 			{
+				// failed: log and let the connection drop
 				UE_LOG( LogRcRci, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 				return;
 			}
@@ -259,5 +226,6 @@ void ARemoteControlInterface::CmdConnect( std::string args, TSharedPtr<FSocket> 
 		}
 	}
 
+	// target not found, log and let the connection drop
 	UE_LOG( LogRcRci, Error, TEXT( "(%s) Target actor not found: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 }

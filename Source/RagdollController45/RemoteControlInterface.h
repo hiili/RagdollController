@@ -11,6 +11,7 @@
 #include "RemoteControlInterface.generated.h"
 
 class FSocket;
+class LineFSocket;
 
 
 
@@ -30,7 +31,7 @@ protected:
 	TSharedPtr<FSocket> ListenSocket;
 
 	/** Connection sockets that have not yet been dispatched. Currently, there are no cleanup mechanisms for stalled connections. */
-	TArray< TSharedPtr<FSocket> > PendingSockets;
+	TArray< TSharedPtr<LineFSocket> > PendingSockets;
 
 	/** Effective receive buffer size of the listen socket */
 	int32 RCIReceiveBufferSize;
@@ -46,13 +47,13 @@ protected:
 	void ManagePendingConnections();
 
 	/** Try to dispatch the socket according to the command. Close and discard the socket upon errors. */
-	void DispatchSocket( std::string command, TSharedPtr<FSocket> socket );
+	void DispatchSocket( std::string command, TSharedPtr<LineFSocket> socket );
 
 
 	/* commands */
 
 	/** Connect to an actor */
-	void CmdConnect( std::string args, TSharedPtr<FSocket> socket );
+	void CmdConnect( std::string args, TSharedPtr<LineFSocket> socket );
 
 
 public:

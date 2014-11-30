@@ -324,7 +324,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\RagdollController45\RemoteControllable.cpp" />
+    <ClCompile Include="..\..\Source\RagdollController45\LineFSocket.cpp" />
     <ClCompile Include="..\..\Source\RagdollController45\Utility.cpp" />
+    <ClInclude Include="..\..\Source\RagdollController45\LineFSocket.h" />
     <ClInclude Include="..\..\Source\RagdollController45\Utility.h" />
     <None Include="..\..\RagdollController45.uproject" />
     <None Include="..\..\Source\RagdollController45.Target.cs" />
