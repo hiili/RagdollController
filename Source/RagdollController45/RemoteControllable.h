@@ -27,7 +27,7 @@ class IRemoteControllable
 protected:
 
 	/** Reference to this object as an AActor */
-	AActor * thisActor;
+	AActor * ThisActor;
 
 	/** Remote control socket */
 	TSharedPtr<LineFSocket> RemoteControlSocket;
@@ -35,7 +35,7 @@ protected:
 
 public:
 
-	IRemoteControllable( AActor * newThisActor );
+	IRemoteControllable( AActor * thisActor );
 
 	virtual void ConnectWith( const TSharedPtr<LineFSocket> & socket );
 

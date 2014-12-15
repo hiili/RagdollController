@@ -18,16 +18,16 @@ URemoteControllable::URemoteControllable( const class FPostConstructInitializePr
 
 
 
-IRemoteControllable::IRemoteControllable( AActor * thisActor_ ) :
-	thisActor( thisActor_ )
+IRemoteControllable::IRemoteControllable( AActor * thisActor ) :
+	ThisActor( thisActor )
 {
-	check( thisActor );
+	check( ThisActor );
 }
 
 
 void IRemoteControllable::ConnectWith( const TSharedPtr<LineFSocket> & socket )
 {
-	UE_LOG( LogRcRci, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ), *this->thisActor->GetName() );
+	UE_LOG( LogRcRci, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ), *this->ThisActor->GetName() );
 
 	// store the new socket
 	this->RemoteControlSocket = socket;
