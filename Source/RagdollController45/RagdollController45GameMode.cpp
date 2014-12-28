@@ -6,9 +6,6 @@
 #include <App.h>
 
 
-// constant frame rate
-#define FIXED_FPS 60.f
-
 // frame rate logging: averaging window size (set to 0 to disable logging)
 #define ESTIMATE_FRAMERATE_SAMPLES 100
 
@@ -28,7 +25,7 @@ void ARagdollController45GameMode::InitGame( const FString & MapName, const FStr
 	Super::InitGame( MapName, Options, ErrorMessage );
 
 	// set the fixed dt (remember to use the -UseFixedTimeStep command line option!)
-	FApp::SetFixedDeltaTime( 1.f / FIXED_FPS );
+	FApp::SetFixedDeltaTime( 1.f / this->FixedFps );
 }
 
 
@@ -40,7 +37,7 @@ void ARagdollController45GameMode::Tick( float DeltaSeconds )
 
 	// cap fps here, as the -UseFixedTimeStep commannd line option disables built-in framerate control in UEngine::UpdateTimeAndHandleMaxTickRate(),
 	// and we can't override that method as it is not virtual.
-	//HandleMaxTickRate( FIXED_FPS );
+	//HandleMaxTickRate( this->FixedFps );
 
 	// estimate the current average frame rate
 	estimateAverageFrameRate();

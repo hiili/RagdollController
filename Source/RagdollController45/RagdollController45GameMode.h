@@ -11,7 +11,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Config=RagdollController)
 class RAGDOLLCONTROLLER45_API ARagdollController45GameMode : public AGameMode
 {
 	GENERATED_UCLASS_BODY()
@@ -28,6 +28,10 @@ protected:
 
 
 public:
+
+	/** The constant frame rate to be used. This is allowed to be changed run-time. */
+	UPROPERTY(Config)
+	float FixedFps;
 
 	/** Estimate of the current average frame rate (averaging window length is controlled by ESTIMATE_FRAMERATE_SAMPLES) */
 	float currentAverageFps;
