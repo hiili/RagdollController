@@ -85,7 +85,7 @@ void AControlledRagdoll::PostInitializeComponents()
 		/* We are standalone or a server */
 		
 		// Store server's interpretation of 0xdeadbeef to a replicated float
-		std::strncpy( (char *)&this->ServerInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(this->ServerInterpretationOfDeadbeef) );
+		std::memcpy( &this->ServerInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(this->ServerInterpretationOfDeadbeef) );
 
 		// make sure that physics simulation is enabled also on a dedicated server
 		if( this->SkeletalMeshComponent )
@@ -360,7 +360,7 @@ void AControlledRagdoll::receivePose()
 
 	// Check for float binary compatibility (eg endianness) and that the PhysX data sizes match. Assume that UE replicates floats always correctly.
 	float ourInterpretationOfDeadbeef;
-	std::strncpy( (char *)&ourInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(ourInterpretationOfDeadbeef) );
+	std::memcpy( &ourInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(ourInterpretationOfDeadbeef) );
 	if( std::abs( (this->ServerInterpretationOfDeadbeef / ourInterpretationOfDeadbeef) - 1.f ) > 1e-6f
 		|| (this->BoneStates.Num() > 0 && !this->BoneStates[0].DoDataSizesMatch()) )
 	{
