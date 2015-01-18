@@ -18,10 +18,10 @@ Create launch shortcuts:
       * DebugGame: Use the non-debug UE4Editor executable, add the -debug flag
       * Debug: Use the debug UE4Editor executable, add the -debug flag
    * launch modes
-      * standalone: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -game -log -UseFixedTimeStep
-      * client: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" 127.0.0.1 -game -log -UseFixedTimeStep
-      * server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -server -game -log -UseFixedTimeStep
-      * listen server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" main?listen -game -log -UseFixedTimeStep
+      * standalone: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController\RagdollController.uproject" -game -log -UseFixedTimeStep
+      * client: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController\RagdollController.uproject" 127.0.0.1 -game -log -UseFixedTimeStep
+      * server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController\RagdollController.uproject" -server -game -log -UseFixedTimeStep
+      * listen server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController\RagdollController.uproject" main?listen -game -log -UseFixedTimeStep
 
 
 
@@ -33,11 +33,34 @@ In your GameMode (create it if it does not yet exist, and make sure that all Gam
    1 Set fixed dt in constructor: FApp::SetFixedDeltaTime( 1.f / 60.f )<br />
      (you use the command line option -UseFixedTimeStep to enable fixed time stepping!)
 
-Set the framerate in Project Preferences ('desired framerate' might still affect something?)
+Set the framerate in Project Preferences to 60 ('desired framerate' might still affect something?)
 
 (In MyGameMode::Tick(), implement manual fps capping (use code from UEngine::UpdateTimeAndHandleMaxTickRate()))
 
 Double check that launch shortcuts have the -UseFixedTimeStep flag set
+
+
+Access PhysX
+------------
+
+RagdollController.Build.cs, add PhysX to the following:
+   * PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysX" });
+   * PublicIncludePaths.AddRange(new string[] { "Engine/Source/ThirdParty/PhysX/PhysX-3.3/include" });
+(see https://answers.unrealengine.com/questions/70019/how-to-include-the-header-file-from-a-plugin.html)
+
+
+Uncap dedicated server fps
+--------------------------
+
+UGameEngine::GetMaxTickRate() clamps NetServerMaxTickRate to [10,120], hard-coded.
+
+Solution: Subclass from UGameEngine and override GetMaxTickRate()
+   * Make the game use your class by adding this to DefaultEngine.ini: [/Script/Engine.Engine] ... GameEngine=/Script/YourModuleName.YourGameEngine
+   * See https://wiki.unrealengine.com/Create_Custom_engine_classes_for_your_game_module
+
+Notes
+   * Rama's Blueprint library has functions for disabling and enabling rendering. check the performance with those?<br />
+     If this works, then do we need a dedicated server approach anymore? Maybe for running on linux clusters, in case that we cannot launch a standalone game on linux without display?
 
 
 Create the ragdoll
@@ -66,38 +89,6 @@ Re-enable ticking in the constructor: (needs a full restart)
 	(//PrimaryActorTick.bAllowTickOnDedicatedServer = true;)
 
 
-Enable and access PhysX
------------------------
-
-Enable ragdoll physics on dedicated server. In PostInitializeComponents(), do:
-   * this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
-   * this->SkeletalMeshComponent->SetSimulatePhysics( true );
-
-
-RagdollController45.Build.cs, add PhysX to the following:
-   * PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysX" });
-   * PublicIncludePaths.AddRange(new string[] { "Engine/Source/ThirdParty/PhysX/PhysX-3.3/include" });
-(see https://answers.unrealengine.com/questions/70019/how-to-include-the-header-file-from-a-plugin.html)
-
-Source files
-   * #include <extensions/PxD6Joint.h>
-      * this->SkeletalMeshComponent->Constraints[joint]->ConstraintData->getTwist() ...
-
-
-Uncap dedicated server fps
---------------------------
-
-UGameEngine::GetMaxTickRate() clamps NetServerMaxTickRate to [10,120], hard-coded.
-
-Solution: Subclass from UGameEngine and override GetMaxTickRate()
-   * Make the game use your class by adding this to DefaultEngine.ini: [/Script/Engine.Engine] ... GameEngine=/Script/YourModuleName.YourGameEngine
-   * See https://wiki.unrealengine.com/Create_Custom_engine_classes_for_your_game_module
-
-Notes
-   * Rama's Blueprint library has functions for disabling and enabling rendering. check the performance with those?<br />
-     If this works, then do we need a dedicated server approach anymore? Maybe for running on linux clusters, in case that we cannot launch a standalone game on linux without display?
-
-
 Replication
 -----------
 
@@ -114,23 +105,6 @@ Remote control
 
 Add a Remote Control Interface actor to the scene.
    * Cannot find the class in the Class Viewer? You must ALWAYS start the editor via the shortcuts that contain the -debug flag properly!
-
-
-
-
-
-
-
-
-Applying joint forces
----------------------
-
-For testing
-   * World Settings -> Override World Gravity = on (ie, gravity off)
-
-
-
-
 
 
 
