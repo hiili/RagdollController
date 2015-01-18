@@ -5,28 +5,28 @@
 		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrashReporter\MinidumpDiagnostics\MinidumpDiagnostics.Target.cs" />
 		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrashReporter\MinidumpDiagnostics\MinidumpDiagnostics.Build.cs" />
 		<Filter Include="Private">
-			<UniqueIdentifier>{9CA98AE1-9345-4C96-B297-F16C5B7153CB}</UniqueIdentifier>
+			<UniqueIdentifier>{7276FB53-5605-403A-9AF5-6AABF0A825B6}</UniqueIdentifier>
 		</Filter>
 		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrashReporter\MinidumpDiagnostics\Private\MinidumpDiagnosticsApp.cpp">
 			<Filter>Private</Filter>
 		</ClCompile >
 		<Filter Include="Private\Windows">
-			<UniqueIdentifier>{5BFC1E66-FBCA-42FD-A2CC-1A55F2842F31}</UniqueIdentifier>
+			<UniqueIdentifier>{4C0181B9-298E-47B8-BB8F-2C486E247F18}</UniqueIdentifier>
 		</Filter>
 		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrashReporter\MinidumpDiagnostics\Private\Windows\MinidumpDiagnosticsMainWindows.cpp">
 			<Filter>Private\Windows</Filter>
 		</ClCompile >
 		<Filter Include="Public">
-			<UniqueIdentifier>{3799C363-1F69-4015-988E-23EE2A0A3FE0}</UniqueIdentifier>
+			<UniqueIdentifier>{92099924-7758-4D93-A0EF-40CF94F78A7F}</UniqueIdentifier>
 		</Filter>
 		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrashReporter\MinidumpDiagnostics\Public\MinidumpDiagnosticsApp.h">
 			<Filter>Public</Filter>
 		</ClInclude >
 		<Filter Include="Resources">
-			<UniqueIdentifier>{43283515-824E-4A72-AAFA-A9A6216BD030}</UniqueIdentifier>
+			<UniqueIdentifier>{281958EC-CCC0-4542-B074-A87BA79F23CA}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Resources\Windows">
-			<UniqueIdentifier>{92F5257D-2578-4A3D-988A-070FD1193294}</UniqueIdentifier>
+			<UniqueIdentifier>{F1CE6899-94A3-4670-800C-AEBC506F5CA5}</UniqueIdentifier>
 		</Filter>
 		<Manifest Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrashReporter\MinidumpDiagnostics\Resources\Windows\Debug-PCLaunch-Win32.manifest">
 			<Filter>Resources\Windows</Filter>

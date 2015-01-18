@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<None Include="..\..\RagdollController.uproject" />
+		<Filter Include="Source">
+			<UniqueIdentifier>{4B086CF8-523F-418F-9CCE-8B950B6C0C74}</UniqueIdentifier>
+		</Filter>
+		<None Include="..\..\Source\RagdollController.Target.cs">
+			<Filter>Source</Filter>
+		</None >
+		<None Include="..\..\Source\RagdollControllerEditor.Target.cs">
+			<Filter>Source</Filter>
+		</None >
+		<Filter Include="Config">
+			<UniqueIdentifier>{770F7D78-53AA-461E-BDAB-2D30B7B8C451}</UniqueIdentifier>
+		</Filter>
+		<None Include="..\..\Config\DefaultDeviceProfiles.ini">
+			<Filter>Config</Filter>
+		</None >
+		<None Include="..\..\Config\DefaultEditor.ini">
+			<Filter>Config</Filter>
+		</None >
+		<None Include="..\..\Config\DefaultEngine.ini">
+			<Filter>Config</Filter>
+		</None >
+		<None Include="..\..\Config\DefaultGame.ini">
+			<Filter>Config</Filter>
+		</None >
+		<None Include="..\..\Config\DefaultInput.ini">
+			<Filter>Config</Filter>
+		</None >
+		<None Include="..\..\Config\DefaultLightmass.ini">
+			<Filter>Config</Filter>
+		</None >
+		<Filter Include="Source\RagdollController">
+			<UniqueIdentifier>{B3957983-3952-48CA-A22D-50EF02D3BEDE}</UniqueIdentifier>
+		</Filter>
+		<None Include="..\..\Source\RagdollController\RagdollController.Build.cs">
+			<Filter>Source\RagdollController</Filter>
+		</None >
+		<ClCompile Include="..\..\Source\RagdollController\RagdollController.cpp">
+			<Filter>Source\RagdollController</Filter>
+		</ClCompile >
+		<ClInclude Include="..\..\Source\RagdollController\RagdollController.h">
+			<Filter>Source\RagdollController</Filter>
+		</ClInclude >
+		<ClCompile Include="..\..\Source\RagdollController\RagdollControllerGameMode.cpp">
+			<Filter>Source\RagdollController</Filter>
+		</ClCompile >
+		<ClInclude Include="..\..\Source\RagdollController\RagdollControllerGameMode.h">
+			<Filter>Source\RagdollController</Filter>
+		</ClInclude >
+		<Filter Include="Source\RagdollController\Resources">
+			<UniqueIdentifier>{0B396FDC-F84C-4EE2-93FF-71D962EF3B5E}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source\RagdollController\Resources\Windows">
+			<UniqueIdentifier>{4C62EEDD-E9D7-4ACE-9519-C9E8B9D4FF78}</UniqueIdentifier>
+		</Filter>
+		<ResourceCompile Include="..\..\Source\RagdollController\Resources\Windows\RagdollController.rc">
+			<Filter>Source\RagdollController\Resources\Windows</Filter>
+		</ResourceCompile >
+	</ItemGroup>
+</Project>

@@ -4,14 +4,14 @@
 	<ItemGroup>
 		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\UnrealHeaderTool\UnrealHeaderTool.Target.cs" />
 		<Filter Include="Config">
-			<UniqueIdentifier>{AA5B20ED-6449-4080-B7A8-1345F063B4AF}</UniqueIdentifier>
+			<UniqueIdentifier>{C333D419-4AA8-4107-AAC2-91A59B11657A}</UniqueIdentifier>
 		</Filter>
 		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Programs\UnrealHeaderTool\Config\DefaultEngine.ini">
 			<Filter>Config</Filter>
 		</None >
 		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\UnrealHeaderTool\UnrealHeaderTool.Build.cs" />
 		<Filter Include="Private">
-			<UniqueIdentifier>{34B72CDD-6689-4640-83DD-4719D19ECAC5}</UniqueIdentifier>
+			<UniqueIdentifier>{EFE3EE77-73F2-471F-AB09-94C8A77994CE}</UniqueIdentifier>
 		</Filter>
 		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\UnrealHeaderTool\Private\BaseParser.cpp">
 			<Filter>Private</Filter>
@@ -71,7 +71,7 @@
 			<Filter>Private</Filter>
 		</ClCompile >
 		<Filter Include="Public">
-			<UniqueIdentifier>{6CA55FD1-542A-44F6-9346-1E6FE87033F6}</UniqueIdentifier>
+			<UniqueIdentifier>{E4A7370F-01EA-42D8-B05A-538E44ABB062}</UniqueIdentifier>
 		</Filter>
 		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\UnrealHeaderTool\Public\IScriptGeneratorPluginInterface.h">
 			<Filter>Public</Filter>
@@ -80,7 +80,7 @@
 			<Filter>Public</Filter>
 		</ClInclude >
 		<Filter Include="Resources">
-			<UniqueIdentifier>{C794BE98-5F0A-4DBC-A133-B25DEBE99D7C}</UniqueIdentifier>
+			<UniqueIdentifier>{74DD1DB4-772E-4435-BA2A-0703CB099B64}</UniqueIdentifier>
 		</Filter>
 		<ResourceCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\UnrealHeaderTool\Resources\PCLaunch.rc">
 			<Filter>Resources</Filter>
@@ -89,7 +89,7 @@
 			<Filter>Resources</Filter>
 		</Manifest >
 		<Filter Include="Resources\UHTDebugging">
-			<UniqueIdentifier>{602B16DD-211D-44D1-A83A-20D7AFF12CC5}</UniqueIdentifier>
+			<UniqueIdentifier>{9BA65A0D-A739-45BA-A69A-F07B1836C530}</UniqueIdentifier>
 		</Filter>
 		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\UnrealHeaderTool\Resources\UHTDebugging\EnumOnlyHeader.h">
 			<Filter>Resources\UHTDebugging</Filter>

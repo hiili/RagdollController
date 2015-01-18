@@ -4,22 +4,24 @@ Non-code steps (editor, config files, ...)
 Init
 ----
 
-Create a new Minimal Code project, with starter content
-
-Create a new level, using the template 'Default' (maybe add some lights)
-Save as main.umap
+Create a new project using your favorite template (Sun Temple at the moment)
 
 Project settings:
-   * Maps&modes
-      * Set default maps to main.umap (all 3)
-   * Input: console key = home
-   * Physics: max delta time = 1 (we use fixed dt, get this out of the way)
+   * Maps&modes: make sure that all three default/startup maps point to the main map
+   * Input: add "console key = home"
+   * Physics: set substepping on, max substep delta time = 0.004167 (240 Hz), max substeps = 4<br />
+     (if changing this, make sure it is <0.02! See https://answers.unrealengine.com/questions/154604/addtorque-malfunctions-if-using-fixed-delta-time.html)
 
-Create shortcuts: (maybe add the -debug flag, in case of using DebugGame builds)
-   * standalone: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -game -log -UseFixedTimeStep
-   * client: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" 127.0.0.1 -game -log -UseFixedTimeStep
-   * server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -server -game -log -UseFixedTimeStep
-   * listen server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" main?listen -game -log -UseFixedTimeStep
+Create launch shortcuts:
+   * debug modes
+      * Development: Use the non-debug UE4Editor executable
+      * DebugGame: Use the non-debug UE4Editor executable, add the -debug flag
+      * Debug: Use the debug UE4Editor executable, add the -debug flag
+   * launch modes
+      * standalone: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -game -log -UseFixedTimeStep
+      * client: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" 127.0.0.1 -game -log -UseFixedTimeStep
+      * server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" -server -game -log -UseFixedTimeStep
+      * listen server: X:\GitHub\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe "X:\work\Unreal Projects\RagdollController45\RagdollController45.uproject" main?listen -game -log -UseFixedTimeStep
 
 
 
@@ -27,16 +29,15 @@ Create shortcuts: (maybe add the -debug flag, in case of using DebugGame builds)
 Use fixed dt
 ------------
 
-In your GameMode, do:
+In your GameMode (create it if it does not yet exist, and make sure that all GameModes in config point to it):
    1 Set fixed dt in constructor: FApp::SetFixedDeltaTime( 1.f / 60.f )<br />
-     (in 4.4, you use the command line option -UseFixedTimeStep to enable fixed time stepping!)
-   1 (already done as we started from the Minimal Code template: Set all GameModes to MyGameMode in config)
-
-In MyGameMode::Tick(), implement manual fps capping (use code from UEngine::UpdateTimeAndHandleMaxTickRate())
+     (you use the command line option -UseFixedTimeStep to enable fixed time stepping!)
 
 Set the framerate in Project Preferences ('desired framerate' might still affect something?)
 
-Check that launch shortcuts have the -UseFixedTimeStep flag set
+(In MyGameMode::Tick(), implement manual fps capping (use code from UEngine::UpdateTimeAndHandleMaxTickRate()))
+
+Double check that launch shortcuts have the -UseFixedTimeStep flag set
 
 
 Create the ragdoll

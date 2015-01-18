@@ -1,0 +1,20 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{C87C98C2-4ED0-52AC-4347-11AFE5F3ECBD}",
+	"Category": "Samples",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "RagdollController",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"TargetPlatforms": [
+		"IOS",
+		"MacNoEditor",
+		"WindowsNoEditor",
+		"Android"
+	],
+	"EpicSampleNameHash": "3038063013"
+}
