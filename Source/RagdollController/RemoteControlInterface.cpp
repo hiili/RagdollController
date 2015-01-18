@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RagdollController45.h"
+#include "RagdollController.h"
 #include "RemoteControlInterface.h"
 
 #include "RemoteControllable.h"
@@ -33,8 +33,8 @@
 
 
 
-ARemoteControlInterface::ARemoteControlInterface(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP)
+ARemoteControlInterface::ARemoteControlInterface()
+	: Super( FObjectInitializer() )
 {
 	// enable ticking
 	PrimaryActorTick.bCanEverTick = true;
@@ -204,7 +204,7 @@ void ARemoteControlInterface::CmdConnect( std::string args, const TSharedPtr<Lin
 			UE_LOG( LogRcRci, Log, TEXT( "(%s) Target actor found, forwarding the connection. Target: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 
 			// check that the actor is RemoteControllable
-			IRemoteControllable * target = InterfaceCast<IRemoteControllable>( *iter );
+			IRemoteControllable * target = Cast<IRemoteControllable>( *iter );
 			if( !target )
 			{
 				// no: log and let the connection drop

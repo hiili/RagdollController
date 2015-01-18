@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RagdollController45.h"
+#include "RagdollController.h"
 #include "ControlledRagdoll.h"
 
-#include "RagdollController45GameMode.h"
+#include "RagdollControllerGameMode.h"
 #include "ScopeGuard.h"
 #include "Utility.h"
 
@@ -25,8 +25,8 @@
 
 
 
-AControlledRagdoll::AControlledRagdoll(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP),
+AControlledRagdoll::AControlledRagdoll()
+	: Super( FObjectInitializer() ),
 	IRemoteControllable( this ),
 	lastSendPoseTime( -INFINITY )
 {
@@ -302,7 +302,7 @@ void AControlledRagdoll::communicateWithRemoteController()
 void AControlledRagdoll::recomputeNetUpdateFrequency( float gameDeltaTime )
 {
 	// get a pointer to our GameMode instance
-	ARagdollController45GameMode * gm = Cast<ARagdollController45GameMode>( GetWorld()->GetAuthGameMode() );
+	ARagdollControllerGameMode * gm = Cast<ARagdollControllerGameMode>( GetWorld()->GetAuthGameMode() );
 	if( !gm ) return;   // probably not authority..
 
 	// compute how fast the simulation is running with respect to wall clock time

@@ -114,11 +114,11 @@ public:
  * 
  */
 UCLASS()
-class RAGDOLLCONTROLLER45_API AControlledRagdoll :
+class RAGDOLLCONTROLLER_API AControlledRagdoll :
 	public AActor,
 	public IRemoteControllable
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
 
 	/** Last time that the pose was sent using sendPose(). */
@@ -165,6 +165,8 @@ protected:
 
 
 public:
+
+	AControlledRagdoll();
 
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;

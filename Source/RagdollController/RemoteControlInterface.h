@@ -20,9 +20,9 @@ class LineFSocket;
  * 
  */
 UCLASS(Blueprintable)
-class RAGDOLLCONTROLLER45_API ARemoteControlInterface : public AActor
+class RAGDOLLCONTROLLER_API ARemoteControlInterface : public AActor
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
 	
 protected:
@@ -57,6 +57,8 @@ protected:
 
 
 public:
+
+	ARemoteControlInterface();
 
 	/** Initialize the remote control interface. */
 	virtual void PostInitializeComponents() override;
