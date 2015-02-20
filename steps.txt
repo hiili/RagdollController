@@ -52,9 +52,12 @@ RagdollController.Build.cs, add PhysX to the following:
 Uncap dedicated server fps
 --------------------------
 
-UGameEngine::GetMaxTickRate() clamps NetServerMaxTickRate to [10,120], hard-coded.
+In DefaultEngine.ini, you could set (but this is not needed, see below):
+[/Script/OnlineSubsystemUtils.IpNetDriver]
+NetServerMaxTickRate=1000000000
+LanServerMaxTickRate=1000000000
 
-Solution: Subclass from UGameEngine and override GetMaxTickRate()
+However, UGameEngine::GetMaxTickRate() clamps NetServerMaxTickRate to [10,120], hard-coded. Solution: Subclass from UGameEngine and override GetMaxTickRate()
    * Make the game use your class by adding this to DefaultEngine.ini: [/Script/Engine.Engine] ... GameEngine=/Script/YourModuleName.YourGameEngine
    * See https://wiki.unrealengine.com/Create_Custom_engine_classes_for_your_game_module
 
@@ -190,3 +193,11 @@ Conclusion after much more experimenting:
    * SkeletalMeshComponent pose is not replicated by UE, you have to do it by yourself.
    * Current solution: do it on the PhysX level. Note that setting the global pose causes PhysX to ignore any velocities set during the same tick!
    * Replication seems tricky on UE level: there are no transform setters for the FBodyInstances. One path could be to do the pose replication via the animation system, replicate the velocities directly to PhysX, and use physics blending to merge these: PhysX would simulate the ragdoll based on the velocities while the animation system would constantly blend in absolute pose corrections -> we have smoothly blended client side prediction, plus more or less proper kinematic interaction with other simulated actors.
+
+
+
+
+Appendix D: Dedicated server issues
+----------
+
+Starting a dedicated server for the first time (after running other UE projects, etc) incurs a delay of several minutes before the gameloop actually starts. Just be patient!
