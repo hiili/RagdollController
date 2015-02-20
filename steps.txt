@@ -71,20 +71,20 @@ Create the ragdoll
 
 Migrate from Content Examples: SkeletalMesh'/Game/ExampleContent/AnimationDemo/Meshes/Owen.Owen'
 
-Create BP from Owen -> RagdollControl/OwenBP
+Create BP from Owen -> RagdollController/OwenBP
 
 Set Skeletal mesh component properties:
    * Simulate physics: on
    * Collision presets: PhysicsActor
 
-Place him in the world, rename to Owen
+Place him in the world (eg, under a RagdollController folder), rename to Owen
 
 
 Create a C++ access point
 -------------------------
 
 Create the ControlledRagdoll C++ class extending Actor, reparent OwenBP to it
-   * reparenting does not become saved automatically, you need to save the asset directly in the BP editor
+   * reparenting does not become saved automatically, you need to save the asset directly in the BP editor!
 
 Re-enable ticking in the constructor: (needs a full restart)
 	PrimaryActorTick.bCanEverTick = true;
@@ -106,10 +106,12 @@ Activate replication
 Remote control
 --------------
 
-Add a Remote Control Interface actor to the scene.
+Add a Remote Control Interface actor to the scene. (eg, under the RagdollController folder, and name it to "RemoteControlInterface")
    * Cannot find the class in the Class Viewer? You must ALWAYS start the editor via the shortcuts that contain the -debug flag properly!
 
-
+Test it:
+   * telnet to localhost 7770
+   * connect command: RagdollController RCI: CONNECT Owen 
 
 
 ----------
