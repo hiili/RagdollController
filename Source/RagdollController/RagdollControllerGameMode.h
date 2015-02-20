@@ -29,6 +29,10 @@ protected:
 
 public:
 
+	/** Whether to attempt to connect to PhysX Visual Debugger (slows down startup for a second or two if PVD not found) */
+	UPROPERTY( Config )
+	bool ConnectToPhysXVisualDebugger;
+
 	/** The constant frame rate to be used. This is allowed to be changed run-time. */
 	UPROPERTY( Config )
 	float FixedFps;

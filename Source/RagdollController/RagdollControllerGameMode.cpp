@@ -33,23 +33,26 @@ void ARagdollControllerGameMode::InitGame( const FString & MapName, const FStrin
 	FApp::SetFixedDeltaTime( 1.f / this->FixedFps );
 
 	// connect to physics debugger (adapted from https://physx3.googlecode.com/svn/trunk/PhysX-3.2_PC_SDK_Core/Samples/SampleBase/PhysXSample.cpp)
-	physx::PxScene * scene = GetWorld()->GetPhysicsScene()->GetPhysXScene( 0 );
-	physx::PxPhysics & physics = scene->getPhysics();
-	physx::PxVisualDebuggerConnection * theConnection = 0;
-	if( physics.getPvdConnectionManager() && physics.getVisualDebugger() )
+	if( this->ConnectToPhysXVisualDebugger )
 	{
-		theConnection = physx::PxVisualDebuggerExt::createConnection( physics.getPvdConnectionManager(), "127.0.0.1", 5425, 10000,
-			physx::PxVisualDebuggerExt::getAllConnectionFlags() );
-		physics.getVisualDebugger()->setVisualDebuggerFlags( physx::PxVisualDebuggerFlag::eTRANSMIT_CONTACTS |
-			physx::PxVisualDebuggerFlag::eTRANSMIT_SCENEQUERIES | physx::PxVisualDebuggerFlag::eTRANSMIT_CONSTRAINTS );
-	}
-	if( theConnection )
-	{
-		UE_LOG( LogTemp, Log, TEXT( "(%s) PhysX Visual Debugger connection initialized succesfully." ), TEXT( __FUNCTION__ ) );
-	}
-	else
-	{
-		UE_LOG( LogTemp, Warning, TEXT( "(%s) PhysX Visual Debugger: Failed to initialize connection!" ), TEXT( __FUNCTION__ ) );
+		physx::PxScene * scene = GetWorld()->GetPhysicsScene()->GetPhysXScene( 0 );
+		physx::PxPhysics & physics = scene->getPhysics();
+		physx::PxVisualDebuggerConnection * theConnection = 0;
+		if( physics.getPvdConnectionManager() && physics.getVisualDebugger() )
+		{
+			theConnection = physx::PxVisualDebuggerExt::createConnection( physics.getPvdConnectionManager(), "127.0.0.1", 5425, 10000,
+				physx::PxVisualDebuggerExt::getAllConnectionFlags() );
+			physics.getVisualDebugger()->setVisualDebuggerFlags( physx::PxVisualDebuggerFlag::eTRANSMIT_CONTACTS |
+				physx::PxVisualDebuggerFlag::eTRANSMIT_SCENEQUERIES | physx::PxVisualDebuggerFlag::eTRANSMIT_CONSTRAINTS );
+		}
+		if( theConnection )
+		{
+			UE_LOG( LogTemp, Log, TEXT( "(%s) PhysX Visual Debugger connection initialized succesfully." ), TEXT( __FUNCTION__ ) );
+		}
+		else
+		{
+			UE_LOG( LogTemp, Error, TEXT( "(%s) PhysX Visual Debugger: Failed to initialize connection!" ), TEXT( __FUNCTION__ ) );
+		}
 	}
 }
 
