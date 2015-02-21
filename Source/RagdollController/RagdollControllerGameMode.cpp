@@ -63,9 +63,19 @@ void ARagdollControllerGameMode::Tick( float DeltaSeconds )
 {
 	Super::Tick( DeltaSeconds );
 
-	// cap fps here, as the -UseFixedTimeStep commannd line option disables built-in framerate control in UEngine::UpdateTimeAndHandleMaxTickRate(),
-	// and we can't override that method as it is not virtual.
-	//HandleMaxTickRate( this->FixedFps );
+	// If not dedicated server, or CapServerTickRate == true, then cap fps here. The -UseFixedTimeStep commannd line option disables built-in framerate
+	// control in UEngine::UpdateTimeAndHandleMaxTickRate(), and we can't override that method as it is not virtual.
+	if( UWorld * world = GetWorld() )
+	{
+		if( world->GetNetMode() != NM_DedicatedServer || this->CapServerTickRate )
+		{
+			HandleMaxTickRate( this->FixedFps );
+		}
+	}
+	else
+	{
+		UE_LOG( LogTemp, Error, TEXT("(%s) GetWorld() == null!"), __FUNCTION__ );
+	}
 
 	// estimate the current average frame rate
 	estimateAverageFrameRate();

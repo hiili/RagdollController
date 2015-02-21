@@ -40,7 +40,13 @@ public:
 	UPROPERTY( Config )
 	float FixedFps;
 
-	/** Estimate of the current average frame rate (averaging window length is controlled by ESTIMATE_FRAMERATE_SAMPLES) */
+	/** Whether to cap the real (wall-clock) tick rate by FixedFps also on dedicated servers. */
+	UPROPERTY( Config )
+	bool CapServerTickRate;
+
+
+	/** Computed estimate of the current average frame rate (averaging window length is controlled by ESTIMATE_FRAMERATE_SAMPLES). At least ControlledRagdoll
+	 ** uses this for server-to-client bandwidth capping in replication. */
 	float currentAverageFps;
 
 
