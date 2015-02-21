@@ -29,11 +29,14 @@ protected:
 
 public:
 
+	/* .ini configuration */
+
 	/** Whether to attempt to connect to PhysX Visual Debugger (slows down startup for a second or two if PVD not found) */
 	UPROPERTY( Config )
 	bool ConnectToPhysXVisualDebugger;
 
-	/** The constant frame rate to be used. This is allowed to be changed run-time. */
+	/** The constant virtual (game-time) tick rate to be used. The real (wall-clock) tick rate of clients and standalone instances is always capped to not
+	 ** exceed this. */
 	UPROPERTY( Config )
 	float FixedFps;
 

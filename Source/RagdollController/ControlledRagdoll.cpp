@@ -19,7 +19,7 @@
 #include <cmath>
 
 
-/** Target real time value for AActor::NetUpdateFrequency (the nominal value must be corrected by the wall clock vs game time fps difference). */
+/** Target real-time value for AActor::NetUpdateFrequency (the nominal value must be corrected by the wall clock vs game time fps difference). */
 #define NET_UPDATE_FREQUENCY 60.f
 
 
