@@ -3,7 +3,7 @@
 #include "RagdollController.h"
 #include "ControlledRagdoll.h"
 
-#include "RagdollControllerGameMode.h"
+#include "RCLevelScriptActor.h"
 #include "ScopeGuard.h"
 #include "Utility.h"
 
@@ -301,15 +301,20 @@ void AControlledRagdoll::communicateWithRemoteController()
 
 void AControlledRagdoll::recomputeNetUpdateFrequency( float gameDeltaTime )
 {
-	// get a pointer to our GameMode instance
-	ARagdollControllerGameMode * gm = Cast<ARagdollControllerGameMode>( GetWorld()->GetAuthGameMode() );
-	if( !gm ) return;   // probably not authority..
+	// get a pointer to our LevelScriptActor instance
+	check( GetWorld() );
+	if( ARCLevelScriptActor * ls = Cast<ARCLevelScriptActor>( GetWorld()->GetLevelScriptActor() ) )
+	{
+		// compute how fast the simulation is running with respect to wall clock time
+		float currentSpeedMultiplier = ls->currentAverageFps / (1.f / gameDeltaTime);
 
-	// compute how fast the simulation is running with respect to wall clock time
-	float currentSpeedMultiplier = gm->currentAverageFps / (1.f / gameDeltaTime);
-
-	// apply to AActor::NetUpdateFrequency
-	this->NetUpdateFrequency = NET_UPDATE_FREQUENCY / currentSpeedMultiplier;
+		// apply to AActor::NetUpdateFrequency
+		this->NetUpdateFrequency = NET_UPDATE_FREQUENCY / currentSpeedMultiplier;
+	}
+	else
+	{
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Failed to locate our RCLevelScriptActor!" ), TEXT( __FUNCTION__ ) );
+	}
 }
 
 
