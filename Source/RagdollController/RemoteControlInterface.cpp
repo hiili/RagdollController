@@ -195,6 +195,7 @@ void ARemoteControlInterface::DispatchSocket( std::string command, const TShared
 void ARemoteControlInterface::CmdConnect( std::string args, const TSharedPtr<LineFSocket> & socket )
 {
 	// find the target actor based on its FName
+	check( GetWorld() );
 	for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
 	{
 		if( iter->GetName() == FString( args.c_str() ) )

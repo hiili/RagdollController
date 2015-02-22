@@ -70,12 +70,12 @@ void AControlledRagdoll::PostInitializeComponents()
 		// warn about multiple SkeletalMeshComponents
 		if( comps.Num() > 1 )
 		{
-			UE_LOG( LogTemp, Warning, TEXT( "(%s) Multiple USkeletalMeshComponents found! Using the first one." ), TEXT( __FUNCTION__ ) );
+			UE_LOG( LogRcCr, Warning, TEXT( "(%s) Multiple USkeletalMeshComponents found! Using the first one." ), TEXT( __FUNCTION__ ) );
 		}
 	}
 	else
 	{
-		UE_LOG( LogTemp, Error, TEXT( "(%s) No USkeletalMeshComponents found!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) No USkeletalMeshComponents found!" ), TEXT( __FUNCTION__ ) );
 	}
 
 
@@ -95,7 +95,7 @@ void AControlledRagdoll::PostInitializeComponents()
 		}
 		else
 		{
-			UE_LOG( LogTemp, Error, TEXT( "(%s) Failed to enable SkeletalMeshComponent physics on dedicated server!" ), TEXT( __FUNCTION__ ) );
+			UE_LOG( LogRcCr, Error, TEXT( "(%s) Failed to enable SkeletalMeshComponent physics on dedicated server!" ), TEXT( __FUNCTION__ ) );
 		}
 
 	}
@@ -112,7 +112,7 @@ void AControlledRagdoll::PostInitializeComponents()
 		}
 		else
 		{
-			UE_LOG( LogTemp, Error, TEXT( "(%s) Failed to switch SkeletalMeshComponent to kinematic mode on a network client!" ), TEXT( __FUNCTION__ ) );
+			UE_LOG( LogRcCr, Error, TEXT( "(%s) Failed to switch SkeletalMeshComponent to kinematic mode on a network client!" ), TEXT( __FUNCTION__ ) );
 		}
 
 	}
@@ -197,7 +197,7 @@ void AControlledRagdoll::refreshStaticJointData()
 {
 	// init the error cleanup scope guard
 	auto sgError = MakeScopeGuard( [this](){
-		UE_LOG( LogTemp, Error, TEXT( "(%s) Scope guard 'sgError' triggered!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Scope guard 'sgError' triggered!" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data if any errors
 		this->JointStates.Empty();
@@ -248,7 +248,7 @@ void AControlledRagdoll::refreshDynamicJointData()
 {
 	// init the error cleanup scope guard
 	auto sgError = MakeScopeGuard( [this](){
-		UE_LOG( LogTemp, Error, TEXT( "(%s) Scope guard 'sgError' triggered!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Scope guard 'sgError' triggered!" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data (including static joint data!) if any errors
 		this->JointStates.Empty();
@@ -332,7 +332,7 @@ void AControlledRagdoll::sendPose()
 		physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
 		if( !pxBody )
 		{
-			UE_LOG( LogTemp, Error, TEXT( "(%s) GetPxRididDynamic() failed for body %d!" ), TEXT( __FUNCTION__ ), body );
+			UE_LOG( LogRcCr, Error, TEXT( "(%s) GetPxRididDynamic() failed for body %d!" ), TEXT( __FUNCTION__ ), body );
 			return;
 		}
 
@@ -354,7 +354,7 @@ void AControlledRagdoll::receivePose()
 	// Verify that the skeletal meshes have the same number of bones (for example, one might not be initialized yet)
 	if( numBodies != this->SkeletalMeshComponent->Bodies.Num() )
 	{
-		UE_LOG( LogTemp, Error, TEXT( "(%s) Number of bones do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Number of bones do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
 		return;
 	}
 
@@ -364,7 +364,7 @@ void AControlledRagdoll::receivePose()
 	if( std::abs( (this->ServerInterpretationOfDeadbeef / ourInterpretationOfDeadbeef) - 1.f ) > 1e-6f
 		|| (this->BoneStates.Num() > 0 && !this->BoneStates[0].DoDataSizesMatch()) )
 	{
-		UE_LOG( LogTemp, Error, TEXT( "(%s) Floats are not binary compatible or bone state data sizes do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Floats are not binary compatible or bone state data sizes do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
 		return;
 	}
 
@@ -374,7 +374,7 @@ void AControlledRagdoll::receivePose()
 		physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
 		if( !pxBody )
 		{
-			UE_LOG( LogTemp, Error, TEXT( "(%s) GetPxRididDynamic() failed for body %d!" ), TEXT( __FUNCTION__ ), body );
+			UE_LOG( LogRcCr, Error, TEXT( "(%s) GetPxRididDynamic() failed for body %d!" ), TEXT( __FUNCTION__ ), body );
 			return;
 		}
 
