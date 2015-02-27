@@ -118,8 +118,8 @@ void AControlledRagdoll::PostInitializeComponents()
 	}
 
 
-	// Read and store dynamic data from joints
-	refreshStaticJointData();
+	// Initialize the internal state structs
+	InitState();
 
 }
 
@@ -136,29 +136,50 @@ void AControlledRagdoll::BeginPlay()
 
 void AControlledRagdoll::Tick( float deltaSeconds )
 {
-	Super::Tick( deltaSeconds );
-
-	// If network client, then apply the received pose from the server and return
+	// If network client, then we are just visualizing the ragdoll that is being simulated on the server
 	if( this->Role < ROLE_Authority )
 	{
-		receivePose();
+		// Replicate pose from the server
+		ReceivePose();
+
+		// Call the tick hook (available for inherited C++ classes), then Super::Tick(), which runs this actor's Blueprint
+		TickHook( deltaSeconds );
+		Super::Tick( deltaSeconds );
+
 		return;
 	}
 
 
 	/* We are standalone or a server */
 	
-	// Read and store dynamic data from joints
-	refreshDynamicJointData();
 
-	// Communicate with the remote controller, if connected
-	communicateWithRemoteController();
+	/* Relay data between the game engine and the remote controller, while calling additional tick functionality in between. */
+
+	// Read inbound data
+	ReadFromSimulation();
+	ReadFromRemoteController();
+
+	// Call the tick hook (available for inherited C++ classes), then Super::Tick(), which runs this actor's Blueprint
+	TickHook( deltaSeconds );
+	Super::Tick( deltaSeconds );
+	ValidateBlueprintWritables();
+
+	// Write outbound data
+	WriteToSimulation();
+	WriteToRemoteController();
+
+
+	/* Handle client-server pose replication */
 
 	// Adjust net update frequency based on the current wall clock vs game time fps difference
-	recomputeNetUpdateFrequency( deltaSeconds );
+	RecomputeNetUpdateFrequency( deltaSeconds );
 
 	// Store pose so that it can be replicated to client(s)
-	sendPose();
+	SendPose();
+
+
+
+	return;
 
 
 
@@ -193,11 +214,11 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 
 
-void AControlledRagdoll::refreshStaticJointData()
+void AControlledRagdoll::InitState()
 {
 	// init the error cleanup scope guard
 	auto sgError = MakeScopeGuard( [this](){
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) Scope guard 'sgError' triggered!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error! (scope guard 'sgError' was triggered)" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data if any errors
 		this->JointStates.Empty();
@@ -209,8 +230,8 @@ void AControlledRagdoll::refreshStaticJointData()
 
 	// check the number of joints and preallocate the top level array
 	int32 numJoints = this->SkeletalMeshComponent->Constraints.Num();
-	this->JointStates.SetNum( numJoints );
 	this->JointNames.SetNum( numJoints );
+	this->JointStates.SetNum( numJoints );
 
 	// fill the array with joint data
 	for( int joint = 0; joint < numJoints; ++joint )
@@ -231,6 +252,10 @@ void AControlledRagdoll::refreshStaticJointData()
 		this->JointStates[joint].RefFrameRotations[0] = constraint->GetRefFrame( EConstraintFrame::Frame1 ).GetRotation();
 		this->JointStates[joint].RefFrameRotations[1] = constraint->GetRefFrame( EConstraintFrame::Frame2 ).GetRotation();
 
+		// clear the angle readouts and the motor command
+		this->JointStates[joint].JointAngles = FVector::ZeroVector;
+		this->JointStates[joint].MotorCommand = FVector::ZeroVector;
+
 		// bail out if something was not available
 		if( !this->JointStates[joint].Bodies[0] || !this->JointStates[joint].Bodies[1]
 			|| this->JointStates[joint].BoneInds[0] == INDEX_NONE || this->JointStates[joint].BoneInds[1] == INDEX_NONE ) return;
@@ -244,11 +269,28 @@ void AControlledRagdoll::refreshStaticJointData()
 
 
 
-void AControlledRagdoll::refreshDynamicJointData()
+void AControlledRagdoll::ValidateBlueprintWritables()
+{
+	// check if non-Blueprint JointState fields have been accidentally zeroed in Blueprint
+	for( auto & jointState : this->JointStates )
+	{
+		// check only the first field..
+		if( !jointState.Constraint ) {
+			UE_LOG( LogRcCr, Error,
+				TEXT( "(%s) A JointState struct seems to become partially zeroed! Breaking and re-making a JointState in Blueprints is the likely cause. Use a 'Set members in JointState' node instead!" ),
+				TEXT( __FUNCTION__ ) );
+		}
+	}
+}
+
+
+
+
+void AControlledRagdoll::ReadFromSimulation()
 {
 	// init the error cleanup scope guard
 	auto sgError = MakeScopeGuard( [this](){
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) Scope guard 'sgError' triggered!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error! (scope guard 'sgError' was triggered)" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data (including static joint data!) if any errors
 		this->JointStates.Empty();
@@ -259,22 +301,22 @@ void AControlledRagdoll::refreshDynamicJointData()
 	if( !this->SkeletalMeshComponent || this->JointStates.Num() == 0 ) return;
 
 	// check that the array size matches the skeleton's joint count
-	check( this->JointStates.Num() == this->SkeletalMeshComponent->Constraints.Num() );
-	//check( false );
+	if( this->JointStates.Num() != this->SkeletalMeshComponent->Constraints.Num() ) return;
 
 	// loop through joints
 	for( auto & jointState : this->JointStates )
 	{
 		// check availability of PhysX data
-		if( !jointState.Constraint->ConstraintData ) return;
+		if( !jointState.Constraint || !jointState.Constraint->ConstraintData ) return;
 
 		// store the global rotations of the connected bones
-		for( int i = 0; i < 2; ++i ) {
+		for( int i = 0; i < 2; ++i )
+		{
 			jointState.BoneGlobalRotations[i] = this->SkeletalMeshComponent->GetBoneTransform( jointState.BoneInds[i] ).GetRotation();
 		}
 
 		// store the joint rotation
-		jointState.Rotation = FRotator(
+		jointState.JointAngles = FVector(
 			jointState.Constraint->ConstraintData->getTwist(),
 			jointState.Constraint->ConstraintData->getSwingYAngle(),
 			jointState.Constraint->ConstraintData->getSwingZAngle() );
@@ -288,7 +330,7 @@ void AControlledRagdoll::refreshDynamicJointData()
 
 
 
-void AControlledRagdoll::communicateWithRemoteController()
+void AControlledRagdoll::ReadFromRemoteController()
 {
 	// no-op if no remote controller
 	if( !this->IRemoteControllable::RemoteControlSocket.IsValid() ) return;
@@ -299,7 +341,60 @@ void AControlledRagdoll::communicateWithRemoteController()
 
 
 
-void AControlledRagdoll::recomputeNetUpdateFrequency( float gameDeltaTime )
+void AControlledRagdoll::WriteToSimulation()
+{
+	// init the error cleanup scope guard
+	auto sgError = MakeScopeGuard( [this](){
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error! (scope guard 'sgError' was triggered)" ), TEXT( __FUNCTION__ ) );
+
+		// erase all data (including static joint data!) if any errors
+		this->JointStates.Empty();
+	} );
+
+
+	// check that we have everything we need, otherwise bail out
+	if( !this->SkeletalMeshComponent || this->JointStates.Num() == 0 ) return;
+
+	// check that the array size matches the skeleton's joint count
+	if( this->JointStates.Num() != this->SkeletalMeshComponent->Constraints.Num() ) return;
+
+	// loop through joints
+	for( auto & jointState : this->JointStates )
+	{
+		// check availability of PhysX data
+		if( !jointState.Constraint || !jointState.Constraint->ConstraintData ) return;
+
+		// transform the joint's reference frame for the child bone (bone 0) to global coordinates
+		FQuat referenceFrame0Global = jointState.BoneGlobalRotations[0] * jointState.RefFrameRotations[0];
+
+		// transform the motor command vector to a global-coordinate torque vector
+		FVector torque0Global = referenceFrame0Global.RotateVector( jointState.MotorCommand );
+
+		// apply the torque to both bodies
+		jointState.Bodies[0]->AddTorque( torque0Global );
+		jointState.Bodies[1]->AddTorque( -torque0Global );
+	}
+
+	// all good, release the error cleanup scope guard and return
+	sgError.release();
+	return;
+}
+
+
+
+
+void AControlledRagdoll::WriteToRemoteController()
+{
+	// no-op if no remote controller
+	if( !this->IRemoteControllable::RemoteControlSocket.IsValid() ) return;
+
+	// ...
+}
+
+
+
+
+void AControlledRagdoll::RecomputeNetUpdateFrequency( float gameDeltaTime )
 {
 	// get a pointer to our LevelScriptActor instance
 	check( GetWorld() );
@@ -320,7 +415,7 @@ void AControlledRagdoll::recomputeNetUpdateFrequency( float gameDeltaTime )
 
 
 
-void AControlledRagdoll::sendPose()
+void AControlledRagdoll::SendPose()
 {
 	// cap update rate by 2 * NET_UPDATE_FREQUENCY (UE level replication intervals are not accurate, have a safety margin so as to not miss any replications)
 	double currentTime = FPlatformTime::Seconds();
@@ -352,11 +447,11 @@ void AControlledRagdoll::sendPose()
 
 
 
-void AControlledRagdoll::receivePose()
+void AControlledRagdoll::ReceivePose()
 {
 	int numBodies = this->BoneStates.Num();
 
-	// Verify that the skeletal meshes have the same number of bones (for example, one might not be initialized yet)
+	// Verify that the skeletal meshes have the same number of bones (for example, one might not be initialized yet, or replication might have not yet started).
 	if( numBodies != this->SkeletalMeshComponent->Bodies.Num() )
 	{
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Number of bones do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
@@ -383,7 +478,7 @@ void AControlledRagdoll::receivePose()
 			return;
 		}
 
-		// Replicate pose, skip velocities (see sendPose())
+		// Replicate pose, skip velocities (see SendPose())
 		pxBody->setGlobalPose( this->BoneStates[body].GetPxTransform() );
 		//pxBody->setLinearVelocity( this->BoneStates[body].GetPxLinearVelocity() );
 		//pxBody->setAngularVelocity( this->BoneStates[body].GetPxAngularVelocity() );

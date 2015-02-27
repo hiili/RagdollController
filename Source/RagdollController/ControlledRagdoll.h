@@ -16,12 +16,15 @@
 
 
 /** Struct for representing data for a single PhysX joint. */
-struct JointState
+USTRUCT( Blueprintable )
+struct FJointState
 {
+	GENERATED_USTRUCT_BODY()
 
-	// static data (not updated during Tick)
+	/* Static PhysX data (not updated during Tick) */
 
-	/** Pointer to the FConstraintInstance of this joint */
+	/** Pointer to the FConstraintInstance of this joint. Make sure to always check that this is not null: it is possible to cause all non-Blueprintable
+	 ** fields to become zeroed by the actor's Blueprint (eg, by changing struct fields by breaking and re-making the struct). */
 	FConstraintInstance * Constraint;
 
 	/** Pointers to the two bodies connected by the joint */
@@ -34,13 +37,22 @@ struct JointState
 	std::array<FQuat, 2> RefFrameRotations;
 
 
-	// dynamic data (updated during Tick)
+	/* Dynamic PhysX data (updated during the 1st half of Tick, before the actor's Blueprint is run) */
 
-	/** Rotations of the connected bones (in global coordinates) */
+	/** Rotations of the connected bones in global coordinates (needed for applying motor forces via AddTorque()) */
 	std::array<FQuat, 2> BoneGlobalRotations;
 
-	/** PhysX joint rotation. The pitch, roll and yaw dimensions correspond to twist, swing1 and swing2 fields of the PhysX joint, respectively. */
-	FRotator Rotation;
+	/** PhysX joint angles. The X, Y and Z dimensions correspond to twist, swing1 and swing2 fields of the PhysX joint, respectively. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
+	FVector JointAngles;
+
+
+	/* Dynamic controller data (updated during the 1st half of Tick, before the actor's Blueprint is run) */
+
+	/** Joint motor command for the current tick. The X, Y and Z dimensions correspond to twist, swing1 and swing2 in the PhysX joint, respectively. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
+	FVector MotorCommand;
+
 };
 
 
@@ -48,9 +60,9 @@ struct JointState
 
 /**
 * Replication-ready struct for holding the state of a single bone. Velocity information is commented out as it is not currently being used (PhysX
-* seems to ignore set velocity if the pose is being set during the same tick; see AControlledRagdoll::sendPose).
+* seems to ignore the set velocity if the pose is being set during the same tick; see AControlledRagdoll::SendPose).
 */
-USTRUCT()
+USTRUCT( Blueprintable )
 struct FBoneState {
 	GENERATED_USTRUCT_BODY()
 
@@ -77,10 +89,8 @@ public:
 	}
 
 
-	/**
-	* Verifies that the size of the data fields match the size of the local PhysX objects. In general, word size of the platform might affect this (although
-	* the current contents of this struct probably aren't affected).
-	*/
+	/** Verifies that the size of the data fields match the size of the local PhysX objects. In general, word size of the platform might affect this, although
+	 ** the current contents of this struct probably aren't affected. */
 	bool DoDataSizesMatch()
 	{
 		return
@@ -121,7 +131,7 @@ class RAGDOLLCONTROLLER_API AControlledRagdoll :
 	GENERATED_BODY()
 
 
-	/** Last time that the pose was sent using sendPose(). */
+	/** Last time that the pose was sent using SendPose(). */
 	double lastSendPoseTime;
 
 
@@ -130,38 +140,68 @@ protected:
 	/** The SkeletalMeshComponent of the actor to be controlled. */
 	USkeletalMeshComponent * SkeletalMeshComponent;
 
+	/** Server's float interpretation of 0xdeadbeef, for checking float representation compatibility (eg, float endianness). Assume that UE replicates
+	 ** floats always correctly. */
+	UPROPERTY( Replicated )
+	float ServerInterpretationOfDeadbeef;
 
-	/** Joint names of the actor's SkeletalMeshComponent. When initialized, then JointNames.Num() == SkeletonState.Num(). */
+
+	/* State data */
+
+	/** Cached joint names of the actor's SkeletalMeshComponent. When initialized, then JointNames.Num() == JointStates.Num(). */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
 	TArray<FName> JointNames;
 
-	/** Data for all joints and associated bodies of the actor's SkeletalMeshComponent. Refresh errors are signaled by emptying the array: test validity with SkeletonState.Num() != 0. */
-	TArray<JointState> JointStates;
+	/** Data for all joints and associated bodies of the actor's SkeletalMeshComponent. Refresh errors are signaled by emptying the array: test validity with
+	 ** JointStates.Num() != 0. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
+	TArray<FJointState> JointStates;
 
-	/** Data for all bodies of the SkeletalMeshComponent, for server-to-client pose replication. */
+	/** Data for all bodies of the SkeletalMeshComponent, mainly for server-to-client pose replication. */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Replicated, Category = RagdollController )
 	TArray<FBoneState> BoneStates;
 
 
-	/** Server's float interpretation of 0xdeadbeef, for checking float representation compatilibity (eg, float endianness). Assume that UE replicates
-	* floats always correctly. */
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, Replicated, Category = RagdollController )
-	float ServerInterpretationOfDeadbeef;
+	/** Initialize the state data structs (read static data from the game engine, etc.) */
+	void InitState();
 
+	/** Tick hook that is called from Tick() after internal data structs have been updated but before sending anything out to PhysX and the remote controller.
+	 ** This is called between the 1st and the 2nd half of Tick(), and just before running the actor's Blueprint. */
+	virtual void TickHook( float deltaSeconds ) {};
+
+	/** Run a sanity check on all Blueprint-writable data. */
+	void ValidateBlueprintWritables();
+
+
+	/* Inbound data flow, 1st half of Tick() */
 	
-	/** If a remote controller is connected, then send pose data and receive joint motor command data. */
-	void communicateWithRemoteController();
+	/** Read data from the game engine (PhysX etc). Called during the first half of each tick. */
+	void ReadFromSimulation();
 
-	/**
-	* Recompute net update frequency, using the current frame rate estimate from our game mode instance. When using fixed time steps, this needs to be adjusted
-	* for our real fps as UE interprets the AActor::NetUpdateFrequency parameter based on game time, not wall clock time.
-	* */
-	void recomputeNetUpdateFrequency( float gameDeltaTime );
+	/** If a remote controller is connected, then receive joint motor command and other data. */
+	void ReadFromRemoteController();
+
+
+	/* Outbound data flow, 2nd half of Tick() */
+
+	/** Write data to the game engine (PhysX etc). Called during the second half of each tick. */
+	void WriteToSimulation();
+
+	/** If a remote controller is connected, then send pose and other data. */
+	void WriteToRemoteController();
+
+
+	/* Client-server replication */
+
+	/** Recompute net update frequency, using the current frame rate estimate from our game mode instance. When using fixed time steps, this needs to be adjusted
+	 ** for our real fps as UE interprets the AActor::NetUpdateFrequency parameter based on game time, not wall clock time. */
+	void RecomputeNetUpdateFrequency( float gameDeltaTime );
 
 	/** Store pose into the replicated BoneStates array. */
-	void sendPose();
+	void SendPose();
 
 	/** Apply replicated pose from the BoneStates array. */
-	void receivePose();
+	void ReceivePose();
 
 
 public:
@@ -170,13 +210,10 @@ public:
 
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+
+	/** Ticking is performed in two stages. During the first stage, inbound data from the game engine and the remote controller is read and stored to internal
+	 ** data structs. During the second stage, outbound data is sent back to the game engine and to the remote controller. TickHook() and the actor's Blueprint
+	 ** are called between these stages. TickHook() is called just before the Blueprint. */
 	virtual void Tick( float deltaSeconds ) override;
-
-
-	/** Refresh all static joint data structs. */
-	void refreshStaticJointData();
-
-	/** Refresh all dynamic joint data structs. */
-	void refreshDynamicJointData();
 
 };
