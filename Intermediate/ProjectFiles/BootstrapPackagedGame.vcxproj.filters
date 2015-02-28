@@ -2,15 +2,15 @@
 
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Windows\BootstrapPackagedGame\BootstrapPackagedGame.Target.cs" />
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Windows\BootstrapPackagedGame\BootstrapPackagedGame.Build.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Windows\BootstrapPackagedGame\BootstrapPackagedGame.Target.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Windows\BootstrapPackagedGame\BootstrapPackagedGame.Build.cs" />
 		<Filter Include="Private">
-			<UniqueIdentifier>{14B0DE72-7018-40F4-8BC5-866478565849}</UniqueIdentifier>
+			<UniqueIdentifier>{BE0217AE-E46D-4F8E-B7B8-0B981153632B}</UniqueIdentifier>
 		</Filter>
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Windows\BootstrapPackagedGame\Private\BootstrapPackagedGame.cpp">
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Windows\BootstrapPackagedGame\Private\BootstrapPackagedGame.cpp">
 			<Filter>Private</Filter>
 		</ClCompile >
-		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Windows\BootstrapPackagedGame\Private\BootstrapPackagedGame.h">
+		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Windows\BootstrapPackagedGame\Private\BootstrapPackagedGame.h">
 			<Filter>Private</Filter>
 		</ClInclude >
 	</ItemGroup>

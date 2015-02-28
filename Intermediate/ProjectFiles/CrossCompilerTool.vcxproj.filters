@@ -2,18 +2,18 @@
 
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\CrossCompilerTool.Target.cs" />
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\CrossCompilerTool.Build.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\CrossCompilerTool.Target.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\CrossCompilerTool.Build.cs" />
 		<Filter Include="Private">
-			<UniqueIdentifier>{D7BA9807-072D-477C-91A3-B78904A80601}</UniqueIdentifier>
+			<UniqueIdentifier>{AA66F73F-B2B3-4CDF-81FB-05C4F93734C2}</UniqueIdentifier>
 		</Filter>
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerTool.cpp">
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerTool.cpp">
 			<Filter>Private</Filter>
 		</ClCompile >
-		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerTool.h">
+		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerTool.h">
 			<Filter>Private</Filter>
 		</ClInclude >
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerUtils.cpp">
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerUtils.cpp">
 			<Filter>Private</Filter>
 		</ClCompile >
 	</ItemGroup>

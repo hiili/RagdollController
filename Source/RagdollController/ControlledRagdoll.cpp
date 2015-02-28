@@ -26,12 +26,9 @@
 
 
 AControlledRagdoll::AControlledRagdoll()
-	: Super( FObjectInitializer() ),
-	IRemoteControllable( this ),
+	: IRemoteControllable( this ),
 	lastSendPoseTime( -INFINITY )
 {
-	// enable ticking
-	PrimaryActorTick.bCanEverTick = true;
 }
 
 
@@ -51,9 +48,6 @@ void AControlledRagdoll::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> &
 void AControlledRagdoll::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-
-	// clean up the actor name
-	Utility::UObjectNameCleanup( *this );
 
 
 	/* init SkeletalMeshComponent: scan all components and choose the first USkeletalMeshComponent */

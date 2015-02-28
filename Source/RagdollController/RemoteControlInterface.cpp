@@ -34,7 +34,6 @@
 
 
 ARemoteControlInterface::ARemoteControlInterface()
-	: Super( FObjectInitializer() )
 {
 	// enable ticking
 	PrimaryActorTick.bCanEverTick = true;
@@ -46,9 +45,6 @@ ARemoteControlInterface::ARemoteControlInterface()
 void ARemoteControlInterface::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-
-	// clean up the actor name
-	Utility::UObjectNameCleanup( *this );
 
 	// if authority, then create the main listen socket
 	if( this->Role >= ROLE_Authority )
@@ -198,7 +194,7 @@ void ARemoteControlInterface::CmdConnect( std::string args, const TSharedPtr<Lin
 	check( GetWorld() );
 	for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
 	{
-		if( iter->GetName() == FString( args.c_str() ) )
+		if( Utility::CleanupName( iter->GetName() ) == FString( args.c_str() ) )
 		{
 			/* target actor found */
 

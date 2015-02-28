@@ -2,36 +2,36 @@
 
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Mac\UE4EditorServices\UE4EditorServices.Target.cs" />
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Mac\UE4EditorServices\UE4EditorServices.Build.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Mac\UE4EditorServices\UE4EditorServices.Target.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Mac\UE4EditorServices\UE4EditorServices.Build.cs" />
 		<Filter Include="Private">
-			<UniqueIdentifier>{EEB98201-FF5F-49F5-AF4C-FD3EE6753C38}</UniqueIdentifier>
+			<UniqueIdentifier>{799613A4-B581-4356-8172-E2BA737CA34E}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Private\Mac">
-			<UniqueIdentifier>{FD941E44-F1C0-4811-A26E-F9AC1F90A9E4}</UniqueIdentifier>
+			<UniqueIdentifier>{79984270-884D-433A-92F9-4F74EACDE7AB}</UniqueIdentifier>
 		</Filter>
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Mac\UE4EditorServices\Private\Mac\UE4EditorServicesAppDelegate.cpp">
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Mac\UE4EditorServices\Private\Mac\UE4EditorServicesAppDelegate.cpp">
 			<Filter>Private\Mac</Filter>
 		</ClCompile >
-		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Mac\UE4EditorServices\Private\Mac\UE4EditorServicesAppDelegate.h">
+		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Mac\UE4EditorServices\Private\Mac\UE4EditorServicesAppDelegate.h">
 			<Filter>Private\Mac</Filter>
 		</ClInclude >
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Mac\UE4EditorServices\Private\Mac\UE4EditorServicesMain.cpp">
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Mac\UE4EditorServices\Private\Mac\UE4EditorServicesMain.cpp">
 			<Filter>Private\Mac</Filter>
 		</ClCompile >
 		<Filter Include="Private\Windows">
-			<UniqueIdentifier>{1B747331-4933-4059-950A-D53908CB5945}</UniqueIdentifier>
+			<UniqueIdentifier>{62E98BF3-7915-4FE9-9CFB-63051228D1C1}</UniqueIdentifier>
 		</Filter>
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Mac\UE4EditorServices\Private\Windows\UE4EditorServicesMain.cpp">
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Mac\UE4EditorServices\Private\Windows\UE4EditorServicesMain.cpp">
 			<Filter>Private\Windows</Filter>
 		</ClCompile >
 		<Filter Include="Resources">
-			<UniqueIdentifier>{DA7EBC08-4A23-4040-A9EA-C941B38DD8C1}</UniqueIdentifier>
+			<UniqueIdentifier>{343948A7-26CD-4B43-80FE-27BA610C97DE}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Resources\Mac">
-			<UniqueIdentifier>{E1112A7C-FB5D-4CBF-8DF2-389F38CDA061}</UniqueIdentifier>
+			<UniqueIdentifier>{6A2E1E38-C3F5-45D8-AF73-08BF2CAA25DC}</UniqueIdentifier>
 		</Filter>
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\Mac\UE4EditorServices\Resources\Mac\Info.plist">
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\Mac\UE4EditorServices\Resources\Mac\Info.plist">
 			<Filter>Resources\Mac</Filter>
 		</None >
 	</ItemGroup>

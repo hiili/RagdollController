@@ -4,7 +4,7 @@
 	<ItemGroup>
 		<None Include="..\..\RagdollController.uproject" />
 		<Filter Include="Source">
-			<UniqueIdentifier>{864117D1-5801-4EC7-B263-94C0A5E3A4F4}</UniqueIdentifier>
+			<UniqueIdentifier>{149B0053-7B2F-45DE-B936-C10E018803E3}</UniqueIdentifier>
 		</Filter>
 		<None Include="..\..\Source\RagdollController.Target.cs">
 			<Filter>Source</Filter>
@@ -13,7 +13,7 @@
 			<Filter>Source</Filter>
 		</None >
 		<Filter Include="Config">
-			<UniqueIdentifier>{B6A063B0-7446-44CA-A0AF-E168DE37962B}</UniqueIdentifier>
+			<UniqueIdentifier>{5E544E0E-350E-4525-A709-221F7B5965EE}</UniqueIdentifier>
 		</Filter>
 		<None Include="..\..\Config\DefaultDeviceProfiles.ini">
 			<Filter>Config</Filter>
@@ -37,7 +37,7 @@
 			<Filter>Config</Filter>
 		</None >
 		<Filter Include="Source\RagdollController">
-			<UniqueIdentifier>{30C23CFF-FEA0-4F35-955A-8D4EC87D144D}</UniqueIdentifier>
+			<UniqueIdentifier>{F192B0D9-2267-44C0-B7C1-405A7CCEDD85}</UniqueIdentifier>
 		</Filter>
 		<ClCompile Include="..\..\Source\RagdollController\ControlledRagdoll.cpp">
 			<Filter>Source\RagdollController</Filter>
@@ -100,10 +100,10 @@
 			<Filter>Source\RagdollController</Filter>
 		</ClInclude >
 		<Filter Include="Source\RagdollController\Resources">
-			<UniqueIdentifier>{1AC1081F-17C2-4D81-89BA-12342BD7A0C9}</UniqueIdentifier>
+			<UniqueIdentifier>{A6DBB4C5-6560-4D12-82B5-8D9A80A48AD1}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="Source\RagdollController\Resources\Windows">
-			<UniqueIdentifier>{8866DCC1-8940-4F56-BFB2-92EC2FDA3737}</UniqueIdentifier>
+			<UniqueIdentifier>{39C17731-FB71-4803-A926-729EC3B71DF8}</UniqueIdentifier>
 		</Filter>
 		<ResourceCompile Include="..\..\Source\RagdollController\Resources\Windows\RagdollController.rc">
 			<Filter>Source\RagdollController\Resources\Windows</Filter>

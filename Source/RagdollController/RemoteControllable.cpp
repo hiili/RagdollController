@@ -4,14 +4,15 @@
 #include "RemoteControllable.h"
 
 #include "LineFSocket.h"
+#include "Utility.h"
 
 #include <SharedPointer.h>
 
 
 
 
-URemoteControllable::URemoteControllable( const class FPostConstructInitializeProperties& PCIP )
-	: Super( PCIP )
+URemoteControllable::URemoteControllable( const FObjectInitializer & ObjectInitializer )
+	: Super( ObjectInitializer )
 {
 }
 
@@ -27,7 +28,8 @@ IRemoteControllable::IRemoteControllable( AActor * thisActor ) :
 
 void IRemoteControllable::ConnectWith( const TSharedPtr<LineFSocket> & socket )
 {
-	UE_LOG( LogRcRci, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ), *this->ThisActor->GetName() );
+	UE_LOG( LogRcRci, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ),
+		*Utility::CleanupName( this->ThisActor->GetName() ) );
 
 	// store the new socket
 	this->RemoteControlSocket = socket;

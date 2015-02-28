@@ -6,17 +6,18 @@
 
 
 
-void Utility::UObjectNameCleanup( UObject & object )
+FString Utility::CleanupName( FString name )
 {
-	// get the current name of the object
-	FString name( object.GetName() );
-
 	// find the first underscore
 	int32 firstUnderscoreInd = name.Find( TEXT( "_" ), ESearchCase::IgnoreCase, ESearchDir::FromStart );
 
-	// if found, then crop starting from it (inclusive) and assign to object
+	// if found, then crop starting from it (inclusive)
 	if( firstUnderscoreInd != -1 )
 	{
-		object.Rename( *name.Left( firstUnderscoreInd ) );
+		//object.Rename( *name.Left( firstUnderscoreInd ) );
+		name.RemoveAt( firstUnderscoreInd, name.Len() - firstUnderscoreInd );
 	}
+
+	// return the possibly cropped name
+	return name;
 }

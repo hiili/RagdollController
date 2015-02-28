@@ -84,15 +84,15 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\TestPAL\TestPAL.Target.cs" />
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\TestPAL\TestPAL.Build.cs" />
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\TestPAL\Private\Main.cpp" />
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\TestPAL\Private\Parent.cpp" />
-		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\TestPAL\Private\Parent.h" />
-		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\TestPAL\Private\PrivatePCH.h" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\TestPAL\TestPAL.Target.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\TestPAL\TestPAL.Build.cs" />
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\TestPAL\Private\Main.cpp" />
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\TestPAL\Private\Parent.cpp" />
+		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\TestPAL\Private\Parent.h" />
+		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\TestPAL\Private\PrivatePCH.h" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{4FC2A258-6022-499A-AB50-E787E8B5C081}</ProjectGuid>
+		<ProjectGuid>{7C8064F2-89C8-4922-91BC-F091423F97C0}</ProjectGuid>
 		<Keyword>MakeFileProj</Keyword>
 		<RootNamespace>TestPAL</RootNamespace>
 	</PropertyGroup>
@@ -160,10 +160,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL Win32 Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL Win32 Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL Win32 Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win32\TestPAL-Win32-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL Win32 Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL Win32 Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL Win32 Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win32\TestPAL-Win32-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Program|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -177,10 +177,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL Win64 Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL Win64 Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL Win64 Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win64\TestPAL-Win64-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL Win64 Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL Win64 Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL Win64 Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win64\TestPAL-Win64-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Mac_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -194,10 +194,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL Mac Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL Mac Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL Mac Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Mac\TestPAL-Mac-Debug</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL Mac Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL Mac Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL Mac Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Mac\TestPAL-Mac-Debug</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -211,10 +211,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL WinRT Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL WinRT Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL WinRT Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT\TestPAL-WinRT-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL WinRT Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL WinRT Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL WinRT Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT\TestPAL-WinRT-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_ARM_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -228,10 +228,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL WinRT_ARM Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL WinRT_ARM Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL WinRT_ARM Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT_ARM\TestPAL-WinRT_ARM-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL WinRT_ARM Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL WinRT_ARM Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL WinRT_ARM Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT_ARM\TestPAL-WinRT_ARM-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Linux_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -245,10 +245,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL Linux Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL Linux Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL Linux Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Linux\TestPAL-Linux-Debugx86_64-unknown-linux-gnu</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL Linux Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL Linux Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL Linux Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Linux\TestPAL-Linux-Debugx86_64-unknown-linux-gnu</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -262,10 +262,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL Win32 Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL Win32 Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL Win32 Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win32\TestPAL.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL Win32 Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL Win32 Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL Win32 Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win32\TestPAL.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development_Program|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -279,10 +279,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL Win64 Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL Win64 Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL Win64 Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win64\TestPAL.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL Win64 Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL Win64 Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL Win64 Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win64\TestPAL.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Mac_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -296,10 +296,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL Mac Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL Mac Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL Mac Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Mac\TestPAL</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL Mac Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL Mac Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL Mac Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Mac\TestPAL</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -313,10 +313,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL WinRT Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL WinRT Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL WinRT Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT\TestPAL.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL WinRT Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL WinRT Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL WinRT Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT\TestPAL.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_ARM_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -330,10 +330,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL WinRT_ARM Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL WinRT_ARM Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL WinRT_ARM Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT_ARM\TestPAL.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL WinRT_ARM Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL WinRT_ARM Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL WinRT_ARM Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT_ARM\TestPAL.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Linux_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -347,14 +347,14 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat TestPAL Linux Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat TestPAL Linux Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat TestPAL Linux Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Linux\TestPALx86_64-unknown-linux-gnu</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat TestPAL Linux Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat TestPAL Linux Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat TestPAL Linux Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Linux\TestPALx86_64-unknown-linux-gnu</NMakeOutput>
 	</PropertyGroup>
 	<PropertyGroup>
-		<NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions);IS_PROGRAM=1;UE_ROCKET=0;UNICODE;_UNICODE;__UNREAL__;IS_MONOLITHIC=1;WITH_ENGINE=0;WITH_UNREAL_DEVELOPER_TOOLS=0;WITH_COREUOBJECT=0;USE_STATS_WITHOUT_ENGINE=0;WITH_PLUGIN_SUPPORT=0;USE_LOGGING_IN_SHIPPING=1;UE_BUILD_MINIMAL=1;WITH_EDITOR=0;WITH_SERVER_CODE=0;UBT_COMPILED_PLATFORM=Win64;WIN32=1;_WIN32_WINNT=0x0600;WINVER=0x0600;PLATFORM_WINDOWS=1;NDEBUG=1;UE_BUILD_DEVELOPMENT=1;UE_PROJECT_NAME=RagdollController;ORIGINAL_FILE_NAME="TestPAL.exe";TESTPAL_API=;UE_ENABLE_ICU=1;WITH_STEAMWORKS=0;WITH_DIRECTXMATH=0;CORE_API=;PROJECTS_API=;JSON_API=</NMakePreprocessorDefinitions>
-		<NMakeIncludeSearchPath>$(NMakeIncludeSearchPath);X:\GitHub\UnrealEngine\Engine\Source;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Launch\Private;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Launch\Public;..\Build\Win64\TestPAL\Inc\TestPAL;X:\GitHub\UnrealEngine\Engine\Source\Programs\TestPAL;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Internationalization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Async;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Concurrency;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Containers;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Delegates;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\GenericPlatform;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\HAL;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Logging;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Math;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Misc;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Modules;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Modules\Boilerplate;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\ProfilingDebugging;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Serialization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Serialization\Json;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Serialization\Csv;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Stats;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Templates;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\UObject;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Windows;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core;..\Build\Win64\TestPAL\Inc\Projects;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Projects\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Projects\Public\Interfaces;..\Build\Win64\TestPAL\Inc\Json;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public\Dom;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public\Policies;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public\Serialization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Projects;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\INCLUDE;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\ATLMFC\INCLUDE;C:\Program Files (x86)\Windows Kits\8.1\include\shared;C:\Program Files (x86)\Windows Kits\8.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\winrt;;</NMakeIncludeSearchPath>
+		<NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions);IS_PROGRAM=1;UE_ROCKET=0;UNICODE;_UNICODE;__UNREAL__;IS_MONOLITHIC=1;WITH_ENGINE=0;WITH_UNREAL_DEVELOPER_TOOLS=0;WITH_COREUOBJECT=0;USE_STATS_WITHOUT_ENGINE=1;WITH_PLUGIN_SUPPORT=0;USE_LOGGING_IN_SHIPPING=1;UE_BUILD_MINIMAL=1;WITH_EDITOR=0;WITH_SERVER_CODE=1;UBT_COMPILED_PLATFORM=Win64;WIN32=1;_WIN32_WINNT=0x0600;WINVER=0x0600;PLATFORM_WINDOWS=1;NDEBUG=1;UE_BUILD_DEVELOPMENT=1;UE_PROJECT_NAME=RagdollController;ORIGINAL_FILE_NAME="TestPAL.exe";TESTPAL_API=;UE_ENABLE_ICU=1;WITH_STEAMWORKS=0;WITH_DIRECTXMATH=0;CORE_API=;PROJECTS_API=;JSON_API=</NMakePreprocessorDefinitions>
+		<NMakeIncludeSearchPath>$(NMakeIncludeSearchPath);X:\GitHub\UnrealEngine-4.7\Engine\Source;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Launch\Private;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Launch\Public;..\Build\Win64\TestPAL\Inc\TestPAL;X:\GitHub\UnrealEngine-4.7\Engine\Source\Programs\TestPAL;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Internationalization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Async;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Concurrency;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Containers;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Delegates;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\GenericPlatform;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\HAL;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Logging;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Math;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Misc;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Modules;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Modules\Boilerplate;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\ProfilingDebugging;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Serialization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Serialization\Csv;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Stats;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Templates;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\UObject;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Windows;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core;..\Build\Win64\TestPAL\Inc\Projects;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Projects\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Projects\Public\Interfaces;..\Build\Win64\TestPAL\Inc\Json;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public\Dom;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public\Policies;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public\Serialization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Projects;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\INCLUDE;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\ATLMFC\INCLUDE;C:\Program Files (x86)\Windows Kits\8.1\include\shared;C:\Program Files (x86)\Windows Kits\8.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\winrt;;</NMakeIncludeSearchPath>
 		<NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
 		<NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
 		<NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

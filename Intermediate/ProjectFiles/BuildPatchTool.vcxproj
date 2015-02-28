@@ -84,13 +84,13 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\BuildPatchTool\BuildPatchTool.Target.cs" />
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\BuildPatchTool\BuildPatchTool.Automation.cs" />
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\BuildPatchTool\BuildPatchTool.Build.cs" />
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\BuildPatchTool\Private\BuildPatchToolMain.cpp" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\BuildPatchTool\BuildPatchTool.Target.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\BuildPatchTool\BuildPatchTool.Automation.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\BuildPatchTool\BuildPatchTool.Build.cs" />
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\BuildPatchTool\Private\BuildPatchToolMain.cpp" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{1AA1EA7E-9D36-4CF5-BD65-A7FE4F1C54F3}</ProjectGuid>
+		<ProjectGuid>{1D441156-B16F-441D-B88E-B024133E1BD8}</ProjectGuid>
 		<Keyword>MakeFileProj</Keyword>
 		<RootNamespace>BuildPatchTool</RootNamespace>
 	</PropertyGroup>
@@ -158,10 +158,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool Win32 Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Win32 Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Win32 Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win32\BuildPatchTool-Win32-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool Win32 Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Win32 Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Win32 Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win32\BuildPatchTool-Win32-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Program|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -175,10 +175,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool Win64 Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Win64 Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Win64 Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win64\BuildPatchTool-Win64-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool Win64 Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Win64 Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Win64 Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win64\BuildPatchTool-Win64-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Mac_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -192,10 +192,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool Mac Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Mac Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Mac Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Mac\BuildPatchTool-Mac-Debug</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool Mac Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Mac Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Mac Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Mac\BuildPatchTool-Mac-Debug</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -209,10 +209,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool WinRT Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool WinRT Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool WinRT Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT\BuildPatchTool-WinRT-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool WinRT Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool WinRT Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool WinRT Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT\BuildPatchTool-WinRT-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_ARM_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -226,10 +226,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool WinRT_ARM Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool WinRT_ARM Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool WinRT_ARM Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT_ARM\BuildPatchTool-WinRT_ARM-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool WinRT_ARM Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool WinRT_ARM Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool WinRT_ARM Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT_ARM\BuildPatchTool-WinRT_ARM-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Linux_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -243,10 +243,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool Linux Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Linux Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Linux Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Linux\BuildPatchTool-Linux-Debugx86_64-unknown-linux-gnu</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool Linux Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Linux Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Linux Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Linux\BuildPatchTool-Linux-Debugx86_64-unknown-linux-gnu</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -260,10 +260,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool Win32 Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Win32 Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Win32 Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win32\BuildPatchTool.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool Win32 Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Win32 Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Win32 Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win32\BuildPatchTool.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development_Program|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -277,10 +277,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool Win64 Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Win64 Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Win64 Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win64\BuildPatchTool.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool Win64 Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Win64 Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Win64 Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win64\BuildPatchTool.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Mac_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -294,10 +294,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool Mac Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Mac Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Mac Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Mac\BuildPatchTool</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool Mac Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Mac Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Mac Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Mac\BuildPatchTool</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -311,10 +311,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool WinRT Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool WinRT Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool WinRT Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT\BuildPatchTool.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool WinRT Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool WinRT Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool WinRT Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT\BuildPatchTool.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_ARM_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -328,10 +328,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool WinRT_ARM Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool WinRT_ARM Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool WinRT_ARM Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT_ARM\BuildPatchTool.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool WinRT_ARM Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool WinRT_ARM Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool WinRT_ARM Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT_ARM\BuildPatchTool.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Linux_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -345,14 +345,14 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat BuildPatchTool Linux Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Linux Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Linux Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Linux\BuildPatchToolx86_64-unknown-linux-gnu</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat BuildPatchTool Linux Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat BuildPatchTool Linux Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat BuildPatchTool Linux Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Linux\BuildPatchToolx86_64-unknown-linux-gnu</NMakeOutput>
 	</PropertyGroup>
 	<PropertyGroup>
-		<NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions);WITH_BUILDPATCHGENERATION=1;IS_PROGRAM=1;UE_ROCKET=0;UNICODE;_UNICODE;__UNREAL__;IS_MONOLITHIC=1;WITH_ENGINE=0;WITH_UNREAL_DEVELOPER_TOOLS=0;WITH_COREUOBJECT=0;USE_STATS_WITHOUT_ENGINE=0;WITH_PLUGIN_SUPPORT=0;USE_LOGGING_IN_SHIPPING=0;UE_BUILD_MINIMAL=1;WITH_EDITOR=0;WITH_SERVER_CODE=0;UBT_COMPILED_PLATFORM=Win64;WIN32=1;_WIN32_WINNT=0x0600;WINVER=0x0600;PLATFORM_WINDOWS=1;NDEBUG=1;UE_BUILD_DEVELOPMENT=1;UE_PROJECT_NAME=RagdollController;ORIGINAL_FILE_NAME="BuildPatchTool.exe";BUILDPATCHTOOL_API=;UE_ENABLE_ICU=1;WITH_STEAMWORKS=1;WITH_DIRECTXMATH=0;CORE_API=;BUILDPATCHSERVICES_API=;COREUOBJECT_API=;PROJECTS_API=;JSON_API=</NMakePreprocessorDefinitions>
-		<NMakeIncludeSearchPath>$(NMakeIncludeSearchPath);X:\GitHub\UnrealEngine\Engine\Source;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Launch\Private;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Launch\Public;..\Build\Win64\BuildPatchTool\Inc\BuildPatchTool;X:\GitHub\UnrealEngine\Engine\Source\Programs\BuildPatchTool;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Internationalization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Async;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Concurrency;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Containers;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Delegates;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\GenericPlatform;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\HAL;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Logging;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Math;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Misc;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Modules;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Modules\Boilerplate;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\ProfilingDebugging;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Serialization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Serialization\Json;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Serialization\Csv;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Stats;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Templates;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\UObject;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Windows;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core;..\Build\Win64\BuildPatchTool\Inc\BuildPatchServices;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Online\BuildPatchServices\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Online\BuildPatchServices\Public\Interfaces;X:\GitHub\UnrealEngine\Engine\Source\Runtime\CoreUObject\Classes;..\Build\Win64\BuildPatchTool\Inc\CoreUObject;X:\GitHub\UnrealEngine\Engine\Source\Runtime\CoreUObject\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\CoreUObject\Public\Blueprint;X:\GitHub\UnrealEngine\Engine\Source\Runtime\CoreUObject\Public\Misc;X:\GitHub\UnrealEngine\Engine\Source\Runtime\CoreUObject\Public\Serialization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\CoreUObject\Public\Templates;X:\GitHub\UnrealEngine\Engine\Source\Runtime\CoreUObject\Public\UObject;X:\GitHub\UnrealEngine\Engine\Source\Runtime\CoreUObject;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Online\BuildPatchServices;..\Build\Win64\BuildPatchTool\Inc\Projects;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Projects\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Projects\Public\Interfaces;..\Build\Win64\BuildPatchTool\Inc\Json;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public\Dom;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public\Policies;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public\Serialization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Projects;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\INCLUDE;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\ATLMFC\INCLUDE;C:\Program Files (x86)\Windows Kits\8.1\include\shared;C:\Program Files (x86)\Windows Kits\8.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\winrt;;</NMakeIncludeSearchPath>
+		<NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions);WITH_BUILDPATCHGENERATION=1;IS_PROGRAM=1;UE_ROCKET=0;UNICODE;_UNICODE;__UNREAL__;IS_MONOLITHIC=1;WITH_ENGINE=0;WITH_UNREAL_DEVELOPER_TOOLS=0;WITH_COREUOBJECT=0;USE_STATS_WITHOUT_ENGINE=0;WITH_PLUGIN_SUPPORT=0;USE_LOGGING_IN_SHIPPING=0;UE_BUILD_MINIMAL=1;WITH_EDITOR=0;WITH_SERVER_CODE=1;UBT_COMPILED_PLATFORM=Win64;WIN32=1;_WIN32_WINNT=0x0600;WINVER=0x0600;PLATFORM_WINDOWS=1;NDEBUG=1;UE_BUILD_DEVELOPMENT=1;UE_PROJECT_NAME=RagdollController;ORIGINAL_FILE_NAME="BuildPatchTool.exe";BUILDPATCHTOOL_API=;UE_ENABLE_ICU=1;WITH_STEAMWORKS=1;WITH_DIRECTXMATH=0;CORE_API=;BUILDPATCHSERVICES_API=;COREUOBJECT_API=;PROJECTS_API=;JSON_API=</NMakePreprocessorDefinitions>
+		<NMakeIncludeSearchPath>$(NMakeIncludeSearchPath);X:\GitHub\UnrealEngine-4.7\Engine\Source;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Launch\Private;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Launch\Public;..\Build\Win64\BuildPatchTool\Inc\BuildPatchTool;X:\GitHub\UnrealEngine-4.7\Engine\Source\Programs\BuildPatchTool;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Internationalization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Async;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Concurrency;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Containers;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Delegates;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\GenericPlatform;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\HAL;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Logging;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Math;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Misc;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Modules;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Modules\Boilerplate;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\ProfilingDebugging;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Serialization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Serialization\Csv;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Stats;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Templates;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\UObject;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Windows;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core;..\Build\Win64\BuildPatchTool\Inc\BuildPatchServices;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Online\BuildPatchServices\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Online\BuildPatchServices\Public\Interfaces;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\CoreUObject\Classes;..\Build\Win64\BuildPatchTool\Inc\CoreUObject;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\CoreUObject\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\CoreUObject\Public\Blueprint;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\CoreUObject\Public\Misc;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\CoreUObject\Public\Serialization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\CoreUObject\Public\Templates;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\CoreUObject\Public\UObject;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\CoreUObject;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Online\BuildPatchServices;..\Build\Win64\BuildPatchTool\Inc\Projects;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Projects\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Projects\Public\Interfaces;..\Build\Win64\BuildPatchTool\Inc\Json;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public\Dom;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public\Policies;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public\Serialization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Projects;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\INCLUDE;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\ATLMFC\INCLUDE;C:\Program Files (x86)\Windows Kits\8.1\include\shared;C:\Program Files (x86)\Windows Kits\8.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\winrt;;</NMakeIncludeSearchPath>
 		<NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
 		<NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
 		<NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

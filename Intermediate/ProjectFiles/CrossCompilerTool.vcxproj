@@ -84,14 +84,14 @@
 		</ProjectConfiguration>
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\CrossCompilerTool.Target.cs" />
-		<None Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\CrossCompilerTool.Build.cs" />
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerTool.cpp" />
-		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerTool.h" />
-		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerUtils.cpp" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\CrossCompilerTool.Target.cs" />
+		<None Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\CrossCompilerTool.Build.cs" />
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerTool.cpp" />
+		<ClInclude Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerTool.h" />
+		<ClCompile Include="..\..\..\..\..\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool\Private\CrossCompilerUtils.cpp" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
-		<ProjectGuid>{66AFE33D-CF8C-404D-BB74-27258B952077}</ProjectGuid>
+		<ProjectGuid>{78A4134A-7069-41B2-9901-82922FDE6726}</ProjectGuid>
 		<Keyword>MakeFileProj</Keyword>
 		<RootNamespace>CrossCompilerTool</RootNamespace>
 	</PropertyGroup>
@@ -159,10 +159,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Win32 Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Win32 Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Win32 Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win32\CrossCompilerTool-Win32-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Win32 Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Win32 Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Win32 Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win32\CrossCompilerTool-Win32-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Program|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -176,10 +176,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Win64 Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Win64 Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Win64 Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win64\CrossCompilerTool-Win64-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Win64 Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Win64 Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Win64 Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win64\CrossCompilerTool-Win64-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Mac_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -193,10 +193,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Mac Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Mac Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Mac Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Mac\CrossCompilerTool-Mac-Debug</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Mac Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Mac Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Mac Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Mac\CrossCompilerTool-Mac-Debug</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -210,10 +210,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool WinRT Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool WinRT Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool WinRT Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT\CrossCompilerTool-WinRT-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool WinRT Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool WinRT Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool WinRT Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT\CrossCompilerTool-WinRT-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_ARM_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -227,10 +227,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool WinRT_ARM Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool WinRT_ARM Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool WinRT_ARM Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT_ARM\CrossCompilerTool-WinRT_ARM-Debug.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool WinRT_ARM Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool WinRT_ARM Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool WinRT_ARM Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT_ARM\CrossCompilerTool-WinRT_ARM-Debug.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Linux_Debug_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -244,10 +244,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Linux Debug</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Linux Debug</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Linux Debug</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Linux\CrossCompilerTool-Linux-Debugx86_64-unknown-linux-gnu</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Linux Debug</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Linux Debug</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Linux Debug</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Linux\CrossCompilerTool-Linux-Debugx86_64-unknown-linux-gnu</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -261,10 +261,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Win32 Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Win32 Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Win32 Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win32\CrossCompilerTool.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Win32 Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Win32 Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Win32 Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win32\CrossCompilerTool.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development_Program|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -278,10 +278,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Win64 Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Win64 Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Win64 Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Win64\CrossCompilerTool.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Win64 Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Win64 Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Win64 Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Win64\CrossCompilerTool.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Mac_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -295,10 +295,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Mac Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Mac Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Mac Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Mac\CrossCompilerTool</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Mac Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Mac Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Mac Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Mac\CrossCompilerTool</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -312,10 +312,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool WinRT Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool WinRT Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool WinRT Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT\CrossCompilerTool.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool WinRT Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool WinRT Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool WinRT Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT\CrossCompilerTool.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRT_ARM_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -329,10 +329,10 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool WinRT_ARM Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool WinRT_ARM Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool WinRT_ARM Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\WinRT_ARM\CrossCompilerTool.exe</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool WinRT_ARM Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool WinRT_ARM Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool WinRT_ARM Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\WinRT_ARM\CrossCompilerTool.exe</NMakeOutput>
 	</PropertyGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Linux_Development_Program|Win32'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -346,14 +346,14 @@
 		<ExcludePath />
 		<OutDir>$(ProjectDir)..\Build\Unused\</OutDir>
 		<IntDir>$(ProjectDir)..\Build\Unused\</IntDir>
-		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Linux Development</NMakeBuildCommandLine>
-		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Linux Development</NMakeReBuildCommandLine>
-		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Linux Development</NMakeCleanCommandLine>
-		<NMakeOutput>X:\GitHub\UnrealEngine\Engine\Binaries\Linux\CrossCompilerToolx86_64-unknown-linux-gnu</NMakeOutput>
+		<NMakeBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Build.bat CrossCompilerTool Linux Development</NMakeBuildCommandLine>
+		<NMakeReBuildCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Rebuild.bat CrossCompilerTool Linux Development</NMakeReBuildCommandLine>
+		<NMakeCleanCommandLine>X:\GitHub\UnrealEngine-4.7\Engine\Build\BatchFiles\Clean.bat CrossCompilerTool Linux Development</NMakeCleanCommandLine>
+		<NMakeOutput>X:\GitHub\UnrealEngine-4.7\Engine\Binaries\Linux\CrossCompilerToolx86_64-unknown-linux-gnu</NMakeOutput>
 	</PropertyGroup>
 	<PropertyGroup>
-		<NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions);IS_PROGRAM=1;UE_ROCKET=0;UNICODE;_UNICODE;__UNREAL__;IS_MONOLITHIC=1;WITH_ENGINE=0;WITH_UNREAL_DEVELOPER_TOOLS=0;WITH_COREUOBJECT=0;USE_STATS_WITHOUT_ENGINE=0;WITH_PLUGIN_SUPPORT=0;USE_LOGGING_IN_SHIPPING=1;UE_BUILD_MINIMAL=1;WITH_EDITOR=0;WITH_SERVER_CODE=0;UBT_COMPILED_PLATFORM=Win64;WIN32=1;_WIN32_WINNT=0x0600;WINVER=0x0600;PLATFORM_WINDOWS=1;NDEBUG=1;UE_BUILD_DEVELOPMENT=1;UE_PROJECT_NAME=RagdollController;ORIGINAL_FILE_NAME="CrossCompilerTool.exe";CROSSCOMPILERTOOL_API=;UE_ENABLE_ICU=1;WITH_STEAMWORKS=0;WITH_DIRECTXMATH=0;CORE_API=;PROJECTS_API=;JSON_API=;SHADERCOMPILERCOMMON_API=;METALSHADERFORMAT_API=;SHADERFORMATOPENGL_API=</NMakePreprocessorDefinitions>
-		<NMakeIncludeSearchPath>$(NMakeIncludeSearchPath);X:\GitHub\UnrealEngine\Engine\Source;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Launch\Private;X:\GitHub\UnrealEngine\Engine\Source\Developer\iOS\MetalShaderFormat\Private;X:\GitHub\UnrealEngine\Engine\Source\Developer\ShaderFormatOpenGL\Private;X:\GitHub\UnrealEngine\Engine\Source\Developer\ShaderCompilerCommon\Private;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Launch\Public;..\Build\Win64\CrossCompilerTool\Inc\CrossCompilerTool;X:\GitHub\UnrealEngine\Engine\Source\Programs\CrossCompilerTool;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Internationalization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Async;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Concurrency;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Containers;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Delegates;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\GenericPlatform;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\HAL;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Logging;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Math;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Misc;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Modules;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Modules\Boilerplate;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\ProfilingDebugging;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Serialization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Serialization\Json;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Serialization\Csv;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Stats;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Templates;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\UObject;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core\Public\Windows;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Core;..\Build\Win64\CrossCompilerTool\Inc\Projects;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Projects\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Projects\Public\Interfaces;..\Build\Win64\CrossCompilerTool\Inc\Json;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public\Dom;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public\Policies;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json\Public\Serialization;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Json;X:\GitHub\UnrealEngine\Engine\Source\Runtime\Projects;..\Build\Win64\CrossCompilerTool\Inc\ShaderCompilerCommon;X:\GitHub\UnrealEngine\Engine\Source\Developer\ShaderCompilerCommon\Public;X:\GitHub\UnrealEngine\Engine\Source\Developer\ShaderCompilerCommon;X:\GitHub\UnrealEngine\Engine\Source\Runtime\IOS\MetalRHI\Public;..\Build\Win64\CrossCompilerTool\Inc\MetalShaderFormat;X:\GitHub\UnrealEngine\Engine\Source\Developer\iOS\MetalShaderFormat;..\Build\Win64\CrossCompilerTool\Inc\ShaderFormatOpenGL;X:\GitHub\UnrealEngine\Engine\Source\Developer\ShaderFormatOpenGL;X:\GitHub\UnrealEngine\Engine\Source\ThirdParty\hlslcc\hlslcc\src\hlslcc_lib;X:\GitHub\UnrealEngine\Engine\Source\ThirdParty\hlslcc;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\INCLUDE;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\ATLMFC\INCLUDE;C:\Program Files (x86)\Windows Kits\8.1\include\shared;C:\Program Files (x86)\Windows Kits\8.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\winrt;;</NMakeIncludeSearchPath>
+		<NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions);IS_PROGRAM=1;UE_ROCKET=0;UNICODE;_UNICODE;__UNREAL__;IS_MONOLITHIC=1;WITH_ENGINE=0;WITH_UNREAL_DEVELOPER_TOOLS=0;WITH_COREUOBJECT=0;USE_STATS_WITHOUT_ENGINE=0;WITH_PLUGIN_SUPPORT=0;USE_LOGGING_IN_SHIPPING=1;UE_BUILD_MINIMAL=1;WITH_EDITOR=0;WITH_SERVER_CODE=1;UBT_COMPILED_PLATFORM=Win64;WIN32=1;_WIN32_WINNT=0x0600;WINVER=0x0600;PLATFORM_WINDOWS=1;NDEBUG=1;UE_BUILD_DEVELOPMENT=1;UE_PROJECT_NAME=RagdollController;ORIGINAL_FILE_NAME="CrossCompilerTool.exe";CROSSCOMPILERTOOL_API=;UE_ENABLE_ICU=1;WITH_STEAMWORKS=0;WITH_DIRECTXMATH=0;CORE_API=;PROJECTS_API=;JSON_API=;SHADERCOMPILERCOMMON_API=;METALSHADERFORMAT_API=;SHADERFORMATOPENGL_API=;SHADERPREPROCESSOR_API=;SHADERCORE_API=;RHI_API=;RENDERCORE_API=</NMakePreprocessorDefinitions>
+		<NMakeIncludeSearchPath>$(NMakeIncludeSearchPath);X:\GitHub\UnrealEngine-4.7\Engine\Source;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Launch\Private;X:\GitHub\UnrealEngine-4.7\Engine\Source\Developer\iOS\MetalShaderFormat\Private;X:\GitHub\UnrealEngine-4.7\Engine\Source\Developer\ShaderFormatOpenGL\Private;X:\GitHub\UnrealEngine-4.7\Engine\Source\Developer\ShaderCompilerCommon\Private;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Launch\Public;..\Build\Win64\CrossCompilerTool\Inc\CrossCompilerTool;X:\GitHub\UnrealEngine-4.7\Engine\Source\Programs\CrossCompilerTool;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Internationalization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Async;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Concurrency;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Containers;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Delegates;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\GenericPlatform;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\HAL;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Logging;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Math;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Misc;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Modules;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Modules\Boilerplate;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\ProfilingDebugging;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Serialization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Serialization\Csv;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Stats;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Templates;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\UObject;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core\Public\Windows;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Core;..\Build\Win64\CrossCompilerTool\Inc\Projects;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Projects\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Projects\Public\Interfaces;..\Build\Win64\CrossCompilerTool\Inc\Json;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public\Dom;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public\Policies;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json\Public\Serialization;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Json;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\Projects;..\Build\Win64\CrossCompilerTool\Inc\ShaderCompilerCommon;X:\GitHub\UnrealEngine-4.7\Engine\Source\Developer\ShaderCompilerCommon\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Developer\ShaderCompilerCommon;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\IOS\MetalRHI\Public;..\Build\Win64\CrossCompilerTool\Inc\MetalShaderFormat;X:\GitHub\UnrealEngine-4.7\Engine\Source\Developer\iOS\MetalShaderFormat;..\Build\Win64\CrossCompilerTool\Inc\ShaderFormatOpenGL;X:\GitHub\UnrealEngine-4.7\Engine\Source\Developer\ShaderFormatOpenGL;..\Build\Win64\CrossCompilerTool\Inc\ShaderPreprocessor;X:\GitHub\UnrealEngine-4.7\Engine\Source\Developer\ShaderPreprocessor\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Developer\ShaderPreprocessor;..\Build\Win64\CrossCompilerTool\Inc\ShaderCore;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\ShaderCore\Public;..\Build\Win64\CrossCompilerTool\Inc\RHI;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\RHI\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\RHI;..\Build\Win64\CrossCompilerTool\Inc\RenderCore;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\RenderCore\Public;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\RenderCore;X:\GitHub\UnrealEngine-4.7\Engine\Source\Runtime\ShaderCore;X:\GitHub\UnrealEngine-4.7\Engine\Source\ThirdParty\hlslcc\hlslcc\src\hlslcc_lib;X:\GitHub\UnrealEngine-4.7\Engine\Source\ThirdParty\hlslcc;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\INCLUDE;C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\ATLMFC\INCLUDE;C:\Program Files (x86)\Windows Kits\8.1\include\shared;C:\Program Files (x86)\Windows Kits\8.1\include\um;C:\Program Files (x86)\Windows Kits\8.1\include\winrt;;</NMakeIncludeSearchPath>
 		<NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
 		<NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
 		<NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
