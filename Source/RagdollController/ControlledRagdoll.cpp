@@ -173,13 +173,70 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 
 
-	return;
-
-
 
 
 	static int tickCounter = -1;
 	++tickCounter;
+
+
+
+
+	int32 jointInd_dbg = this->JointNames.Find( FName( "head" ) );
+
+	static FDebugFloatHistory histX, histY, histZ;
+	static FDebugFloatHistory histXmy, histYmy, histZmy;
+	static FDebugFloatHistory histXmyLocal, histYmyLocal, histZmyLocal, histWmyLocal;
+	if( tickCounter == 0 )
+	{
+		histX.MinValue = histY.MinValue = histZ.MinValue = -physx::PxPi;
+		histX.MaxValue = histY.MaxValue = histZ.MaxValue = physx::PxPi;
+		histXmy.MinValue = histYmy.MinValue = histZmy.MinValue = -physx::PxPi;
+		histXmy.MaxValue = histYmy.MaxValue = histZmy.MaxValue = physx::PxPi;
+		histXmyLocal.MinValue = histYmyLocal.MinValue = histZmyLocal.MinValue = histWmyLocal.MinValue = -physx::PxPi;
+		histXmyLocal.MaxValue = histYmyLocal.MaxValue = histZmyLocal.MaxValue = histWmyLocal.MaxValue = physx::PxPi;
+	}
+	histX.AddSample( this->JointStates[jointInd_dbg].JointAngles[0] );
+	histY.AddSample( this->JointStates[jointInd_dbg].JointAngles[1] );
+	histZ.AddSample( this->JointStates[jointInd_dbg].JointAngles[2] );
+	histXmy.AddSample( this->JointStates[jointInd_dbg].JointAnglesMy[0] );
+	histYmy.AddSample( this->JointStates[jointInd_dbg].JointAnglesMy[1] );
+	histZmy.AddSample( this->JointStates[jointInd_dbg].JointAnglesMy[2] );
+
+	physx::PxQuat q = this->JointStates[jointInd_dbg].Constraint->ConstraintData->getRelativeTransform().q, swing, twist;
+
+	//Ps::separateSwingTwist( q, swing, twist );
+	twist = q.x != 0.0f ? physx::PxQuat( q.x, 0, 0, q.w ).getNormalized() : physx::PxQuat( physx::PxIdentity );
+	//swing = q * twist.getConjugate();
+
+	physx::PxReal angle = twist.getAngle();
+	//float returnValue = angle <= physx::PxPi ? angle : angle - 2 * physx::PxPi;
+
+	histXmyLocal.AddSample( q.x );
+	histYmyLocal.AddSample( q.y );
+	histZmyLocal.AddSample( q.z );
+	histWmyLocal.AddSample( q.w );
+	DrawDebugFloatHistory( *GetWorld(), histX, FVector( 10.000000, 3600.000000, 300.000000 ), FVector2D( 10.f, 10.f ), FColor( 255, 0, 0 ) );
+	DrawDebugFloatHistory( *GetWorld(), histY, FVector( 10.000000, 3600.000000, 320.000000 ), FVector2D( 10.f, 10.f ), FColor( 0, 255, 0 ) );
+	DrawDebugFloatHistory( *GetWorld(), histZ, FVector( 10.000000, 3600.000000, 340.000000 ), FVector2D( 10.f, 10.f ), FColor( 0, 0, 255 ) );
+	DrawDebugFloatHistory( *GetWorld(), histXmy, FVector( 0.000000, 3600.000000, 300.000000 ), FVector2D( 10.f, 10.f ), FColor( 255, 0, 0 ) );
+	DrawDebugFloatHistory( *GetWorld(), histYmy, FVector( 0.000000, 3600.000000, 320.000000 ), FVector2D( 10.f, 10.f ), FColor( 0, 255, 0 ) );
+	DrawDebugFloatHistory( *GetWorld(), histZmy, FVector( 0.000000, 3600.000000, 340.000000 ), FVector2D( 10.f, 10.f ), FColor( 0, 0, 255 ) );
+	DrawDebugFloatHistory( *GetWorld(), histXmyLocal, FVector( -10.000000, 3600.000000, 300.000000 ), FVector2D( 10.f, 10.f ), FColor( 255, 0, 0 ) );
+	DrawDebugFloatHistory( *GetWorld(), histYmyLocal, FVector( -10.000000, 3600.000000, 320.000000 ), FVector2D( 10.f, 10.f ), FColor( 0, 255, 0 ) );
+	DrawDebugFloatHistory( *GetWorld(), histZmyLocal, FVector( -10.000000, 3600.000000, 340.000000 ), FVector2D( 10.f, 10.f ), FColor( 0, 0, 255 ) );
+	DrawDebugFloatHistory( *GetWorld(), histWmyLocal, FVector( -10.000000, 3600.000000, 360.000000 ), FVector2D( 10.f, 10.f ), FColor( 0, 0, 255 ) );
+
+
+
+
+
+
+
+
+	return;
+
+
+
 
 	int32 jointInd = this->JointNames.Find( FName( "upperarm_l" ) );
 
@@ -314,6 +371,31 @@ void AControlledRagdoll::ReadFromSimulation()
 			jointState.Constraint->ConstraintData->getTwist(),
 			jointState.Constraint->ConstraintData->getSwingYAngle(),
 			jointState.Constraint->ConstraintData->getSwingZAngle() );
+
+
+
+
+
+
+		jointState.JointAnglesMy = jointState.JointAngles;
+
+		physx::PxQuat q = jointState.Constraint->ConstraintData->getRelativeTransform().q, swing, twist;
+
+		//Ps::separateSwingTwist( q, swing, twist );
+		twist = q.x != 0.0f ? physx::PxQuat( q.x, 0, 0, q.w ).getNormalized() : physx::PxQuat( physx::PxIdentity );
+		//swing = q * twist.getConjugate();
+
+		physx::PxReal angle = twist.getAngle();
+		float returnValue = angle <= physx::PxPi ? angle : angle - 2 * physx::PxPi;
+		float signedReturnValue = q.x >= 0.f ? returnValue : -returnValue;
+
+		jointState.JointAnglesMy[0] = angle;
+		jointState.JointAnglesMy[1] = returnValue;
+		jointState.JointAnglesMy[2] = signedReturnValue;
+
+
+
+
 	}
 
 	// all good, release the error cleanup scope guard and return

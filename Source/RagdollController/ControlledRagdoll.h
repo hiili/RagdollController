@@ -46,6 +46,8 @@ struct FJointState
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
 	FVector JointAngles;
 
+	FVector JointAnglesMy;
+
 
 	/* Dynamic controller data (updated during the 1st half of Tick, before the actor's Blueprint is run) */
 
