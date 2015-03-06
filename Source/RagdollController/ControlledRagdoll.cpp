@@ -314,6 +314,10 @@ void AControlledRagdoll::ReadFromSimulation()
 			jointState.Constraint->ConstraintData->getTwist(),
 			jointState.Constraint->ConstraintData->getSwingYAngle(),
 			jointState.Constraint->ConstraintData->getSwingZAngle() );
+
+		// physx::PxD6Joint::getTwist() ignores the sign of q.x, fix this here
+		jointState.JointAngles[0] *= jointState.Constraint->ConstraintData->getRelativeTransform().q.x >= 0.f ?
+			1.f : -1.f;
 	}
 
 	// all good, release the error cleanup scope guard and return
