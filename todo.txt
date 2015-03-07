@@ -1,4 +1,3 @@
-Replace physx getSwing() etc. calls with the new UE wrappers GetCurrentTwist() etc.
 
 
 cosmetic

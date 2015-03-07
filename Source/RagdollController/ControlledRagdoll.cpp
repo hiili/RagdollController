@@ -309,7 +309,8 @@ void AControlledRagdoll::ReadFromSimulation()
 			jointState.BoneGlobalRotations[i] = this->SkeletalMeshComponent->GetBoneTransform( jointState.BoneInds[i] ).GetRotation();
 		}
 
-		// store the joint rotation
+		// store the joint rotation angles (we could use the UE wrappers, however they reverse Y and Z for some reason. do not get involved with that:
+		// they might be reverted back in a future version, and if/when that goes unnoticed by us then we will have a bug here.)
 		jointState.JointAngles = FVector(
 			jointState.Constraint->ConstraintData->getTwist(),
 			jointState.Constraint->ConstraintData->getSwingYAngle(),
