@@ -312,13 +312,19 @@ void AControlledRagdoll::ReadFromSimulation()
 		// store the joint rotation angles (we could use the UE wrappers, however they reverse Y and Z for some reason. do not get involved with that:
 		// they might be reverted back in a future version, and if/when that goes unnoticed by us then we will have a bug here.)
 		jointState.JointAngles = FVector(
-			jointState.Constraint->ConstraintData->getTwist(),
+			/* jointState.Constraint->ConstraintData->getTwist() */ 0.f,   // see below
 			jointState.Constraint->ConstraintData->getSwingYAngle(),
 			jointState.Constraint->ConstraintData->getSwingZAngle() );
 
-		// physx::PxD6Joint::getTwist() ignores the sign of q.x, fix this here
-		jointState.JointAngles[0] *= jointState.Constraint->ConstraintData->getRelativeTransform().q.x >= 0.f ?
-			1.f : -1.f;
+		// physx::PxD6Joint::getTwist() ignores the sign of q.x, overwrite with our own version. Just correcting the value returned by physx::getTwist() would
+		// lead to trouble if Nvidia ever decides to fix their version of getTwist().
+		// (the following few lines are mostly copied from PhysX)
+		physx::PxQuat q = jointState.Constraint->ConstraintData->getRelativeTransform().q;
+		physx::PxQuat twist = q.x != 0.0f ? physx::PxQuat( q.x, 0, 0, q.w ).getNormalized() : physx::PxQuat( physx::PxIdentity );
+		physx::PxReal angle = twist.getAngle();
+		angle = angle <= physx::PxPi ? angle : angle - 2 * physx::PxPi;
+		angle = twist.x >= 0.f ? angle : -angle;   // the correction
+		jointState.JointAngles[0] = angle;
 	}
 
 	// all good, release the error cleanup scope guard and return
