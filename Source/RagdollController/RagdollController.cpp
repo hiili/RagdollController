@@ -7,4 +7,4 @@ IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, RagdollController, "Ragdo
 
 DEFINE_LOG_CATEGORY( LogRcSystem );
 DEFINE_LOG_CATEGORY( LogRcCr );
-DEFINE_LOG_CATEGORY( LogRcRci );
+DEFINE_LOG_CATEGORY( LogRcRch );

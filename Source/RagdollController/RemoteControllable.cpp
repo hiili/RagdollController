@@ -28,7 +28,7 @@ IRemoteControllable::IRemoteControllable( AActor * thisActor ) :
 
 void IRemoteControllable::ConnectWith( const TSharedPtr<LineFSocket> & socket )
 {
-	UE_LOG( LogRcRci, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ),
+	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ),
 		*Utility::CleanupName( this->ThisActor->GetName() ) );
 
 	// store the new socket

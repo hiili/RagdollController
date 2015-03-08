@@ -1,112 +1,135 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<ItemGroup>
-		<None Include="..\..\RagdollController.uproject" />
-		<Filter Include="Source">
-			<UniqueIdentifier>{149B0053-7B2F-45DE-B936-C10E018803E3}</UniqueIdentifier>
-		</Filter>
-		<None Include="..\..\Source\RagdollController.Target.cs">
-			<Filter>Source</Filter>
-		</None >
-		<None Include="..\..\Source\RagdollControllerEditor.Target.cs">
-			<Filter>Source</Filter>
-		</None >
-		<Filter Include="Config">
-			<UniqueIdentifier>{5E544E0E-350E-4525-A709-221F7B5965EE}</UniqueIdentifier>
-		</Filter>
-		<None Include="..\..\Config\DefaultDeviceProfiles.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultEditor.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultEngine.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultGame.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultInput.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultLightmass.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultRagdollController.ini">
-			<Filter>Config</Filter>
-		</None >
-		<Filter Include="Source\RagdollController">
-			<UniqueIdentifier>{F192B0D9-2267-44C0-B7C1-405A7CCEDD85}</UniqueIdentifier>
-		</Filter>
-		<ClCompile Include="..\..\Source\RagdollController\ControlledRagdoll.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\ControlledRagdoll.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\LineFSocket.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\LineFSocket.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<None Include="..\..\Source\RagdollController\RagdollController.Build.cs">
-			<Filter>Source\RagdollController</Filter>
-		</None >
-		<ClCompile Include="..\..\Source\RagdollController\RagdollController.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RagdollController.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RagdollControllerGameEngine.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RagdollControllerGameEngine.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RagdollControllerGameMode.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RagdollControllerGameMode.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RCLevelScriptActor.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RCLevelScriptActor.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RemoteControlInterface.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RemoteControlInterface.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RemoteControllable.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RemoteControllable.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClInclude Include="..\..\Source\RagdollController\ScopeGuard.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\Utility.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\Utility.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<Filter Include="Source\RagdollController\Resources">
-			<UniqueIdentifier>{A6DBB4C5-6560-4D12-82B5-8D9A80A48AD1}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source\RagdollController\Resources\Windows">
-			<UniqueIdentifier>{39C17731-FB71-4803-A926-729EC3B71DF8}</UniqueIdentifier>
-		</Filter>
-		<ResourceCompile Include="..\..\Source\RagdollController\Resources\Windows\RagdollController.rc">
-			<Filter>Source\RagdollController\Resources\Windows</Filter>
-		</ResourceCompile >
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\RagdollController.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{149B0053-7B2F-45DE-B936-C10E018803E3}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\RagdollController.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\RagdollControllerEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Config">
+      <UniqueIdentifier>{5E544E0E-350E-4525-A709-221F7B5965EE}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultDeviceProfiles.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultLightmass.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultRagdollController.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\RagdollController">
+      <UniqueIdentifier>{F192B0D9-2267-44C0-B7C1-405A7CCEDD85}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\RagdollController\ControlledRagdoll.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\ControlledRagdoll.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\LineFSocket.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\LineFSocket.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <None Include="..\..\Source\RagdollController\RagdollController.Build.cs">
+      <Filter>Source\RagdollController</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\RagdollController\RagdollController.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RagdollController.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RagdollControllerGameEngine.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RagdollControllerGameEngine.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RagdollControllerGameMode.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RagdollControllerGameMode.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RCLevelScriptActor.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RCLevelScriptActor.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControllable.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControllable.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\ScopeGuard.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\Utility.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\Utility.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <Filter Include="Source\RagdollController\Resources">
+      <UniqueIdentifier>{A6DBB4C5-6560-4D12-82B5-8D9A80A48AD1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RagdollController\Resources\Windows">
+      <UniqueIdentifier>{39C17731-FB71-4803-A926-729EC3B71DF8}</UniqueIdentifier>
+    </Filter>
+    <ResourceCompile Include="..\..\Source\RagdollController\Resources\Windows\RagdollController.rc">
+      <Filter>Source\RagdollController\Resources\Windows</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlHub.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ThirdParty\rapidxml-1.13\rapidxml.hpp">
+      <Filter>ThirdParty\rapidxml-1.13</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ThirdParty\rapidxml-1.13\rapidxml_iterators.hpp">
+      <Filter>ThirdParty\rapidxml-1.13</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ThirdParty\rapidxml-1.13\rapidxml_print.hpp">
+      <Filter>ThirdParty\rapidxml-1.13</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ThirdParty\rapidxml-1.13\rapidxml_utils.hpp">
+      <Filter>ThirdParty\rapidxml-1.13</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlHub.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ThirdParty">
+      <UniqueIdentifier>{1ed619fb-fc08-472c-82d9-022205929fbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThirdParty\rapidxml-1.13">
+      <UniqueIdentifier>{33bcdcb9-483f-43b4-afe4-077925fc6e76}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
 </Project>
