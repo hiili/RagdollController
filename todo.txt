@@ -1,3 +1,5 @@
+UE 4.7's PhysX seems to be a debug build! When the source code integration has stabilized, make sure that you are using a release build (for performance).
+
 Turn it into an actor component library. By default, components auto-detect needed other components from the same Actor (eg, skelmesh), and from the world's actors (eg, a remote control interface).
 This can be overrided, so as to have the components connect with given other components. Provide also a RedetectComponents() method for re-scanning for default targets. Possible components:
   - SkeletalMeshComponent controller (implements SensorInterface and ActuatorInterface):
