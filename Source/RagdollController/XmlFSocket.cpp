@@ -1,21 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "RagdollController.h"
-#include "LineFSocket.h"
+#include "XmlFSocket.h"
 
 #include <Sockets.h>
 
 
 
 
-LineFSocket::LineFSocket( const TSharedPtr<FSocket> & socket ) :
+XmlFSocket::XmlFSocket( const TSharedPtr<FSocket> & socket ) :
 	Socket( socket )
 {}
 
 
 
 
-bool LineFSocket::IsGood()
+bool XmlFSocket::IsGood()
 {
 	return this->Socket.IsValid() && this->Socket->GetConnectionState() == ESocketConnectionState::SCS_Connected;
 }
@@ -23,13 +23,13 @@ bool LineFSocket::IsGood()
 
 
 
-bool LineFSocket::GetLine()
+bool XmlFSocket::GetLine()
 {
 	// read more data until either we have a full line or no more new data
 	do
 	{
 		// see if Buffer has a complete line, in which case extract it and return
-		if( ExtractFromBuffer() ) return true;
+		if( ExtractLineFromBuffer() ) return true;
 
 	} while( GetFromSocketToBuffer() );
 
@@ -40,7 +40,7 @@ bool LineFSocket::GetLine()
 
 
 
-bool LineFSocket::PutLine( std::string line )
+bool XmlFSocket::PutLine( std::string line )
 {
 	// check that we have a valid and connected socket
 	if( !IsGood() ) return false;
@@ -59,7 +59,7 @@ bool LineFSocket::PutLine( std::string line )
 
 
 
-bool LineFSocket::ExtractFromBuffer()
+bool XmlFSocket::ExtractLineFromBuffer()
 {
 	// seek over all leading CR and LF characters in Buffer
 	std::size_t contentBegin = 0; std::size_t bufferSize = this->Buffer.size();
@@ -84,7 +84,7 @@ bool LineFSocket::ExtractFromBuffer()
 
 
 
-bool LineFSocket::GetFromSocketToBuffer()
+bool XmlFSocket::GetFromSocketToBuffer()
 {
 	bool success;
 	uint32 bytesPending;

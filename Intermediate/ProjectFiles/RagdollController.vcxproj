@@ -339,8 +339,8 @@
     <None Include="..\..\Config\DefaultRagdollController.ini" />
     <ClCompile Include="..\..\Source\RagdollController\ControlledRagdoll.cpp" />
     <ClInclude Include="..\..\Source\RagdollController\ControlledRagdoll.h" />
-    <ClCompile Include="..\..\Source\RagdollController\LineFSocket.cpp" />
-    <ClInclude Include="..\..\Source\RagdollController\LineFSocket.h" />
+    <ClCompile Include="..\..\Source\RagdollController\XmlFSocket.cpp" />
+    <ClInclude Include="..\..\Source\RagdollController\XmlFSocket.h" />
     <None Include="..\..\Source\RagdollController\RagdollController.Build.cs" />
     <ClCompile Include="..\..\Source\RagdollController\RagdollController.cpp" />
     <ClInclude Include="..\..\Source\RagdollController\RagdollController.h" />

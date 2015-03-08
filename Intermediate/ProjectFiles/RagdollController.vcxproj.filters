@@ -44,12 +44,6 @@
     <ClInclude Include="..\..\Source\RagdollController\ControlledRagdoll.h">
       <Filter>Source\RagdollController</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\Source\RagdollController\LineFSocket.cpp">
-      <Filter>Source\RagdollController</Filter>
-    </ClCompile>
-    <ClInclude Include="..\..\Source\RagdollController\LineFSocket.h">
-      <Filter>Source\RagdollController</Filter>
-    </ClInclude>
     <None Include="..\..\Source\RagdollController\RagdollController.Build.cs">
       <Filter>Source\RagdollController</Filter>
     </None>
@@ -118,9 +112,15 @@
     <ClInclude Include="..\..\ThirdParty\rapidxml-1.13\rapidxml_utils.hpp">
       <Filter>ThirdParty\rapidxml-1.13</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\XmlFSocket.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\RagdollController\RemoteControlHub.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\XmlFSocket.cpp">
       <Filter>Source\RagdollController</Filter>
     </ClCompile>
   </ItemGroup>
