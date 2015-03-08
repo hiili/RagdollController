@@ -13,11 +13,11 @@ class FSocket;
 
 
 /**
-* Line-based non-blocking wrapper for FSockets.
+* Non-blocking xml wrapper for FSockets.
 *
 * WARNING: No flood protection! The line buffer size is unlimited.
 */
-class LineFSocket
+class XmlFSocket
 {
 protected:
 
@@ -29,7 +29,7 @@ protected:
 	* Tries to extract a complete, non-empty line from Buffer. On success, the line is placed in Line and true is returned.
 	* The Line field is not touched on failure.
 	*/
-	bool ExtractFromBuffer();
+	bool ExtractLineFromBuffer();
 
 	/** Tries to read some more data from the socket into Buffer. Returns true if any new data was read. */
 	bool GetFromSocketToBuffer();
@@ -45,10 +45,10 @@ public:
 
 
 	/**
-	* Constructs a new LineFSocket wrapper around the provided FSocket and shares its ownership via the provided shared pointer.
+	* Constructs a new XmlFSocket wrapper around the provided FSocket and shares its ownership via the provided shared pointer.
 	* The socket argument can be null, in which case the resulting object will be in an invalid state (IsGood() == false).
 	*/
-	LineFSocket( const TSharedPtr<FSocket> & socket );
+	XmlFSocket( const TSharedPtr<FSocket> & socket );
 
 
 	/** Check whether we have a socket and that it is connected and all-ok. */

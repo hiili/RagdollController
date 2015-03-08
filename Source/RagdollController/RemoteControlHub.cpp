@@ -5,7 +5,7 @@
 
 #include "RemoteControllable.h"
 
-#include "LineFSocket.h"
+#include "XmlFSocket.h"
 #include "ScopeGuard.h"
 #include "Utility.h"
 
@@ -128,8 +128,8 @@ void ARemoteControlHub::CheckForNewConnections()
 		}
 		UE_LOG( LogRcRch, Log, TEXT( "(%s) Incoming connection accepted." ), TEXT( __FUNCTION__ ) );
 
-		// wrap the socket into a LineFSocket and store it to PendingSockets (check goodness later)
-		this->PendingSockets.Add( TSharedPtr<LineFSocket>( new LineFSocket( TSharedPtr<FSocket>( connectionSocket ) ) ) );
+		// wrap the socket into a XmlFSocket and store it to PendingSockets (check goodness later)
+		this->PendingSockets.Add( TSharedPtr<XmlFSocket>( new XmlFSocket( TSharedPtr<FSocket>( connectionSocket ) ) ) );
 
 	}
 }
@@ -170,7 +170,7 @@ void ARemoteControlHub::ManagePendingConnections()
 
 
 
-void ARemoteControlHub::DispatchSocket( std::string command, const TSharedPtr<LineFSocket> & socket )
+void ARemoteControlHub::DispatchSocket( std::string command, const TSharedPtr<XmlFSocket> & socket )
 {
 	// verify and remove handshake
 	if( command.find( RCH_HANDSHAKE_STRING ) != 0 )
@@ -194,7 +194,7 @@ void ARemoteControlHub::DispatchSocket( std::string command, const TSharedPtr<Li
 
 
 
-void ARemoteControlHub::CmdConnect( std::string args, const TSharedPtr<LineFSocket> & socket )
+void ARemoteControlHub::CmdConnect( std::string args, const TSharedPtr<XmlFSocket> & socket )
 {
 	// find the target actor based on its FName
 	check( GetWorld() );

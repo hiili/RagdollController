@@ -3,7 +3,7 @@
 #include "RagdollController.h"
 #include "RemoteControllable.h"
 
-#include "LineFSocket.h"
+#include "XmlFSocket.h"
 #include "Utility.h"
 
 #include <SharedPointer.h>
@@ -26,7 +26,7 @@ IRemoteControllable::IRemoteControllable( AActor * thisActor ) :
 }
 
 
-void IRemoteControllable::ConnectWith( const TSharedPtr<LineFSocket> & socket )
+void IRemoteControllable::ConnectWith( const TSharedPtr<XmlFSocket> & socket )
 {
 	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ),
 		*Utility::CleanupName( this->ThisActor->GetName() ) );

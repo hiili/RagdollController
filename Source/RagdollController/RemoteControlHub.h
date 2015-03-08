@@ -11,7 +11,7 @@
 #include "RemoteControlHub.generated.h"
 
 class FSocket;
-class LineFSocket;
+class XmlFSocket;
 
 
 
@@ -31,7 +31,7 @@ protected:
 	TSharedPtr<FSocket> ListenSocket;
 
 	/** Connection sockets that have not yet been dispatched. Currently, there are no cleanup mechanisms for stalled connections. */
-	TArray< TSharedPtr<LineFSocket> > PendingSockets;
+	TArray< TSharedPtr<XmlFSocket> > PendingSockets;
 	
 
 	/** Create the main listen socket. */
@@ -44,13 +44,13 @@ protected:
 	void ManagePendingConnections();
 
 	/** Try to dispatch the socket according to the command. Close and discard the socket upon errors. */
-	void DispatchSocket( std::string command, const TSharedPtr<LineFSocket> & socket );
+	void DispatchSocket( std::string command, const TSharedPtr<XmlFSocket> & socket );
 
 
 	/* commands */
 
 	/** Connect to an actor */
-	void CmdConnect( std::string args, const TSharedPtr<LineFSocket> & socket );
+	void CmdConnect( std::string args, const TSharedPtr<XmlFSocket> & socket );
 
 
 public:

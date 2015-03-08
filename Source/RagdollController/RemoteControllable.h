@@ -6,7 +6,7 @@
 
 #include "RemoteControllable.generated.h"
 
-class LineFSocket;
+class XmlFSocket;
 
 
 
@@ -32,13 +32,13 @@ class IRemoteControllable
 protected:
 
 	/** Remote control socket */
-	TSharedPtr<LineFSocket> RemoteControlSocket;
+	TSharedPtr<XmlFSocket> RemoteControlSocket;
 
 
 public:
 
 	IRemoteControllable( AActor * thisActor );
 
-	virtual void ConnectWith( const TSharedPtr<LineFSocket> & socket );
+	virtual void ConnectWith( const TSharedPtr<XmlFSocket> & socket );
 
 };
