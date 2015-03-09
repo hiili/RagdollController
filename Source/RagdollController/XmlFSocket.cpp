@@ -5,6 +5,83 @@
 
 #include <Sockets.h>
 
+#define RAPIDXML_NO_EXCEPTIONS   // No exceptions in UE
+#include <rapidxml.hpp>
+#include <rapidxml_print.hpp>
+
+
+/** Preallocation size for various internal buffers. */
+#define PREALLOC_SIZE (64 * 1024)
+
+
+
+
+/** Helper class for RapidXML error handling. */
+static class RapidXmlManager_t
+{
+	friend void rapidxml::parse_error_handler( const char *what, void *where );
+
+	enum State_t
+	{
+		S_IDLE,
+		S_RUNNING,
+		S_ERROR
+	} State = S_IDLE;
+
+public:
+
+	/** Call this before starting to call RapidXML's functionality. */
+	void ReserveRapidXml()
+	{
+		if( State != S_IDLE )
+		{
+			// already in use, log a warning and do not touch State
+			UE_LOG( LogRcSystem, Warning, TEXT( "(%s) RapidXML seems to being called simultaneously from multiple threads! Error handling will not work correctly." ),
+				TEXT( __FUNCTION__ ) );
+		}
+		else
+		{
+			State = S_RUNNING;   // check-and-set is not atomic..
+		}
+	}
+
+	/** Call this after using RapidXML's functionality.
+	 ** 
+	 ** @return True on success, false if RapidXML's error handler was triggered (error information is logged into LogRcSystem). */
+	bool ReleaseRapidXml()
+	{
+		if( State == S_IDLE )
+		{
+			UE_LOG( LogRcSystem, Warning, TEXT( "(%s) Assertion failed in RapidXML error handler." ), TEXT( __FUNCTION__ ) );
+		}
+
+		bool status = State != S_ERROR;
+		State = S_IDLE;
+		return status;
+	}
+
+} RapidXmlManager;
+
+
+/** We don't have exceptions, so define an an error handler for RapidXML. We log an error, after which we _continue_; RapidXML is designed to produce
+ ** undefined behavior if this function returns. However, we take that risk after logging the fact. */
+void rapidxml::parse_error_handler( const char *what, void *where )
+{
+	// log the error
+	UE_LOG( LogRcSystem, Error, TEXT( "(%s) RapidXML encountered an error! Continuing, undefined behavior ahead.." ), TEXT( __FUNCTION__ ) );
+	UE_LOG( LogRcSystem, Error, TEXT( "   RapidXML 'what' string: %s" ) );
+	UE_LOG( LogRcSystem, Error, TEXT( "   RapidXML 'where' string (first 80 chars): %.80s" ), *FString( (char *)where ) );
+
+	// set the error flag in RapidXmlManager
+	if( RapidXmlManager.State == RapidXmlManager_t::S_IDLE )
+	{
+		UE_LOG( LogRcSystem, Warning, TEXT( "(%s) Assertion failed in RapidXML error handler." ), TEXT( __FUNCTION__ ) );
+	}
+	RapidXmlManager.State = RapidXmlManager_t::S_ERROR;
+
+	return;   // will lead to undefined behavior in RapidXML!
+}
+
 
 
 
@@ -18,6 +95,14 @@ XmlFSocket::XmlFSocket( const TSharedPtr<FSocket> & socket ) :
 bool XmlFSocket::IsGood()
 {
 	return this->Socket.IsValid() && this->Socket->GetConnectionState() == ESocketConnectionState::SCS_Connected;
+}
+
+
+
+
+void XmlFSocket::SetBlocking( bool shouldBlock, int timeoutMs )
+{
+	check( false );
 }
 
 
@@ -58,6 +143,57 @@ bool XmlFSocket::PutLine( std::string line )
 
 
 
+
+bool XmlFSocket::GetXml()
+{
+	// read more data until either we have a full document or no more new data
+	do
+	{
+		// see if Buffer has a complete document, in which case extract it and return
+		if( ExtractXmlFromBuffer() ) return true;
+
+	} while( GetFromSocketToBuffer() );
+
+	// no more data available and did not get a complete document
+	return false;
+}
+
+
+
+
+bool XmlFSocket::PutXml( rapidxml::xml_document<> * xmlDoc /*= 0 */ )
+{
+	// check that we have a valid and connected socket
+	if( !IsGood() ) return false;
+
+	// Use OutXml if no document given
+	if( !xmlDoc )
+	{
+		xmlDoc = &this->OutXml;
+	}
+
+	// generate the xml string, stop and return false on failure
+	std::string str; str.reserve( PREALLOC_SIZE );
+	RapidXmlManager.ReserveRapidXml();
+	rapidxml::print( std::back_inserter( str ), *xmlDoc );
+	if( !RapidXmlManager.ReleaseRapidXml() ) return false;
+
+	// send the string to the socket
+	int32 bytesSent;
+	this->Socket->Send( (const uint8 *)str.data(), str.size(), bytesSent );
+
+	// return the success status
+	return bytesSent == str.size();
+}
+
+
+
+
+bool XmlFSocket::ExtractXmlFromBuffer()
+{
+	check( false );
+	return false;
+}
 
 bool XmlFSocket::ExtractLineFromBuffer()
 {

@@ -4,8 +4,13 @@
 #include "ControlledRagdoll.h"
 
 #include "RCLevelScriptActor.h"
+#include "XmlFSocket.h"
 #include "ScopeGuard.h"
 #include "Utility.h"
+
+#define RAPIDXML_NO_EXCEPTIONS
+#include <rapidxml.hpp>
+#include <rapidxml_print.hpp>
 
 #include <Net/UnrealNetwork.h>
 #include <GenericPlatform/GenericPlatformProperties.h>
@@ -170,6 +175,39 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 	// Store pose so that it can be replicated to client(s)
 	SendPose();
+
+
+
+
+
+
+
+
+
+
+	if( IRemoteControllable::RemoteControlSocket.Get() && IRemoteControllable::RemoteControlSocket->IsGood() )
+	{
+		XmlFSocket * xmlFSocket = IRemoteControllable::RemoteControlSocket.Get();
+
+		// xml testing
+		rapidxml::xml_document<> & doc = xmlFSocket->OutXml;    // character type defaults to char
+
+		doc.clear();
+		rapidxml::xml_node<> *node = doc.allocate_node( rapidxml::node_element, "a", "Google" );
+		doc.append_node( node );
+		rapidxml::xml_attribute<> *attr = doc.allocate_attribute( "href", "google.com" );
+		node->append_attribute( attr );
+
+		xmlFSocket->PutXml();
+	}
+	else
+	{
+		UE_LOG( LogTemp, Error, TEXT("RemoteControlSocket.Get() == null or RemoteControlSocket->IsGood() == false") );
+	}
+
+
+
+
 
 
 
