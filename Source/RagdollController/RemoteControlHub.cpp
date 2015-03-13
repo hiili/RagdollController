@@ -21,7 +21,7 @@
 #define RCH_PORT 7770
 
 // TCP send and receive buffer size
-#define RCH_TCP_BUFFERS_SIZE (100 * 1024)
+#define RCH_TCP_BUFFERS_SIZE (64 * 1024)
 
 // handshake string: the remote client should send this in the beginning of the initial command line
 #define RCH_HANDSHAKE_STRING "RagdollController RCH: "
