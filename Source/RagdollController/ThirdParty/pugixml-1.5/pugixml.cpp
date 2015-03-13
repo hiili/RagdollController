@@ -14,6 +14,8 @@
 #ifndef SOURCE_PUGIXML_CPP
 #define SOURCE_PUGIXML_CPP
 
+#include "RagdollController.h"   // mandated by the Unreal Build Tool
+
 #include "pugixml.hpp"
 
 #include <stdlib.h>
