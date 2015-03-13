@@ -21,6 +21,8 @@ cosmetic
 
 drop the this-> convention, see https://stackoverflow.com/questions/1228161/why-use-prefixes-on-member-variables-in-c-classes and https://stackoverflow.com/questions/111605/what-kind-of-prefix-do-you-use-for-member-variables
 
+switch private-first to public-first in classes.
+
 think out the naming conventions. At the moment:
   - methods are loCamelCase, member variables are HiCamelCase, arguments and local variables are loCamelCase. Not too logical..
   - UE-style would be to use HiCamelCase also with methods.
