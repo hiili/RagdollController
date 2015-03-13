@@ -100,20 +100,14 @@
     <ClInclude Include="..\..\Source\RagdollController\RemoteControlHub.h">
       <Filter>Source\RagdollController</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\ThirdParty\rapidxml-1.13\rapidxml.hpp">
-      <Filter>ThirdParty\rapidxml-1.13</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ThirdParty\rapidxml-1.13\rapidxml_iterators.hpp">
-      <Filter>ThirdParty\rapidxml-1.13</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ThirdParty\rapidxml-1.13\rapidxml_print.hpp">
-      <Filter>ThirdParty\rapidxml-1.13</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ThirdParty\rapidxml-1.13\rapidxml_utils.hpp">
-      <Filter>ThirdParty\rapidxml-1.13</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\RagdollController\XmlFSocket.h">
       <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugiconfig.hpp">
+      <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.hpp">
+      <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -123,13 +117,19 @@
     <ClCompile Include="..\..\Source\RagdollController\XmlFSocket.cpp">
       <Filter>Source\RagdollController</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.cpp">
+      <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ThirdParty">
       <UniqueIdentifier>{1ed619fb-fc08-472c-82d9-022205929fbd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ThirdParty\rapidxml-1.13">
-      <UniqueIdentifier>{33bcdcb9-483f-43b4-afe4-077925fc6e76}</UniqueIdentifier>
+    <Filter Include="Source\RagdollController\ThirdParty">
+      <UniqueIdentifier>{3b81752f-011d-4bbf-a973-a60758e372f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RagdollController\ThirdParty\pugixml-1.5">
+      <UniqueIdentifier>{eea13076-2e3d-4590-9688-dcd382a48461}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

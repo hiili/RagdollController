@@ -8,9 +8,7 @@
 #include "ScopeGuard.h"
 #include "Utility.h"
 
-#define RAPIDXML_NO_EXCEPTIONS
-#include <rapidxml.hpp>
-#include <rapidxml_print.hpp>
+#include <pugixml.hpp>
 
 #include <Net/UnrealNetwork.h>
 #include <GenericPlatform/GenericPlatformProperties.h>
@@ -189,16 +187,16 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	{
 		XmlFSocket * xmlFSocket = IRemoteControllable::RemoteControlSocket.Get();
 
-		// xml testing
-		rapidxml::xml_document<> & doc = xmlFSocket->OutXml;    // character type defaults to char
+		//// xml testing
+		//rapidxml::xml_document<> & doc = xmlFSocket->OutXml;    // character type defaults to char
 
-		doc.clear();
-		rapidxml::xml_node<> *node = doc.allocate_node( rapidxml::node_element, "a", "Google" );
-		doc.append_node( node );
-		rapidxml::xml_attribute<> *attr = doc.allocate_attribute( "href", "google.com" );
-		node->append_attribute( attr );
+		//doc.clear();
+		//rapidxml::xml_node<> *node = doc.allocate_node( rapidxml::node_element, "a", "Google" );
+		//doc.append_node( node );
+		//rapidxml::xml_attribute<> *attr = doc.allocate_attribute( "href", "google.com" );
+		//node->append_attribute( attr );
 
-		xmlFSocket->PutXml();
+		//xmlFSocket->PutXml();
 	}
 	else
 	{

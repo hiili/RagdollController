@@ -5,9 +5,7 @@
 
 #include <SharedPointer.h>
 
-#define RAPIDXML_NO_EXCEPTIONS
-#include <rapidxml.hpp>
-#include <rapidxml_print.hpp>
+#include <pugixml.hpp>
 
 #include <string>
 
@@ -82,12 +80,12 @@ public:
 	/** The last XML document received with GetXml(). The document is valid only until the next read operation (GetLine or GetXml); the document is an in-situ
 	 ** parse of the XmlFSocket's internal buffer (we use RapidXML in destructive mode), with the implication that any read operation on this XmlFSocket will
 	 ** invalidate the data pointers contained in this xml document. */
-	rapidxml::xml_document<> InXml;
+	//rapidxml::xml_document<> InXml;
 
 	/** A pre-allocated, re-usable xml document that can be sent with SendXml(). If one is sending repeatedly an xml document with the same structure
 	 ** (with only the contained data changing), then it can be handy to initialize this document once and then just update the contained data
 	 ** before each send operation. */
-	rapidxml::xml_document<> OutXml;
+	//rapidxml::xml_document<> OutXml;
 
 
 	/**
@@ -134,5 +132,5 @@ public:
 	 * @xmlDoc A pointer to the RapidXML document to be sent. If null, then the XmlFSocket::OutXml document will be sent.
 	 * @return True on success, false on full or partial failure.
 	 */
-	bool PutXml( rapidxml::xml_document<> * xmlDoc = 0 );
+	//bool PutXml( rapidxml::xml_document<> * xmlDoc = 0 );
 };

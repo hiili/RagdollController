@@ -12,7 +12,7 @@ public class RagdollController : ModuleRules
 
         PublicIncludePaths.AddRange(new string[] { "Engine/Source/ThirdParty/PhysX/PhysX-3.3/include" });
 
-        PrivateIncludePaths.Add("../ThirdParty/rapidxml-1.13");
+        PrivateIncludePaths.Add("RagdollController/ThirdParty/pugixml-1.5");
         
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
