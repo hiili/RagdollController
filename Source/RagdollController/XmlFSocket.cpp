@@ -29,7 +29,7 @@ bool XmlFSocket::IsGood()
 
 
 
-void XmlFSocket::SetBlocking( bool shouldBlock, int timeoutMs )
+void XmlFSocket::SetBlocking( bool shouldBlock, int blockingTimeoutMs )
 {
 	check( false );
 }
@@ -59,7 +59,7 @@ bool XmlFSocket::PutLine( std::string line )
 	// check that we have a valid and connected socket
 	if( !IsGood() ) return false;
 
-	// append LF (prefer a string copy in place of two Send() calls and risking network fragmentation)
+	// append LF (prefer a possible string copy in place of two Send() calls and risking network fragmentation)
 	line.append( "\n" );
 
 	// write data

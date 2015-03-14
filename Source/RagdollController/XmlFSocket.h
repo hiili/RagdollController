@@ -47,8 +47,11 @@ protected:
 	bool ShouldBlock = false;
 
 	/** Timeout value for blocking read operations, in milliseconds. */
-	int32 TimeoutMs;
+	int32 BlockingTimeoutMs;
 
+
+	/** Tries to read some more data from the socket into Buffer. Returns true if any new data was read. */
+	bool GetFromSocketToBuffer();
 
 	/**
 	* Tries to extract a complete, non-empty line from Buffer. On success, the line is placed in Line and true is returned.
@@ -64,9 +67,6 @@ protected:
 	* xmlDoc is not touched on failure, except for parse errors; see GetXml().
 	*/
 	bool ExtractXmlFromBuffer();
-
-	/** Tries to read some more data from the socket into Buffer. Returns true if any new data was read. */
-	bool GetFromSocketToBuffer();
 
 
 public:
