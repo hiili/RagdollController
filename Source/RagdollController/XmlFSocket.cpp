@@ -7,16 +7,28 @@
 
 #include <pugixml.hpp>
 
+#include <boost/interprocess/streams/bufferstream.hpp>
+
+#include <algorithm>
+#include <functional>
+#include <cctype>
+
 
 /** Preallocation size for various internal buffers. */
 #define PREALLOC_SIZE (64 * 1024)
+
+
+/** Xml block header id */
+#define XML_BLOCK_HEADER "XML_DOCUMENT_BEGIN"
 
 
 
 
 XmlFSocket::XmlFSocket( const TSharedPtr<FSocket> & socket ) :
 	Socket( socket )
-{}
+{
+	InXmlStatus.status = pugi::status_no_document_element;
+}
 
 
 
@@ -118,20 +130,36 @@ bool XmlFSocket::GetXml()
 
 
 
-bool XmlFSocket::ExtractXmlFromBuffer()
+void XmlFSocket::CleanupBuffer()
 {
-	check( false );
-	return false;
+	// do we have an in-situ xml parse in Buffer?
+	if( BufferInSituXmlLength > 0 )
+	{
+		// yes, drop it
+		Buffer.erase( 0, BufferInSituXmlLength );
+		BufferInSituXmlLength = 0;
+
+		// reset InXml and its status
+		InXml.reset();
+		InXmlStatus = pugi::xml_parse_result();
+		InXmlStatus.status = pugi::status_no_document_element;
+	}
+
+	// drop leading whitespace
+	// copied from https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+	Buffer.erase( Buffer.begin(), std::find_if( Buffer.begin(), Buffer.end(), std::not1( std::ptr_fun<int, int>( std::isspace ) ) ) );
 }
+
+
+
 
 bool XmlFSocket::ExtractLineFromBuffer()
 {
-	// seek over all leading CR and LF characters in Buffer
-	std::size_t contentBegin = 0; std::size_t bufferSize = this->Buffer.size();
-	while( contentBegin < bufferSize && (this->Buffer[contentBegin] == '\r' || this->Buffer[contentBegin] == '\n') ) ++contentBegin;
+	// skip leading whitespace, drop previous in-situ InXml
+	CleanupBuffer();
 
-	// now, do we have a complete, non-empty line at the beginning of Buffer? look for a CR or LF
-	std::size_t contentLength = this->Buffer.find_first_of( "\r\n", contentBegin );
+	// now, do we have a complete line at the beginning of Buffer? look for a CR or LF
+	std::size_t contentLength = this->Buffer.find_first_of( "\r\n" );
 	if( contentLength != std::string::npos )
 	{
 		// we have a line, extract it and return true
@@ -144,6 +172,39 @@ bool XmlFSocket::ExtractLineFromBuffer()
 		// no full line, return false
 		return false;
 	}
+}
+
+
+
+
+bool XmlFSocket::ExtractXmlFromBuffer()
+{
+	// skip leading whitespace, drop previous in-situ InXml
+	CleanupBuffer();
+
+	// wrap the Buffer in a non-copying bufferstream. limit its length to avoid unnecessary parsing if there is no xml block header but other data.
+	boost::interprocess::bufferstream buffer( &Buffer[0], std::min<int>( 128, Buffer.length() ), std::ios_base::in );
+	
+	// try to parse the header string and the block length string
+	std::string blockHeaderString;
+	int blockLength;
+	buffer >> blockHeaderString >> blockLength;
+
+	// check if a header was successfully detected. return false if not.
+	if( buffer.fail() || 0 != blockHeaderString.compare( XML_BLOCK_HEADER ) ) return false;
+
+	// we have a header, now check if the entire document is already in the buffer. return false if not (keep it simple and do not cache already parsed header data).
+	if( Buffer.length() < blockLength ) return false;
+
+	// we have a valid xml document in the buffer, now try to parse it into InXml (let pugixml eat the block header). remember to set BufferInSituXmlLength!
+	BufferInSituXmlLength = blockLength;
+	InXmlStatus = InXml.load_buffer_inplace( &Buffer[0], blockLength );
+
+	// check for parse errors
+	if( !InXmlStatus ) return false;
+
+	// all ok, return true
+	return true;
 }
 
 

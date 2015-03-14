@@ -15,32 +15,31 @@ class FSocket;
 
 
 /**
-* Non-blocking xml wrapper for FSockets. Supports both xml-based and line-based communications.
-*
-* Warning: No flood protection! The line buffer size is unlimited.
+* Non-blocking xml wrapper for FSockets that supports both xml-based and line-based communications.
 * 
-* Warning: We use RapidXML, and since we do not have exceptions in UE, we have only bad options when a parse error occurs. In this case, RapidXML is designed
-* to produce undefined behavior unles one abort()'s after a parse error. However, we take that risk after logging the fact: on a parse error, we log it to
-* our system log (LogRcSystem) as an error, and continue parsing as if nothing had happened.
+* Xml documents received from the socket must be preceded by a block header that states the byte length of the document. The header is a single LF or CRLF
+* terminated line with the following syntax:
+* XML_DOCUMENT_BEGIN <length>
+* where <length> is the combined byte length of the xml document AND the block header (that is, counting starts from the X character of the word "XML" in the
+* header). <length> can be padded with zeros or spaces, so as to make it fixed-width. For example, the block header
+* XML_DOCUMENT_BEGIN        230
+* is a valid header line, assuming that it is terminated with a single LF, making it 30 bytes long, and it is followed by a 200-byte xml document.
+* 
+* All outgoing xml documents are preceded by a similar block header.
+* 
+* Warning: No flood protection! The line buffer size is unlimited.
 */
 class XmlFSocket
 {
-	/** Is set to true in RapidXML's error handler. Will be reverted back to false */
-	bool RapidXmlParseError;
-
-	/** Helper counter used by ExtractXmlFromBuffer(). */
-	std::size_t BufferXmlScanPos = 0;
-
-	/** Helper counter used by ExtractXmlFromBuffer(). */
-	int32 BufferXmlScanDepth = 0;
-
 
 protected:
 
 	/** Temporary buffer. Might contain an in-situ parse of an xml document; see BufferInSituXmlLength! */
 	std::string Buffer;
 
-	/** If this is non-zero, then the Buffer contains an in-situ parse of an xml document. Further read operations should first  */
+	/** If this is non-zero, then the Buffer contains an in-situ parse of an xml document. Further read operations should first remove this much data
+	 ** from the beginning of the buffer and make sure that the related xml document (InXml) is not used afterwards.
+	 ** Note that the Buffer data to be removed can contain nulls! */
 	std::size_t BufferInSituXmlLength = 0;
 
 	/** Whether read operations should block. */
@@ -52,6 +51,10 @@ protected:
 
 	/** Tries to read some more data from the socket into Buffer. Returns true if any new data was read. */
 	bool GetFromSocketToBuffer();
+
+	/** Prepares Buffer for further processing. Drops leading whitespace (whitespace as in std::isspace, in practice: spaces, tabs, LFs and CRs).
+	 ** Checks for the presence of an in-situ xml parse and, if one is present, drops it and resets InXml. */
+	void CleanupBuffer();
 
 	/**
 	* Tries to extract a complete, non-empty line from Buffer. On success, the line is placed in Line and true is returned.
@@ -77,15 +80,19 @@ public:
 	/** A copy of the last full line read with GetLine(), without the terminating LF or CRLF. It is allowed to directly modify this buffer. */
 	std::string Line;
 
-	/** The last XML document received with GetXml(). The document is valid only until the next read operation (GetLine or GetXml); the document is an in-situ
-	 ** parse of the XmlFSocket's internal buffer (we use RapidXML in destructive mode), with the implication that any read operation on this XmlFSocket will
-	 ** invalidate the data pointers contained in this xml document. */
-	//rapidxml::xml_document<> InXml;
+
+	/** The last XML document received with GetXml(). The document is reset on the next read operation (GetLine or GetXml); the document is an in-situ
+	 ** parse of the XmlFSocket's internal buffer, with the implication that any read operation on this XmlFSocket needs to reset it. */
+	pugi::xml_document InXml;
+
+	/** Parse status of InXMl, set by GetXml(). The status pugi::status_no_document_element means that either GetXml() has not been called yet, or InXMl has
+	 ** been reset due to a subsequent (attempted) read operation. */
+	pugi::xml_parse_result InXmlStatus;
 
 	/** A pre-allocated, re-usable xml document that can be sent with SendXml(). If one is sending repeatedly an xml document with the same structure
 	 ** (with only the contained data changing), then it can be handy to initialize this document once and then just update the contained data
 	 ** before each send operation. */
-	//rapidxml::xml_document<> OutXml;
+	pugi::xml_document OutXml;
 
 
 	/**
@@ -118,11 +125,14 @@ public:
 	bool PutLine( std::string line );
 
 	/**
-	* Tries to read the next complete xml document from the socket. On success, the new document is parsed into InXml.
-	* See the documentation of InXml for details. InXml is not touched if there is no full xml document available in the socket buffer.
-	* However, a parse error of a full document will leave the document _and the whole system_ in an undefined state! See the class documentation for details.
-	*
-	* @return True if a new xml document was read, false otherwise.
+	* Tries to read the next complete xml document from the socket. A proper xml block header is expected (see class documentation for details).
+	* Preceding garbage data is _not_ skipped, except for possible preceding whitespace (spaces, tabs, LFs and CRs). 
+	* Note that the current InXml document will be reset no matter whether a new xml document is available for parsing!
+	* 
+	* On success, the parsed document becomes available in InXml and InXmlStatus is set to pugi::status_ok. See the documentation of InXml for details.
+	* On failure, InXmlStatus can be used to determine the state of InXml.
+	* 
+	* @return True if a new xml document was read successfully, false otherwise. See InXmlStatus for more information about the result.
 	*/
 	bool GetXml();
 

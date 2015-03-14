@@ -187,16 +187,8 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	{
 		XmlFSocket * xmlFSocket = IRemoteControllable::RemoteControlSocket.Get();
 
-		//// xml testing
-		//rapidxml::xml_document<> & doc = xmlFSocket->OutXml;    // character type defaults to char
+		bool result = xmlFSocket->GetXml();
 
-		//doc.clear();
-		//rapidxml::xml_node<> *node = doc.allocate_node( rapidxml::node_element, "a", "Google" );
-		//doc.append_node( node );
-		//rapidxml::xml_attribute<> *attr = doc.allocate_attribute( "href", "google.com" );
-		//node->append_attribute( attr );
-
-		//xmlFSocket->PutXml();
 	}
 	else
 	{
