@@ -18,7 +18,7 @@
 #define PREALLOC_SIZE (64 * 1024)
 
 
-/** Xml block header id */
+/** Xml block header tag */
 #define XML_BLOCK_HEADER "XML_DOCUMENT_BEGIN"
 
 
