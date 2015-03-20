@@ -41,9 +41,10 @@ bool XmlFSocket::IsGood()
 
 
 
-void XmlFSocket::SetBlocking( bool shouldBlock, int blockingTimeoutMs )
+void XmlFSocket::SetBlocking( bool shouldBlock, int blockingTimeoutMs /*= 0*/ )
 {
-	check( false );
+	ShouldBlock = shouldBlock;
+	BlockingTimeoutMs = blockingTimeoutMs;
 }
 
 
@@ -218,6 +219,12 @@ bool XmlFSocket::GetFromSocketToBuffer()
 
 	// check that we have a valid and connected socket
 	if( !IsGood() ) return false;
+
+	// if in blocking mode, wait until we have new data
+	if( this->ShouldBlock )
+	{
+		this->Socket->Wait( ESocketWaitConditions::WaitForRead, FTimespan( 0, 0, 0, 0, this->BlockingTimeoutMs ) );
+	}
 
 	// check how much new data we have, return false if nothing new
 	if( !this->Socket->HasPendingData( bytesPending ) ) return false;

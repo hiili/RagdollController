@@ -97,7 +97,7 @@ protected:
 
 	/* commands */
 
-	/** Connect to an actor */
+	/** Connect directly to an actor that implements the RemoteControllable interface */
 	void CmdConnect( std::string args, const TSharedPtr<XmlFSocket> & socket );
 
 
@@ -105,7 +105,7 @@ public:
 
 	ARemoteControlHub();
 
-	/** Initialize the remote control interface. */
+	/** Initialize the remote control hub and start listening for incoming connections. */
 	virtual void PostInitializeComponents() override;
 
 	/** Check and dispatch new incoming connections. */

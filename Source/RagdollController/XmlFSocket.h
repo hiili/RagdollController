@@ -45,11 +45,13 @@ protected:
 	/** Whether read operations should block. */
 	bool ShouldBlock = false;
 
-	/** Timeout value for blocking read operations, in milliseconds. */
+	/** Network read timeout value for blocking read operations, in milliseconds. Note that a single read operation might perform several network reads, and
+	 ** this value controls the timeout of such single _network_ read operations. */
 	int32 BlockingTimeoutMs;
 
 
-	/** Tries to read some more data from the socket into Buffer. Returns true if any new data was read. */
+	/** Tries to read some more data from the socket into Buffer. Returns true if any new data was read. If ShouldBlock == true, then BlockingTimeoutMs
+	 ** is adhered. */
 	bool GetFromSocketToBuffer();
 
 	/** Prepares Buffer for further processing. Drops leading whitespace (whitespace as in std::isspace, in practice: spaces, tabs, LFs and CRs).
@@ -77,12 +79,12 @@ public:
 	/** The UE FSocket. */
 	TSharedPtr<FSocket> Socket;
 
-	/** A copy of the last full line read with GetLine(), without the terminating LF or CRLF. It is allowed to directly modify this buffer. */
+	/** A copy of the last full line read with GetLine(), without the terminating LF or CRLF. This buffer can be modified directly. */
 	std::string Line;
 
 
 	/** The last XML document received with GetXml(). The document is reset on the next read operation (GetLine or GetXml); the document is an in-situ
-	 ** parse of the XmlFSocket's internal buffer, with the implication that any read operation on this XmlFSocket needs to reset it. */
+	 ** parse of the XmlFSocket's internal buffer, with the implication that any subsequent read operation on this XmlFSocket needs to reset it. */
 	pugi::xml_document InXml;
 
 	/** Parse status of InXMl, set by GetXml(). The status pugi::status_no_document_element means that either GetXml() has not been called yet, or InXMl has
@@ -90,7 +92,7 @@ public:
 	pugi::xml_parse_result InXmlStatus;
 
 	/** A pre-allocated, re-usable xml document that can be sent with SendXml(). If one is sending repeatedly an xml document with the same structure
-	 ** (with only the contained data changing), then it can be handy to initialize this document once and then just update the contained data
+	 ** with only the contained data changing, then it can be handy to initialize this document once and then just update the contained data
 	 ** before each send operation. */
 	pugi::xml_document OutXml;
 
@@ -105,8 +107,9 @@ public:
 	/** Check whether we have a socket and that it is connected and all-ok. */
 	bool IsGood();
 
-	/** Set whether the read methods should block until success. Timeout is specified in milliseconds. Write methods will never retry upon failure. */
-	void SetBlocking( bool shouldBlock, int timeoutMs );
+	/** Set whether the read methods should block until success. Timeout is specified in milliseconds (0 to disable).
+	 ** Write methods will never retry upon failure. */
+	void SetBlocking( bool shouldBlock, int timeoutMs = 0 );
 
 
 	/**
