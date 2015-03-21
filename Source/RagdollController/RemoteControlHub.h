@@ -80,6 +80,9 @@ protected:
 
 	/** Connection sockets that have not yet been dispatched. Currently, there are no cleanup mechanisms for stalled connections. */
 	TArray< TSharedPtr<XmlFSocket> > PendingSockets;
+
+	/** Sockets for remote controllers that operate in global XML mode. */
+	TArray< TSharedPtr<XmlFSocket> > GlobalXmlRemoteControllers;
 	
 
 	/** Create the main listen socket. */
@@ -99,6 +102,9 @@ protected:
 
 	/** Connect directly to an actor that implements the RemoteControllable interface */
 	void CmdConnect( std::string args, const TSharedPtr<XmlFSocket> & socket );
+
+	/** Start global XML-based communications */
+	void CmdStartGlobalXml( std::string args, const TSharedPtr<XmlFSocket> & socket );
 
 
 public:
