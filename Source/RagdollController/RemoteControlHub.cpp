@@ -13,7 +13,6 @@
 #include <SharedPointer.h>
 
 #include <string>
-#include <sstream>
 #include <algorithm>
 
 
@@ -31,9 +30,6 @@
 
 // command strings
 #define RCH_COMMAND_CONNECT "CONNECT "
-#define RCH_COMMAND_START_GLOBAL_XML "START_GLOBAL_XML "
-#define RCH_COMMAND_START_GLOBAL_XML_ARG_SYNC "synchronous"
-#define RCH_COMMAND_START_GLOBAL_XML_ARG_ASYNC "asynchronous"
 
 // size of the buffer for incoming dispatch command lines
 #define LINE_BUFFER_SIZE 1024
@@ -202,10 +198,6 @@ void ARemoteControlHub::DispatchSocket( std::string command, const TSharedPtr<Xm
 	{
 		CmdConnect( command.substr( std::strlen( RCH_COMMAND_CONNECT ) ), socket );
 	}
-	else if( command.compare( 0, std::strlen( RCH_COMMAND_START_GLOBAL_XML ), RCH_COMMAND_START_GLOBAL_XML ) == 0 )
-	{
-		CmdStartGlobalXml( command.substr( std::strlen( RCH_COMMAND_START_GLOBAL_XML ) ), socket );
-	}
 	else
 	{
 		UE_LOG( LogRcRch, Error, TEXT( "(%s) Invalid command: %s" ), TEXT( __FUNCTION__ ), *FString( command.c_str() ) );
@@ -255,53 +247,4 @@ void ARemoteControlHub::CmdConnect( std::string args, const TSharedPtr<XmlFSocke
 	// target not found, log and let the connection drop
 	UE_LOG( LogRcRch, Error, TEXT( "(%s) Target actor not found: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 	socket->PutLine( RCH_ERROR_STRING );
-}
-
-
-
-
-void ARemoteControlHub::CmdStartGlobalXml( std::string args, const TSharedPtr<XmlFSocket> & socket )
-{
-	// try to parse args
-	std::istringstream argstream( args );
-	std::string syncMode;
-	int syncTimeoutMs = -1;
-	if( !argstream.fail() && 0 == syncMode.compare( RCH_COMMAND_START_GLOBAL_XML_ARG_SYNC ) )
-	{
-		argstream >> syncTimeoutMs;
-	}
-
-	// invalid args?
-	if( argstream.fail() || (
-		0 != syncMode.compare( RCH_COMMAND_START_GLOBAL_XML_ARG_SYNC ) &&
-		0 != syncMode.compare( RCH_COMMAND_START_GLOBAL_XML_ARG_ASYNC )) )
-	{
-		// invalid args, log and let the connection drop
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Invalid argument string: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
-		socket->PutLine( RCH_ERROR_STRING );
-		return;
-	}
-
-	// send ack to socket
-	if( !socket->PutLine( RCH_ACK_STRING ) )
-	{
-		// failed: log and let the connection drop
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
-		return;
-	}
-
-	// check args: whether a synchronous or asynchronous mode was requested
-	if( args.compare( RCH_COMMAND_START_GLOBAL_XML_ARG_SYNC ) )
-	{
-		// synchronous connection, set the socket to blocking and set the associated blocking timeout value
-		socket->SetBlocking( true, syncTimeoutMs );
-	}
-	else
-	{
-		// asynchronous connection, set the socket to non-blocking
-		socket->SetBlocking( false );
-	}
-
-	// add the socket to global xml remotes list
-	GlobalXmlRemoteControllers.Add( socket );
 }
