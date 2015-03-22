@@ -4,11 +4,11 @@ fopen(t);
 t.Status
 fprintf(t, 'RagdollController RCH: CONNECT Owen');
 
+xmlHeader = sprintf( 'XML_DOCUMENT_BEGIN\n' );
+xmlFooter = sprintf( 'XML_DOCUMENT_END\n' );
 xmlDocument = sprintf( '<foo1>\n<bar1>abc</bar1>\n<bar2>def</bar2>\n</foo1>\n' );
 
-xmlHeader = sprintf( 'XML_DOCUMENT_BEGIN %.10d\n', 0 );
-xmlHeader = sprintf( 'XML_DOCUMENT_BEGIN %.10d\n', length(xmlHeader) + length(xmlDocument) );
-xmlBlock = [xmlHeader xmlDocument];
+xmlBlock = [xmlHeader xmlDocument xmlFooter];
 
 fwrite(t, xmlBlock);
 

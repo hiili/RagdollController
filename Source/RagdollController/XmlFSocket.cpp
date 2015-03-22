@@ -18,8 +18,9 @@
 #define PREALLOC_SIZE (64 * 1024)
 
 
-/** Xml block header tag */
+/** Xml block header and footer tag */
 #define XML_BLOCK_HEADER "XML_DOCUMENT_BEGIN"
+#define XML_BLOCK_FOOTER "XML_DOCUMENT_END"
 
 
 
@@ -183,23 +184,17 @@ bool XmlFSocket::ExtractXmlFromBuffer()
 	// skip leading whitespace, drop previous in-situ InXml
 	CleanupBuffer();
 
-	// wrap the Buffer in a non-copying bufferstream. limit its length to avoid unnecessary parsing if there is no xml block header but other data.
-	boost::interprocess::bufferstream buffer( &Buffer[0], std::min<int>( 128, Buffer.length() ), std::ios_base::in );
-	
-	// try to parse the header string and the block length string
-	std::string blockHeaderString;
-	int blockLength;
-	buffer >> blockHeaderString >> blockLength;
+	// check if we have an xml block header at the beginning of the buffer. return false if not.
+	if( 0 != Buffer.compare( 0, std::strlen( XML_BLOCK_HEADER ), XML_BLOCK_HEADER ) ) return false;
 
-	// check if a header was successfully detected. return false if not.
-	if( buffer.fail() || 0 != blockHeaderString.compare( XML_BLOCK_HEADER ) ) return false;
+	// check if we have an xml block footer somewhere in the buffer (keep it simple and don't care about the line terminator). return false if not.
+	std::size_t footerPos = Buffer.find( XML_BLOCK_FOOTER );
+	if( footerPos == std::string::npos ) return false;
 
-	// we have a header, now check if the entire document is already in the buffer. return false if not (keep it simple and do not cache already parsed header data).
-	if( Buffer.length() < blockLength ) return false;
-
-	// we have a valid xml document in the buffer, now try to parse it into InXml (let pugixml eat the block header). remember to set BufferInSituXmlLength!
-	BufferInSituXmlLength = blockLength;
-	InXmlStatus = InXml.load_buffer_inplace( &Buffer[0], blockLength );
+	// we have a valid xml document in the buffer, now try to parse it into InXml (let pugixml eat the block header).
+	// Set BufferInSituXmlLength so that the footer is discarded too when the in-situ parse is cleared (let the line terminator stay).
+	BufferInSituXmlLength = footerPos + std::strlen( XML_BLOCK_FOOTER );
+	InXmlStatus = InXml.load_buffer_inplace( &Buffer[0], footerPos );
 
 	// check for parse errors
 	if( !InXmlStatus ) return false;

@@ -17,15 +17,11 @@ class FSocket;
 /**
 * Non-blocking xml wrapper for FSockets that supports both xml-based and line-based communications.
 * 
-* Xml documents received from the socket must be preceded by a block header that states the byte length of the document. The header is a single LF or CRLF
-* terminated line with the following syntax:
-* XML_DOCUMENT_BEGIN <length>
-* where <length> is the combined byte length of the xml document AND the block header (that is, counting starts from the X character of the word "XML" in the
-* header). <length> can be padded with zeros or spaces, so as to make it fixed-width. For example, the block header
-* XML_DOCUMENT_BEGIN        230
-* is a valid header line, assuming that it is terminated with a single LF, making it 30 bytes long, and it is followed by a 200-byte xml document.
-* 
-* All outgoing xml documents are preceded by a similar block header.
+* Xml documents received from the socket must be preceded by a block header and followed by a block footer as follows:
+*   XML_DOCUMENT_BEGIN
+*   <the xml document>
+*   XML_DOCUMENT_END
+* All outgoing xml documents are preceded by a similar block headers and footers.
 * 
 * Warning: No flood protection! The line buffer size is unlimited.
 */
