@@ -117,7 +117,7 @@ public:
 	bool GetLine();
 
 	/**
-	 * Writes an LF-terminated line to the socket.
+	 * Writes the contents of 'line' to the socket after appending an LF to it.
 	 * 
 	 * @return True on success, false on full or partial failure.
 	 */
@@ -125,8 +125,8 @@ public:
 
 	/**
 	* Tries to read the next complete xml document from the socket. A proper xml block header is expected (see class documentation for details).
-	* Preceding garbage data is _not_ skipped, except for possible preceding whitespace (spaces, tabs, LFs and CRs). 
-	* Note that the current InXml document will be reset no matter whether a new xml document is available for parsing!
+	* Preceding garbage data is _not_ skipped, except for whitespace (spaces, tabs, LFs and CRs). 
+	* Note that the current InXml document is reset no matter whether a new xml document was found for parsing!
 	* 
 	* On success, the parsed document becomes available in InXml and InXmlStatus is set to pugi::status_ok. See the documentation of InXml for details.
 	* On failure, InXmlStatus can be used to determine the state of InXml.
