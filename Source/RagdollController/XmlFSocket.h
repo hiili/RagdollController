@@ -138,8 +138,8 @@ public:
 	/**
 	 * Sends an xml document to the socket.
 	 * 
-	 * @xmlDoc A pointer to the RapidXML document to be sent. If null, then the XmlFSocket::OutXml document will be sent.
+	 * @xmlDoc A pointer to the xml document to be sent. If null, then the XmlFSocket::OutXml document will be sent.
 	 * @return True on success, false on full or partial failure.
 	 */
-	//bool PutXml( rapidxml::xml_document<> * xmlDoc = 0 );
+	bool PutXml( pugi::xml_document * xmlDoc = 0 );
 };

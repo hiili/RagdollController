@@ -104,30 +104,46 @@ bool XmlFSocket::GetXml()
 
 
 
-//bool XmlFSocket::PutXml( rapidxml::xml_document<> * xmlDoc /*= 0 */ )
-//{
-//	// check that we have a valid and connected socket
-//	if( !IsGood() ) return false;
-//
-//	// Use OutXml if no document given
-//	if( !xmlDoc )
-//	{
-//		xmlDoc = &this->OutXml;
-//	}
-//
-//	// generate the xml string, stop and return false on failure
-//	std::string str; str.reserve( PREALLOC_SIZE );
-//	RapidXmlManager.ReserveRapidXml();
-//	rapidxml::print( std::back_inserter( str ), *xmlDoc );
-//	if( !RapidXmlManager.ReleaseRapidXml() ) return false;
-//
-//	// send the string to the socket
-//	int32 bytesSent;
-//	this->Socket->Send( (const uint8 *)str.data(), str.size(), bytesSent );
-//
-//	// return the success status
-//	return bytesSent == str.size();
-//}
+bool XmlFSocket::PutXml( pugi::xml_document * xmlDoc /*= 0 */ )
+{
+	// check that we have a valid and connected socket
+	if( !IsGood() ) return false;
+
+	// Use OutXml if no document given
+	if( !xmlDoc )
+	{
+		xmlDoc = &this->OutXml;
+	}
+
+	// create the writer object for pugi
+	class Writer : public pugi::xml_writer
+	{
+		XmlFSocket & Socket;
+
+	public:
+		bool IsGood;
+
+		Writer( XmlFSocket & socket ) : Socket( socket ), IsGood( Socket.IsGood() ) {}
+
+		virtual void write( const void* data, size_t size )
+		{
+			if( !IsGood || !Socket.Socket.IsValid() ) return;
+
+			int32 bytesSent;
+			Socket.Socket->Send( (const uint8 *)data, size, bytesSent );
+			IsGood &= bytesSent == size;
+		}
+	} writer( *this );
+
+	// write to socket
+	bool headerFooterOk = true;
+	headerFooterOk &= this->PutLine( XML_BLOCK_HEADER );
+	xmlDoc->save( writer );
+	headerFooterOk &= this->PutLine( XML_BLOCK_FOOTER );
+
+	// return the success status
+	return headerFooterOk && writer.IsGood;
+}
 
 
 

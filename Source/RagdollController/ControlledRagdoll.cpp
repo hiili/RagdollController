@@ -188,6 +188,7 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 		XmlFSocket * xmlFSocket = IRemoteControllable::RemoteControlSocket.Get();
 
 		bool result = xmlFSocket->GetXml();
+		xmlFSocket->PutXml( &xmlFSocket->InXml );
 
 	}
 	else
