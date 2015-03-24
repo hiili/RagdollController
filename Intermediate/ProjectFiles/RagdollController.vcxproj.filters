@@ -109,6 +109,9 @@
     <ClInclude Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.hpp">
       <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\Mbml.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\RagdollController\RemoteControlHub.cpp">
@@ -119,6 +122,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.cpp">
       <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\Mbml.cpp">
+      <Filter>Source\RagdollController</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -7,6 +7,7 @@
 #include "XmlFSocket.h"
 #include "ScopeGuard.h"
 #include "Utility.h"
+#include "Mbml.h"
 
 #include <pugixml.hpp>
 
@@ -188,7 +189,44 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 		XmlFSocket * xmlFSocket = IRemoteControllable::RemoteControlSocket.Get();
 
 		bool result = xmlFSocket->GetXml();
+
+		xmlFSocket->PutLine( "*** Echo:" );
 		xmlFSocket->PutXml( &xmlFSocket->InXml );
+
+
+		xmlFSocket->PutLine( "*** MbML test 1:" );
+		//xmlFSocket->OutXml.reset();
+		//xmlFSocket->OutXml.set_name( "RemoteReturn" );
+		//xmlFSocket->OutXml.append_attribute( "class" ).set_value( "struct" );
+		//pugi::xml_node sensorsNode = xmlFSocket->OutXml.append_child( "sensors" );
+		//sensorsNode.append_attribute()
+
+		xmlFSocket->OutXml.reset();
+		int x1 = Mbml::AddChild( xmlFSocket->OutXml, "root1", Mbml::Struct ).empty();
+		int x2 = Mbml::AddChild( xmlFSocket->OutXml, "root2", "STR" ).empty();
+		int x3 = Mbml::AddChild( xmlFSocket->OutXml, "root3", Mbml::Struct, { 1, 2, 3 } ).empty();
+		int x4 = Mbml::AddChild( xmlFSocket->OutXml, "root4", Mbml::Struct, { 1, 2, 3 }, "STR" ).empty();
+		int x5 = Mbml::AddChild( xmlFSocket->OutXml, "root5", Mbml::Char, { 1, 1 }, "foofstring" ).empty();
+		int x6 = Mbml::AddChild( xmlFSocket->OutXml, "root6", Mbml::Double, { 1, 2, 3 } ).empty();
+		int x7 = Mbml::AddChild( xmlFSocket->OutXml, "root7", Mbml::Single ).empty();
+		UE_LOG( LogTemp, Error, TEXT( "%d %d %d %d %d %d %d" ), x1, x2, x3, x4, x5, x6, x7 );
+
+		xmlFSocket->PutXml();
+
+
+		// handle commands
+		if( xmlFSocket->InXml.child( "getSensors" ) )
+		{
+			//...
+		}
+		if( xmlFSocket->InXml.child( "getActuators" ) )
+		{
+			//...
+		}
+		if( pugi::xml_node node = xmlFSocket->InXml.child( "setActuators" ) )
+		{
+			//...
+		}
 
 	}
 	else

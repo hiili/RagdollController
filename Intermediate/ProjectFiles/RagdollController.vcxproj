@@ -335,8 +335,10 @@
     <None Include="..\..\Config\DefaultRagdollController.ini" />
     <ClCompile Include="..\..\Source\RagdollController\ControlledRagdoll.cpp" />
     <ClInclude Include="..\..\Source\RagdollController\ControlledRagdoll.h" />
+    <ClCompile Include="..\..\Source\RagdollController\Mbml.cpp" />
     <ClCompile Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.cpp" />
     <ClCompile Include="..\..\Source\RagdollController\XmlFSocket.cpp" />
+    <ClInclude Include="..\..\Source\RagdollController\Mbml.h" />
     <ClInclude Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugiconfig.hpp" />
     <ClInclude Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.hpp" />
     <ClInclude Include="..\..\Source\RagdollController\XmlFSocket.h" />
