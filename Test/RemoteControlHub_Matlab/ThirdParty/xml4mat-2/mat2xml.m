@@ -1,4 +1,4 @@
-function XML=mat2xml(MAT,VARNAME)
+function XML=mat2xml(MAT,VARNAME,DEPTH)
 
 % MAT2XML converts structured variable MAT into XML string
 %
@@ -12,8 +12,11 @@ function XML=mat2xml(MAT,VARNAME)
 % See Also: XML2MAT
 %
 % Jonas Almeida, almeidaj@musc.edu, 20 Aug 2002, XML4MAT Tbox
+%
+% patch 2015-03-24 Paul Wagner: indentation added
 
 if nargin<2;VARNAME='ans';end % if not provided make it a matlab answer variable
+if nargin<3;DEPTH=0;end
 w=whos('MAT');w.name=VARNAME;
 
 XML=['<',w.name,' class="',w.class,'" size="',num2str(w.size),'">'];
@@ -24,15 +27,17 @@ elseif strcmp(w.class,'struct')
     %struct_fields=[' fields="',names{1}];for j=2:length(names);struct_fields=[struct_fields,' ',names{j}];end;struct_fields=[struct_fields,'">'];XML=[XML(1:(end-1)),struct_fields];
     for i=1:prod(w.size)
         for j=1:length(names)
-            XML=[XML,mat2xml(eval(['MAT(i).',names{j}]),names{j})];
+            XML=[XML,char(10),repmat(char(9),1,DEPTH+1),mat2xml(eval(['MAT(i).',names{j}]),names{j},DEPTH+1)];
         end
     end
+    XML=[XML,char(10),repmat(char(9),1,DEPTH)];
 elseif strcmp(w.class,'cell')
     for i=1:prod(w.size)
-        XML=[XML,mat2xml(MAT{i},'cell')];        
+        XML=[XML,char(10),repmat(char(9),1,DEPTH+1),mat2xml(MAT{i},'cell',DEPTH+1)];        
     end
+    XML=[XML,char(10),repmat(char(9),1,DEPTH)];
 else %if strcmp(w.class,'double')|strcmp(w.class,'single')
     XML=[XML,num2str(MAT(:)')];    
 end
 XML=[XML,'</',w.name,'>'];
-XML=regexprep(XML,'\s{2,}',' ');
+%XML=regexprep(XML,'\s{2,}',' ');
