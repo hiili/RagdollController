@@ -89,7 +89,7 @@ public:
 
 	/** A pre-allocated, re-usable xml document that can be sent with SendXml(). If one is sending repeatedly an xml document with the same structure
 	 ** with only the contained data changing, then it can be handy to initialize this document once and then just update the contained data
-	 ** before each send operation. */
+	 ** before each send operation. OutXml is never written to or reset by XmlFSocket itself; it is up to client code to use it in whatever way seems best. */
 	pugi::xml_document OutXml;
 
 
