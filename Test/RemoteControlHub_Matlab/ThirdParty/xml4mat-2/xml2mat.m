@@ -83,7 +83,7 @@ while do_i<=length(todo_list);
         n_certo=(n_fields/n_unique);
         w.size=[1 n_certo];
     else % it is a numeric type, say "double" or "single"
-        tag_contents{i,4}=str2num(tag_contents{i,4});
+        tag_contents{i,4}=cast(str2num(tag_contents{i,4}),w.class);
         if ~isfield(w,'size');
             w.size=size(tag_contents{i,4});
         end
