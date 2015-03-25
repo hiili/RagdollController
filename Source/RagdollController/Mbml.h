@@ -36,38 +36,43 @@ class Mbml
 {
 public:
 
-	/** Element types. */
-	enum Type { Struct, Char, Double, Single, TYPE_MAX };   // Remember to keep TypeNames in sync with this!
-
 	/** Floating point precision specifiers. */
 	enum Precision { SinglePrecision, DoublePrecision };
 
 
 	// MbML element adders
 
-	/** Add a new MbML element with the name 'name' under the given node.
+	/** Add an MbML struct element to the document.
 	 ** 
-	 ** If 'type' is anything else than 'Struct', then a PCDATA sub-element is also added and initialized to 'content'.
-	 ** Note that you cannot directly add a PCDATA sub-element to a Struct element!
-	 ** 
-	 ** If 'dimensions' is left empty and 'type' is 'Char', then the dimensionality is automatically inferred from the provided string.
-	 ** 
-	 ** On success, a pugi reference to the appended child node is returned. On failure, the pugi null reference is returned. */
-	static pugi::xml_node AddChild( pugi::xml_node & node, const std::string & name, Type type = Struct,
-		std::vector<int> dimensions = {}, const std::string & content = std::string() );
-	
-	/** Helper overload for adding Char content. */
-	static pugi::xml_node AddChild( pugi::xml_node & node, const std::string & name, const std::string & content );
+	 ** Struct fields can be added by calling the element adder methods for the returned element handle and providing the field name in the 'name' argument.
+	 ** Dimensionality defaults to a scalar struct, but struct arrays are supported; simply add all fields of the first struct,
+	 ** then all fields of the second struct, and so on.  */
+	static pugi::xml_node AddStructArray( pugi::xml_node parent, const std::string & name, const std::vector<int> & dimensions = {1, 1} );
 
+	/** Add an MbML cell element to the document.
+	 ** 
+	 ** Cell contents can be added by calling the element adder methods for the returned element handle and specifying "cell" as the element name. */
+	static pugi::xml_node AddCellArray( pugi::xml_node parent, const std::string & name, const std::vector<int> & dimensions );
+
+	/** Add an MbML char array (string) element to the document.
+	 ** 
+	 ** The dimensionality is inferred from the content. */
+	static pugi::xml_node AddCharArray( pugi::xml_node parent, const std::string & name, const std::string & content );
+
+	/** Add an MbML matrix element to the document.
+	 ** 
+	 ** The 'type' argument should correspond to a valid Matlab type specifier ("double", "single", "int16", ...).
+	 ** The content is not processed in any way and is expected to correspond a textual representation of the data.
+	 ** If no dimensionality is provided, then scalar dimensionality ("1 1") is assumed; dimensionality is never inferred from the provided content!
+	 ** 
+	 ** On success, a pugi reference to the appended child node is returned.
+	 ** On failure, the pugi null reference is returned and nothing is added to the document. */
+	static pugi::xml_node AddMatrix( pugi::xml_node parent, const std::string & name, const std::string & type, const std::string & content,
+		const std::vector<int> & dimensions = {1, 1} );
+	
 
 	// element data (PCDATA) adders
 
 	//static bool Set ... add float or double data .. maybe check the precision from the node attribute, if not too expensive/complex? just add 1-dimensional data and let 
-
-
-private:
-
-	/** Matlab strings corresponding to the Type enumeration. (VS requires the double braces) */
-	static const std::array<const char *, TYPE_MAX> TypeNames;
 
 };

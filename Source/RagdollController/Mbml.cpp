@@ -10,70 +10,60 @@
 #include <vector>
 #include <array>
 
-#include <algorithm>
 
 
 
+pugi::xml_node Mbml::AddStructArray( pugi::xml_node parent, const std::string & name, const std::vector<int> & dimensions /*= { 1, 1 }*/ )
+{
+	return AddMatrix( parent, name, "struct", "", dimensions );
+}
 
-const std::array<const char *, Mbml::TYPE_MAX> Mbml::TypeNames = { { "struct", "char", "double", "single" } };
+
+pugi::xml_node Mbml::AddCellArray( pugi::xml_node parent, const std::string & name, const std::vector<int> & dimensions )
+{
+	return AddMatrix( parent, name, "cell", "", dimensions );
+}
 
 
+pugi::xml_node Mbml::AddCharArray( pugi::xml_node parent, const std::string & name, const std::string & content )
+{
+	return AddMatrix( parent, name, "char", content, { 1, (int)content.length() } );
+}
 
 
-pugi::xml_node Mbml::AddChild( pugi::xml_node & node, const std::string & name, Type type /*= Struct*/,
-	std::vector<int> dimensions /*= {}*/, const std::string & content /*= std::string()*/ )
+pugi::xml_node Mbml::AddMatrix( pugi::xml_node parent, const std::string & name, const std::string & type, const std::string & content,
+	const std::vector<int> & dimensions /*= {1, 1}*/ )
 {
 	bool ok = true;
 
 	// create the child node
-	pugi::xml_node child = node.append_child( name.c_str() );
+	pugi::xml_node child = parent.append_child( name.c_str() );
 	ok &= !child.empty();
 
 	// add the type attribute
-	if( !(type >= 0 && type < TYPE_MAX) ) return pugi::xml_node();
-	ok &= child.append_attribute( "class" ).set_value( TypeNames[type] );
+	ok &= child.append_attribute( "class" ).set_value( type.c_str() );
 	
-	// infer dimensionality if no dimensions given
-	if( dimensions.size() == 0 )
-	{
-		if( type == Char )
-		{
-			// Char type, infer from 'content'
-			dimensions = { 1, (int)content.length() };
-		}
-		else
-		{
-			// other type, default to scalar
-			dimensions = { 1, 1 };
-		}
-	}
-
 	// add the size attribute
-	std::stringstream sizeString;
+	std::stringstream sizeSStream;
 	for( auto dimension : dimensions )
 	{
-		sizeString << dimension << ' ';
+		sizeSStream << dimension << ' ';
 	}
-	ok &= child.append_attribute( "size" ).set_value( sizeString.str().c_str() );
+	std::string sizeString( sizeSStream.str() );
+	sizeString.pop_back();
+	ok &= child.append_attribute( "size" ).set_value( sizeString.c_str() );
 
-	// add contents if 'content' is not empty. fail if type is Struct.
+	// add contents if 'content' is not empty
 	if( !content.empty() )
 	{
-		if( type == Struct )
-		{
-			ok = false;
-		}
-		else
-		{
-			ok &= child.text().set( content.c_str() );
-		}
+		ok &= child.text().set( content.c_str() );
 	}
 
 	// check for errors and return
 	if( !ok )
 	{
 		// failed, remove the child and return the null handle
-		node.remove_child( child );
+		parent.remove_child( child );
 		return pugi::xml_node();
 	}
 	else
@@ -81,10 +71,4 @@ pugi::xml_node Mbml::AddChild( pugi::xml_node & node, const std::string & name, 
 		// all ok, return the new child node
 		return child;
 	}
-}
-
-
-pugi::xml_node Mbml::AddChild( pugi::xml_node & node, const std::string & name, const std::string & content )
-{
-	return AddChild( node, name, Char, std::vector<int>(), content );
 }
