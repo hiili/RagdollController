@@ -5,7 +5,7 @@
 
 #include "RemoteControllable.h"
 
-#include "LineFSocket.h"
+#include "XmlFSocket.h"
 #include "ScopeGuard.h"
 #include "Utility.h"
 
@@ -25,7 +25,8 @@
 
 // handshake string: the remote client should send this in the beginning of the initial command line
 #define RCH_HANDSHAKE_STRING "RagdollController RCH: "
-#define RCH_HANDSHAKE_ACK_STRING "OK"
+#define RCH_ACK_STRING "OK"
+#define RCH_ERROR_STRING "ERROR"
 
 // command strings
 #define RCH_COMMAND_CONNECT "CONNECT "
@@ -123,13 +124,25 @@ void ARemoteControlHub::CheckForNewConnections()
 		// check whether we succeeded
 		if( !connectionSocket )
 		{
+			// failed, log and keep looping
 			UE_LOG( LogRcRch, Error, TEXT( "(%s) Incoming connection attempt, accept failed!" ), TEXT( __FUNCTION__ ) );
 			continue;
 		}
-		UE_LOG( LogRcRch, Log, TEXT( "(%s) Incoming connection accepted." ), TEXT( __FUNCTION__ ) );
 
-		// wrap the socket into a LineFSocket and store it to PendingSockets (check goodness later)
-		this->PendingSockets.Add( TSharedPtr<LineFSocket>( new LineFSocket( TSharedPtr<FSocket>( connectionSocket ) ) ) );
+		// set the send and receive buffer sizes
+		int32 finalReceiveBufferSize = -1, finalSendBufferSize = -1;
+		if( !this->ListenSocket->SetReceiveBufferSize( RCH_TCP_BUFFERS_SIZE, finalReceiveBufferSize ) |   // do not short-circuit
+			!this->ListenSocket->SetSendBufferSize( RCH_TCP_BUFFERS_SIZE, finalSendBufferSize ) )
+		{
+			UE_LOG( LogRcRch, Warning, TEXT( "(%s) Failed to set buffer sizes for a new connection!" ), TEXT( __FUNCTION__ ) );
+		}
+
+		// log
+		UE_LOG( LogRcRch, Log, TEXT( "(%s) Incoming connection accepted. Effective buffer sizes: %d (in), %d (out)" ), TEXT( __FUNCTION__ ),
+			finalReceiveBufferSize, finalSendBufferSize );
+
+		// wrap the socket into an XmlFSocket and store it to PendingSockets (check goodness later)
+		this->PendingSockets.Add( TSharedPtr<XmlFSocket>( new XmlFSocket( TSharedPtr<FSocket>( connectionSocket ) ) ) );
 
 	}
 }
@@ -163,38 +176,39 @@ void ARemoteControlHub::ManagePendingConnections()
 
 		// play safe and don't touch the iterator anymore
 		break;
-
 	}
 }
 
 
 
 
-void ARemoteControlHub::DispatchSocket( std::string command, const TSharedPtr<LineFSocket> & socket )
+void ARemoteControlHub::DispatchSocket( std::string command, const TSharedPtr<XmlFSocket> & socket )
 {
 	// verify and remove handshake
-	if( command.find( RCH_HANDSHAKE_STRING ) != 0 )
+	if( command.compare( 0, std::strlen( RCH_HANDSHAKE_STRING ), RCH_HANDSHAKE_STRING ) != 0 )
 	{
 		UE_LOG( LogRcRch, Error, TEXT( "(%s) Invalid handshake string: %s" ), TEXT( __FUNCTION__ ), *FString( command.c_str() ) );
+		socket->PutLine( RCH_ERROR_STRING );   // don't care about errors
 		return;
 	}
 	command.erase( 0, std::strlen( RCH_HANDSHAKE_STRING ) );
 
 	// switch on command
-	if( command.find( RCH_COMMAND_CONNECT ) == 0 )
+	if( command.compare( 0, std::strlen( RCH_COMMAND_CONNECT ), RCH_COMMAND_CONNECT ) == 0 )
 	{
 		CmdConnect( command.substr( std::strlen( RCH_COMMAND_CONNECT ) ), socket );
 	}
 	else
 	{
 		UE_LOG( LogRcRch, Error, TEXT( "(%s) Invalid command: %s" ), TEXT( __FUNCTION__ ), *FString( command.c_str() ) );
+		socket->PutLine( RCH_ERROR_STRING );
 	}
 }
 
 
 
 
-void ARemoteControlHub::CmdConnect( std::string args, const TSharedPtr<LineFSocket> & socket )
+void ARemoteControlHub::CmdConnect( std::string args, const TSharedPtr<XmlFSocket> & socket )
 {
 	// find the target actor based on its FName
 	check( GetWorld() );
@@ -212,13 +226,14 @@ void ARemoteControlHub::CmdConnect( std::string args, const TSharedPtr<LineFSock
 			{
 				// no: log and let the connection drop
 				UE_LOG( LogRcRch, Error, TEXT( "(%s) Target actor is not RemoteControllable! Target: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+				socket->PutLine( RCH_ERROR_STRING );
 				return;
 			}
 
 			// send ack to socket
-			if( !socket->PutLine( RCH_HANDSHAKE_ACK_STRING ) )
+			if( !socket->PutLine( RCH_ACK_STRING ) )
 			{
-				// failed: log and let the connection drop
+				// failed: log and let the connection drop (no point in sending an error string to the already failed TCP stream)
 				UE_LOG( LogRcRch, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 				return;
 			}
@@ -231,4 +246,5 @@ void ARemoteControlHub::CmdConnect( std::string args, const TSharedPtr<LineFSock
 
 	// target not found, log and let the connection drop
 	UE_LOG( LogRcRch, Error, TEXT( "(%s) Target actor not found: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+	socket->PutLine( RCH_ERROR_STRING );
 }

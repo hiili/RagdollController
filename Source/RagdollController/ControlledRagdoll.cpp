@@ -4,8 +4,12 @@
 #include "ControlledRagdoll.h"
 
 #include "RCLevelScriptActor.h"
+#include "XmlFSocket.h"
 #include "ScopeGuard.h"
 #include "Utility.h"
+#include "Mbml.h"
+
+#include <pugixml.hpp>
 
 #include <Net/UnrealNetwork.h>
 #include <GenericPlatform/GenericPlatformProperties.h>
@@ -170,6 +174,81 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 	// Store pose so that it can be replicated to client(s)
 	SendPose();
+
+
+
+
+
+
+
+
+
+
+	if( IRemoteControllable::RemoteControlSocket.Get() && IRemoteControllable::RemoteControlSocket->IsGood() )
+	{
+		XmlFSocket * xmlFSocket = IRemoteControllable::RemoteControlSocket.Get();
+
+		bool result = xmlFSocket->GetXml();
+
+		xmlFSocket->PutLine( "*** Echo:" );
+		xmlFSocket->PutXml( &xmlFSocket->InXml );
+
+
+		xmlFSocket->PutLine( "*** MbML test 1:" );
+		xmlFSocket->OutXml.reset();
+		int x1 = Mbml::AddStructArray( xmlFSocket->OutXml, "root1" ).empty();
+		int x2 = Mbml::AddStructArray( xmlFSocket->OutXml, "root2", { 1, 2, 3 } ).empty();
+		int x3 = Mbml::AddCellArray( xmlFSocket->OutXml, "root3", { 1, 2, 3 } ).empty();
+		int x4 = Mbml::AddCharArray( xmlFSocket->OutXml, "root4", "foofstring" ).empty();
+		int x5 = Mbml::AddCharArray( xmlFSocket->OutXml, "root5", "" ).empty();
+		int x6 = Mbml::AddMatrix( xmlFSocket->OutXml, "root6", "double", "contentdata" ).empty();
+		int x7 = Mbml::AddMatrix( xmlFSocket->OutXml, "root7", "single", "contentdata", { 1, 2, 4 } ).empty();
+		UE_LOG( LogTemp, Error, TEXT( "%d %d %d %d %d %d %d" ), x1, x2, x3, x4, x5, x6, x7 );
+		xmlFSocket->PutXml();
+
+		xmlFSocket->PutLine( "*** MbML test 2:" );
+		xmlFSocket->OutXml.reset();
+		pugi::xml_node n1 = Mbml::AddStructArray( xmlFSocket->OutXml, "struct2d", { 2, 1 } );
+		Mbml::AddCharArray( n1, "field1", "foofstring11" );
+		Mbml::AddCharArray( n1, "field2", "foofstring12" );
+		Mbml::AddCharArray( n1, "field1", "foofstring21" );
+		Mbml::AddCharArray( n1, "field2", "foofstring22" );
+		pugi::xml_node n2 = Mbml::AddStructArray( xmlFSocket->OutXml, "struct1d" );
+		Mbml::AddCharArray( n2, "field1", "struct1d_field1" );
+		Mbml::AddCharArray( n2, "field2", "struct1d_field1" );
+		pugi::xml_node n3 = Mbml::AddCellArray( xmlFSocket->OutXml, "cell2d", { 1, 3 } );
+		Mbml::AddCharArray( n3, "cell", "cell1" );
+		Mbml::AddCharArray( Mbml::AddStructArray( n3, "cell" ), "cellstructfield1", "cellstructf1content" );
+		Mbml::AddMatrix( n3, "cell", "single", "1.2 1.3 1.4", { 1, 3 } );
+		Mbml::AddMatrix( xmlFSocket->OutXml, "isolated", "single", "1.2 1.3 1.4", { 1, 3 } );
+		Mbml::AddMatrix( xmlFSocket->OutXml, "isolated", "double", "1.2 1.3 1.4", { 1, 3 } );
+		Mbml::AddMatrix( xmlFSocket->OutXml, "isolated", "int16", "1.2 1.3 1.4", { 1, 3 } );
+		xmlFSocket->PutXml();
+
+
+		// handle commands
+		if( xmlFSocket->InXml.child( "getSensors" ) )
+		{
+			//...
+		}
+		if( xmlFSocket->InXml.child( "getActuators" ) )
+		{
+			//...
+		}
+		if( pugi::xml_node node = xmlFSocket->InXml.child( "setActuators" ) )
+		{
+			//...
+		}
+
+	}
+	else
+	{
+		UE_LOG( LogTemp, Error, TEXT("RemoteControlSocket.Get() == null or RemoteControlSocket->IsGood() == false") );
+	}
+
+
+
+
 
 
 
