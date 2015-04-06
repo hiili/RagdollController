@@ -84,14 +84,8 @@ void ARemoteControlHub::CreateListenSocket()
 	// verify that we got a socket
 	if( !this->ListenSocket.IsValid() ) return;
 	
-	// set the send and receive buffer sizes
-	int32 finalReceiveBufferSize, finalSendBufferSize;
-	if( !this->ListenSocket->SetReceiveBufferSize( RCH_TCP_BUFFERS_SIZE, finalReceiveBufferSize ) ) return;
-	if( !this->ListenSocket->SetSendBufferSize( RCH_TCP_BUFFERS_SIZE, finalSendBufferSize ) ) return;
-
 	// all ok, release the error cleanup scope guard
-	UE_LOG( LogRcRch, Log, TEXT("(%s) Listen socket created successfully. Effective buffer sizes: %d (in), %d (out)"), TEXT( __FUNCTION__ ),
-		finalReceiveBufferSize, finalSendBufferSize );
+	UE_LOG( LogRcRch, Log, TEXT( "(%s) Listen socket created successfully." ), TEXT( __FUNCTION__ ) );
 	sgError.release();
 }
 
@@ -131,8 +125,8 @@ void ARemoteControlHub::CheckForNewConnections()
 
 		// set the send and receive buffer sizes
 		int32 finalReceiveBufferSize = -1, finalSendBufferSize = -1;
-		if( !this->ListenSocket->SetReceiveBufferSize( RCH_TCP_BUFFERS_SIZE, finalReceiveBufferSize ) |   // do not short-circuit
-			!this->ListenSocket->SetSendBufferSize( RCH_TCP_BUFFERS_SIZE, finalSendBufferSize ) )
+		if( !connectionSocket->SetReceiveBufferSize( RCH_TCP_BUFFERS_SIZE, finalReceiveBufferSize ) |   // do not short-circuit
+			!connectionSocket->SetSendBufferSize( RCH_TCP_BUFFERS_SIZE, finalSendBufferSize ) )
 		{
 			UE_LOG( LogRcRch, Warning, TEXT( "(%s) Failed to set buffer sizes for a new connection!" ), TEXT( __FUNCTION__ ) );
 		}
