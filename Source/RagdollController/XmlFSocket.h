@@ -44,7 +44,7 @@ protected:
 
 	/** Network read timeout value for blocking read operations, in milliseconds. Note that a single read operation might perform several network reads, and
 	 ** this value controls the timeout of such single _network_ read operations. */
-	int32 BlockingTimeoutMs;
+	int32 BlockingTimeoutMs = 0;
 
 
 	/** Tries to read some more data from the socket into Buffer. Returns true if any new data was read. If ShouldBlock == true, then BlockingTimeoutMs
@@ -104,8 +104,7 @@ public:
 	/** Check whether we have a socket and that it is connected and all-ok. */
 	bool IsGood();
 
-	/** Set whether the read methods should block until success. Timeout is specified in milliseconds (0 to disable).
-	 ** Write methods will never retry upon failure. */
+	/** Set whether the read methods should block until success. Timeout is specified in milliseconds. Write methods will never retry upon failure. */
 	void SetBlocking( bool shouldBlock, int timeoutMs = 0 );
 
 
