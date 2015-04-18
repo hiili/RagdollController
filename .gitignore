@@ -1,6 +1,7 @@
 Binaries/
 DerivedDataCache/
 Intermediate/Build/
+Intermediate/Config/
 Intermediate/CachedAssetRegistry.bin
 Saved/Logs/
 
