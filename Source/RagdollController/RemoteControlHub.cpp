@@ -10,9 +10,9 @@
 #include "Utility.h"
 
 #include <Networking.h>
-#include <SharedPointer.h>
 
 #include <string>
+#include <memory>
 #include <algorithm>
 
 
@@ -69,12 +69,12 @@ void ARemoteControlHub::CreateListenSocket()
 		UE_LOG( LogRcRch, Error, TEXT( "(%s) Failed to create the listen socket!" ), TEXT( __FUNCTION__ ) );
 
 		// reset everything on errors
-		this->ListenSocket = 0;
+		this->ListenSocket = nullptr;
 	} );
 
 	// create a listen socket
 	FIPv4Endpoint endpoint( FIPv4Address(RCH_ADDRESS), RCH_PORT );
-	this->ListenSocket = TSharedPtr<FSocket>( FTcpSocketBuilder( "Remote control interface main listener" )
+	this->ListenSocket = std::unique_ptr<FSocket>( FTcpSocketBuilder( "Remote control interface main listener" )
 		//.AsReusable()
 		.AsNonBlocking()
 		.BoundToEndpoint( endpoint )
@@ -82,7 +82,7 @@ void ARemoteControlHub::CreateListenSocket()
 		.Build() );
 
 	// verify that we got a socket
-	if( !this->ListenSocket.IsValid() ) return;
+	if( !this->ListenSocket ) return;
 	
 	// all ok, release the error cleanup scope guard
 	UE_LOG( LogRcRch, Log, TEXT( "(%s) Listen socket created successfully." ), TEXT( __FUNCTION__ ) );
@@ -106,14 +106,14 @@ void ARemoteControlHub::Tick( float deltaSeconds )
 void ARemoteControlHub::CheckForNewConnections()
 {
 	// check that we have a listen socket
-	if( !this->ListenSocket.IsValid() ) return;
+	if( !this->ListenSocket ) return;
 
 	// loop as long as we have new waiting connections
 	bool hasNewConnections;
 	while( this->ListenSocket->HasPendingConnection( hasNewConnections ) && hasNewConnections )
 	{
 		// try to create a new socket for the connection
-		FSocket * connectionSocket = this->ListenSocket->Accept( "Remote control interface connection" );
+		std::unique_ptr<FSocket> connectionSocket( this->ListenSocket->Accept( "Remote control interface connection" ) );
 
 		// check whether we succeeded
 		if( !connectionSocket )
@@ -136,7 +136,7 @@ void ARemoteControlHub::CheckForNewConnections()
 			finalReceiveBufferSize, finalSendBufferSize );
 
 		// wrap the socket into an XmlFSocket and store it to PendingSockets (check goodness later)
-		this->PendingSockets.Add( TSharedPtr<XmlFSocket>( new XmlFSocket( TSharedPtr<FSocket>( connectionSocket ) ) ) );
+		this->PendingSockets.Add( std::make_unique<XmlFSocket>( std::move( connectionSocket ) ) );
 
 	}
 }
@@ -165,7 +165,8 @@ void ARemoteControlHub::ManagePendingConnections()
 		}
 
 		// try to dispatch the connection, then remove the socket from the pending sockets list
-		DispatchSocket( (*iterPendingSocket)->Line, *iterPendingSocket );
+		std::string command = (*iterPendingSocket)->Line;   // do this before move
+		DispatchSocket( command, std::move( *iterPendingSocket ) );
 		this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
 
 		// play safe and don't touch the iterator anymore
@@ -176,7 +177,7 @@ void ARemoteControlHub::ManagePendingConnections()
 
 
 
-void ARemoteControlHub::DispatchSocket( std::string command, const TSharedPtr<XmlFSocket> & socket )
+void ARemoteControlHub::DispatchSocket( std::string command, std::unique_ptr<XmlFSocket> socket )
 {
 	// verify and remove handshake
 	if( command.compare( 0, std::strlen( RCH_HANDSHAKE_STRING ), RCH_HANDSHAKE_STRING ) != 0 )
@@ -190,7 +191,7 @@ void ARemoteControlHub::DispatchSocket( std::string command, const TSharedPtr<Xm
 	// switch on command
 	if( command.compare( 0, std::strlen( RCH_COMMAND_CONNECT ), RCH_COMMAND_CONNECT ) == 0 )
 	{
-		CmdConnect( command.substr( std::strlen( RCH_COMMAND_CONNECT ) ), socket );
+		CmdConnect( command.substr( std::strlen( RCH_COMMAND_CONNECT ) ), std::move( socket ) );
 	}
 	else
 	{
@@ -202,7 +203,7 @@ void ARemoteControlHub::DispatchSocket( std::string command, const TSharedPtr<Xm
 
 
 
-void ARemoteControlHub::CmdConnect( std::string args, const TSharedPtr<XmlFSocket> & socket )
+void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket> socket )
 {
 	// find the target actor based on its FName
 	check( GetWorld() );
@@ -233,7 +234,7 @@ void ARemoteControlHub::CmdConnect( std::string args, const TSharedPtr<XmlFSocke
 			}
 
 			// forward the connection and return
-			target->ConnectWith( socket );
+			target->ConnectWith( std::move( socket ) );
 			return;
 		}
 	}

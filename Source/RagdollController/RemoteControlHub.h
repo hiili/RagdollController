@@ -3,15 +3,14 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "XmlFSocket.h"
 
-#include <SharedPointer.h>
+#include <Networking.h>
 
 #include <string>
+#include <memory>
 
 #include "RemoteControlHub.generated.h"
-
-class FSocket;
-class XmlFSocket;
 
 
 
@@ -28,10 +27,10 @@ class RAGDOLLCONTROLLER_API ARemoteControlHub : public AActor
 protected:
 	
 	/** Main listen socket */
-	TSharedPtr<FSocket> ListenSocket;
+	std::unique_ptr<FSocket> ListenSocket;
 
 	/** Connection sockets that have not yet been dispatched. Currently, there are no cleanup mechanisms for stalled connections. */
-	TArray< TSharedPtr<XmlFSocket> > PendingSockets;
+	TArray< std::unique_ptr<XmlFSocket> > PendingSockets;
 	
 
 	/** Create the main listen socket. */
@@ -44,13 +43,13 @@ protected:
 	void ManagePendingConnections();
 
 	/** Try to dispatch the socket according to the command. Close and discard the socket upon errors. */
-	void DispatchSocket( std::string command, const TSharedPtr<XmlFSocket> & socket );
+	void DispatchSocket( std::string command, std::unique_ptr<XmlFSocket> socket );
 
 
 	/* commands */
 
 	/** Connect directly to an actor that implements the RemoteControllable interface */
-	void CmdConnect( std::string args, const TSharedPtr<XmlFSocket> & socket );
+	void CmdConnect( std::string args, std::unique_ptr<XmlFSocket> socket );
 
 
 public:

@@ -184,9 +184,9 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 
 
-	if( IRemoteControllable::RemoteControlSocket.Get() && IRemoteControllable::RemoteControlSocket->IsGood() )
+	if( IRemoteControllable::RemoteControlSocket && IRemoteControllable::RemoteControlSocket->IsGood() )
 	{
-		XmlFSocket * xmlFSocket = IRemoteControllable::RemoteControlSocket.Get();
+		XmlFSocket * xmlFSocket = IRemoteControllable::RemoteControlSocket.get();
 
 		bool result = xmlFSocket->GetXml();
 
@@ -417,7 +417,7 @@ void AControlledRagdoll::ReadFromSimulation()
 void AControlledRagdoll::ReadFromRemoteController()
 {
 	// no-op if no remote controller
-	if( !this->IRemoteControllable::RemoteControlSocket.IsValid() ) return;
+	if( !this->IRemoteControllable::RemoteControlSocket ) return;
 
 	// ...
 }
@@ -470,7 +470,7 @@ void AControlledRagdoll::WriteToSimulation()
 void AControlledRagdoll::WriteToRemoteController()
 {
 	// no-op if no remote controller
-	if( !this->IRemoteControllable::RemoteControlSocket.IsValid() ) return;
+	if( !this->IRemoteControllable::RemoteControlSocket ) return;
 
 	// ...
 }

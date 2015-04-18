@@ -8,8 +8,9 @@
 #include <pugixml.hpp>
 
 #include <string>
+#include <memory>
 
-class FSocket;
+#include <Networking.h>
 
 
 
@@ -73,7 +74,7 @@ protected:
 public:
 
 	/** The UE FSocket. */
-	TSharedPtr<FSocket> Socket;
+	std::unique_ptr<FSocket> Socket;
 
 	/** A copy of the last full line read with GetLine(), without the terminating LF or CRLF. This buffer can be modified directly. */
 	std::string Line;
@@ -97,7 +98,7 @@ public:
 	* Constructs a new XmlFSocket wrapper around the provided FSocket and shares its ownership via the provided shared pointer.
 	* The socket argument can be null, in which case the resulting object will be in an invalid state (IsGood() == false).
 	*/
-	XmlFSocket( const TSharedPtr<FSocket> & socket );
+	XmlFSocket( std::unique_ptr<FSocket> socket );
 
 
 	/** Check whether we have a socket and that it is connected and all-ok. */
