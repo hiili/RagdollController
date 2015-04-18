@@ -9,6 +9,7 @@
 
 #include <boost/interprocess/streams/bufferstream.hpp>
 
+#include <memory>
 #include <algorithm>
 #include <functional>
 #include <cctype>
@@ -25,8 +26,8 @@
 
 
 
-XmlFSocket::XmlFSocket( const TSharedPtr<FSocket> & socket ) :
-	Socket( socket )
+XmlFSocket::XmlFSocket( std::unique_ptr<FSocket> socket ) :
+	Socket( std::move( socket ) )
 {
 	InXmlStatus.status = pugi::status_no_document_element;
 }
@@ -36,7 +37,7 @@ XmlFSocket::XmlFSocket( const TSharedPtr<FSocket> & socket ) :
 
 bool XmlFSocket::IsGood()
 {
-	return this->Socket.IsValid() && this->Socket->GetConnectionState() == ESocketConnectionState::SCS_Connected;
+	return this->Socket && this->Socket->GetConnectionState() == ESocketConnectionState::SCS_Connected;
 }
 
 
@@ -127,7 +128,7 @@ bool XmlFSocket::PutXml( pugi::xml_document * xmlDoc /*= 0 */ )
 
 		virtual void write( const void* data, size_t size )
 		{
-			if( !IsGood || !Socket.Socket.IsValid() ) return;
+			if( !IsGood || !Socket.Socket ) return;
 
 			int32 bytesSent;
 			Socket.Socket->Send( (const uint8 *)data, size, bytesSent );

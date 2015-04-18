@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include <SharedPointer.h>
+#include "XmlFSocket.h"
+
+#include <memory>
 
 #include "RemoteControllable.generated.h"
-
-class XmlFSocket;
 
 
 
@@ -32,13 +32,13 @@ class IRemoteControllable
 protected:
 
 	/** Remote control socket */
-	TSharedPtr<XmlFSocket> RemoteControlSocket;
+	std::unique_ptr<XmlFSocket> RemoteControlSocket;
 
 
 public:
 
 	IRemoteControllable( AActor * thisActor );
 
-	virtual void ConnectWith( const TSharedPtr<XmlFSocket> & socket );
+	virtual void ConnectWith( std::unique_ptr<XmlFSocket> socket );
 
 };

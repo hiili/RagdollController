@@ -26,11 +26,11 @@ IRemoteControllable::IRemoteControllable( AActor * thisActor ) :
 }
 
 
-void IRemoteControllable::ConnectWith( const TSharedPtr<XmlFSocket> & socket )
+void IRemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 {
 	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ),
 		*Utility::CleanupName( this->ThisActor->GetName() ) );
 
 	// store the new socket
-	this->RemoteControlSocket = socket;
+	this->RemoteControlSocket = std::move( socket );
 }
