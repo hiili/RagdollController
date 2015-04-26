@@ -29,8 +29,7 @@
 
 
 
-AControlledRagdoll::AControlledRagdoll()
-	: IRemoteControllable( this ),
+AControlledRagdoll::AControlledRagdoll() :
 	lastSendPoseTime( -INFINITY )
 {
 }
