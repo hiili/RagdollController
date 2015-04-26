@@ -37,7 +37,7 @@ protected:
 
 public:
 
-	IRemoteControllable( AActor * thisActor );
+	IRemoteControllable();
 
 	virtual void ConnectWith( std::unique_ptr<XmlFSocket> socket );
 

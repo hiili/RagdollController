@@ -19,17 +19,19 @@ URemoteControllable::URemoteControllable( const FObjectInitializer & ObjectIniti
 
 
 
-IRemoteControllable::IRemoteControllable( AActor * thisActor ) :
-	ThisActor( thisActor )
+IRemoteControllable::IRemoteControllable()
 {
-	check( ThisActor );
 }
 
 
 void IRemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 {
-	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ),
-		*Utility::CleanupName( this->ThisActor->GetName() ) );
+	FString name( "(N/A)" );
+	if( AActor *thisActor = dynamic_cast<AActor *>(this) )
+	{
+		name = Utility::CleanupName( thisActor->GetName() );
+	}
+	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ), *name );
 
 	// store the new socket
 	this->RemoteControlSocket = std::move( socket );
