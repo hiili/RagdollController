@@ -116,6 +116,9 @@ void AControlledRagdoll::BeginPlay()
 	// Check that we got a LevelScriptActor. It is unavailable if we are in an editor session, but BeginPlay() should not have been called in that case.
 	check( this->LevelScriptActor );
 
+	// tick after LevelScriptActor
+	AddTickPrerequisiteActor( this->LevelScriptActor );
+
 	// Register for automatic NetUpdateFrequency management
 	this->LevelScriptActor->RegisterManagedNetUpdateFrequency( this );
 }
