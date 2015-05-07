@@ -11,14 +11,15 @@
 #include <extensions/PxVisualDebuggerExt.h>
 
 
-// frame rate logging: averaging window size (set to 0 to disable logging)
-#define ESTIMATE_FRAMERATE_SAMPLES 100
+// average tick rate logging: frame timestamp window size (must be >= 2)
+#define ESTIMATE_TICKRATE_SAMPLES 10
 
 
 
 
 ARCLevelScriptActor::ARCLevelScriptActor() :
-	ALevelScriptActor( FObjectInitializer() )
+	ALevelScriptActor( FObjectInitializer() ),
+	tickTimestamps( ESTIMATE_TICKRATE_SAMPLES )
 {
 }
 
@@ -93,7 +94,7 @@ void ARCLevelScriptActor::Tick( float deltaSeconds )
 	}
 
 	// estimate the current average frame rate
-	estimateAverageFrameRate();
+	estimateAverageTickRate();
 }
 
 
@@ -185,24 +186,10 @@ void ARCLevelScriptActor::HandleMaxTickRate( const float MaxTickRate )
 
 
 
-void ARCLevelScriptActor::estimateAverageFrameRate()
+void ARCLevelScriptActor::estimateAverageTickRate()
 {
-	// fps estimation disabled?
-	if( ESTIMATE_FRAMERATE_SAMPLES == 0 ) return;
+	check( ESTIMATE_TICKRATE_SAMPLES >= 2 );
 
-	static double lastTime = FPlatformTime::Seconds();
-	static int ticksLeft = ESTIMATE_FRAMERATE_SAMPLES;
-
-	--ticksLeft;
-	if( ticksLeft == 0 ) {
-
-		double currentTime = FPlatformTime::Seconds();
-		this->currentAverageFps = ESTIMATE_FRAMERATE_SAMPLES / (currentTime - lastTime);
-
-		UE_LOG( LogRcSystem, Log, TEXT( "Current average frame rate: %g" ), this->currentAverageFps );
-
-		lastTime = currentTime;
-		ticksLeft = ESTIMATE_FRAMERATE_SAMPLES;
-
-	}
+	this->tickTimestamps.push_back( FPlatformTime::Seconds() );
+	this->currentAverageTickRate = (ESTIMATE_TICKRATE_SAMPLES - 1) / (this->tickTimestamps.back() - this->tickTimestamps.front());
 }

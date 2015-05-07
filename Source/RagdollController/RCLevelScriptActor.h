@@ -3,7 +3,13 @@
 #pragma once
 
 #include "Engine/LevelScriptActor.h"
+
+#include <boost/circular_buffer.hpp>
+
 #include "RCLevelScriptActor.generated.h"
+
+
+
 
 /**
  * 
@@ -12,13 +18,17 @@ UCLASS( Config = RagdollController )
 class RAGDOLLCONTROLLER_API ARCLevelScriptActor : public ALevelScriptActor
 {
 	GENERATED_BODY()
-	
 
-	/** Cap FPS. Only operates when using fixed time steps (otherwise no-op). */
+
+	/** Average tick rate estimation: timestamps for the last n ticks */
+	boost::circular_buffer<double> tickTimestamps;
+
+
+	/** Cap the tick rate. Only operates when using fixed time steps (otherwise no-op). */
 	void HandleMaxTickRate( const float MaxTickRate );
 
-	/** Estimate and log the current average frame rate. */
-	void estimateAverageFrameRate();
+	/** Estimate and log the current average tick rate. */
+	void estimateAverageTickRate();
 
 
 public:
@@ -39,9 +49,9 @@ public:
 	bool CapServerTickRate = false;
 
 
-	/** Computed estimate of the current average frame rate (averaging window length is controlled by ESTIMATE_FRAMERATE_SAMPLES). At least ControlledRagdoll
+	/** Computed estimate of the current average tick rate (averaging window length is controlled by ESTIMATE_TICKRATE_SAMPLES). At least ControlledRagdoll
 	 ** uses this for server-to-client bandwidth capping in replication. */
-	float currentAverageFps;
+	float currentAverageTickRate;
 
 
 	ARCLevelScriptActor();
