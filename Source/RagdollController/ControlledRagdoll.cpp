@@ -49,7 +49,7 @@ void AControlledRagdoll::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 
-	/* init SkeletalMeshComponent: scan all components and choose the first USkeletalMeshComponent */
+	/* init the SkeletalMeshComponent pointer: scan all components and choose the first USkeletalMeshComponent */
 
 	// get all components of the right type
 	TArray<USkeletalMeshComponent*> comps;
@@ -68,7 +68,8 @@ void AControlledRagdoll::PostInitializeComponents()
 	}
 	else
 	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) No USkeletalMeshComponents found!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) No USkeletalMeshComponents found! Aborting." ), TEXT( __FUNCTION__ ) );
+		check( false );
 	}
 
 

@@ -79,7 +79,9 @@ public:
 	float currentAverageAuthorityTickRate;
 
 
+
 	ARCLevelScriptActor();
+
 
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;

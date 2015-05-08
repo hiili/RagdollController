@@ -5,10 +5,10 @@
 
 #include <App.h>
 #include <Net/UnrealNetwork.h>
+#include <PhysicsPublic.h>
 
 #include <PxPhysics.h>
 #include <PxScene.h>
-#include <PhysicsPublic.h>
 #include <extensions/PxVisualDebuggerExt.h>
 
 #include <unordered_set>
@@ -99,16 +99,11 @@ void ARCLevelScriptActor::Tick( float deltaSeconds )
 
 	// If not dedicated server, or CapServerTickRate == true, then cap fps here. The -UseFixedTimeStep commannd line option disables built-in framerate
 	// control in UEngine::UpdateTimeAndHandleMaxTickRate(), and we can't override that method as it is not virtual.
-	if( UWorld * world = GetWorld() )
+	UWorld * world = GetWorld();
+	check( world );
+	if( world->GetNetMode() != NM_DedicatedServer || this->CapServerTickRate )
 	{
-		if( world->GetNetMode() != NM_DedicatedServer || this->CapServerTickRate )
-		{
-			HandleMaxTickRate( this->FixedFps );
-		}
-	}
-	else
-	{
-		UE_LOG( LogRcSystem, Error, TEXT( "(%s) GetWorld() == null!" ), __FUNCTION__ );
+		HandleMaxTickRate( this->FixedFps );
 	}
 
 	// estimate the current average frame rate
@@ -217,7 +212,10 @@ void ARCLevelScriptActor::estimateAverageTickRate()
 {
 	check( ESTIMATE_TICKRATE_SAMPLES >= 2 );
 
+	// store a time stamp for the current tick
 	this->tickTimestamps.push_back( FPlatformTime::Seconds() );
+
+	// compute the running average for the last n - 1 deltas
 	this->currentAverageTickRate = (ESTIMATE_TICKRATE_SAMPLES - 1) / (this->tickTimestamps.back() - this->tickTimestamps.front());
 
 	// if authority, then copy this also to currentAverageAuthorityTickRate
@@ -248,6 +246,7 @@ void ARCLevelScriptActor::syncGameSpeedWithServer()
 	//// sync by modifying fixed dt
 	//FApp::SetFixedDeltaTime( serverSpeedMultiplier * (1.f / this->FixedFps) );
 }
+
 
 
 
