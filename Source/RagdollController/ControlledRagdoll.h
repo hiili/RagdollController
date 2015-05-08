@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "RCLevelScriptActor.h"
 #include "RemoteControllable.h"
 
 #include <PxTransform.h>
@@ -131,14 +132,17 @@ class RAGDOLLCONTROLLER_API AControlledRagdoll :
 	GENERATED_BODY()
 
 
-	/** Last time that the pose was sent using SendPose(). */
-	double lastSendPoseTime;
+	/** Last time (wall clock time) that the pose was sent using SendPose(). */
+	double lastSendPoseWallclockTime;
 
 
 protected:
 
 	/** The SkeletalMeshComponent of the actor to be controlled. */
 	USkeletalMeshComponent * SkeletalMeshComponent;
+
+	/** Our LevelScriptActor. This is guaranteed to be always valid. */
+	ARCLevelScriptActor * LevelScriptActor;
 
 	/** Server's float interpretation of 0xdeadbeef, for checking float representation compatibility (eg, float endianness). Assume that UE replicates
 	 ** floats always correctly. */
@@ -192,10 +196,6 @@ protected:
 
 
 	/* Client-server replication */
-
-	/** Recompute net update frequency, using the current frame rate estimate from our game mode instance. When using fixed time steps, this needs to be adjusted
-	 ** for our real fps as UE interprets the AActor::NetUpdateFrequency parameter based on game time, not wall clock time. */
-	void RecomputeNetUpdateFrequency( float gameDeltaTime );
 
 	/** Store pose into the replicated BoneStates array. */
 	void SendPose();

@@ -10,6 +10,10 @@
 #include <PhysicsPublic.h>
 #include <extensions/PxVisualDebuggerExt.h>
 
+#include <unordered_set>
+#include <utility>
+#include <algorithm>
+
 
 // average tick rate logging: frame timestamp window size (must be >= 2)
 #define ESTIMATE_TICKRATE_SAMPLES 10
@@ -29,6 +33,9 @@ ARCLevelScriptActor::ARCLevelScriptActor() :
 void ARCLevelScriptActor::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	// Register self for automatic NetUpdateFrequency management
+	RegisterManagedNetUpdateFrequency( this );
 }
 
 
@@ -95,6 +102,9 @@ void ARCLevelScriptActor::Tick( float deltaSeconds )
 
 	// estimate the current average frame rate
 	estimateAverageTickRate();
+
+	// Adjust the net update frequencies of all registered actors
+	manageNetUpdateFrequencies( deltaSeconds );
 }
 
 
@@ -192,4 +202,53 @@ void ARCLevelScriptActor::estimateAverageTickRate()
 
 	this->tickTimestamps.push_back( FPlatformTime::Seconds() );
 	this->currentAverageTickRate = (ESTIMATE_TICKRATE_SAMPLES - 1) / (this->tickTimestamps.back() - this->tickTimestamps.front());
+}
+
+
+
+
+void ARCLevelScriptActor::RegisterManagedNetUpdateFrequency( AActor * actor )
+{
+	// check if actor is null
+	if( !actor )
+	{
+		UE_LOG( LogRcSystem, Warning, TEXT("(%s) The provided actor pointer is null! Ignoring."), TEXT(__FUNCTION__) );
+		return;
+	}
+
+	// try to insert the actor to the set
+	if( !this->NetUpdateFrequencyManagedActors.emplace( actor ).second )
+	{
+		// the actor was already in the set; log and ignore
+		UE_LOG( LogRcSystem, Warning, TEXT("(%s) The provided actor (%s) is already registered! Ignoring."),
+			TEXT(__FUNCTION__), *actor->GetHumanReadableName() );
+	}
+}
+
+
+void ARCLevelScriptActor::UnregisterManagedNetUpdateFrequency( AActor * actor )
+{
+	// try to erase the actor from the set
+	if( this->NetUpdateFrequencyManagedActors.erase( actor ) != 1 )
+	{
+		// actor not found, log an error
+		UE_LOG( LogRcSystem, Warning, TEXT( "(%s) The provided actor (%s) is not registered! Ignoring." ),
+			TEXT( __FUNCTION__ ), actor ? *actor->GetHumanReadableName() : TEXT( "(nullptr)" ) );
+	}
+}
+
+
+void ARCLevelScriptActor::manageNetUpdateFrequencies( float gameDeltaTime )
+{
+	// compute how fast the simulation is running with respect to wall clock time
+	float currentSpeedMultiplier = this->currentAverageTickRate / (1.f / gameDeltaTime);
+
+	// compute the new net update frequency
+	float netUpdateFrequency = this->RealtimeNetUpdateFrequency / currentSpeedMultiplier;
+
+	// apply to managed actors
+	for( auto actor : this->NetUpdateFrequencyManagedActors )
+	{
+		actor->NetUpdateFrequency = netUpdateFrequency;
+	}
 }

@@ -5,6 +5,7 @@
 #include "Engine/LevelScriptActor.h"
 
 #include <boost/circular_buffer.hpp>
+#include <unordered_set>
 
 #include "RCLevelScriptActor.generated.h"
 
@@ -23,12 +24,18 @@ class RAGDOLLCONTROLLER_API ARCLevelScriptActor : public ALevelScriptActor
 	/** Average tick rate estimation: timestamps for the last n ticks */
 	boost::circular_buffer<double> tickTimestamps;
 
+	/** Actors registered for managed NetUpdateFrequency. @see RegisterManagedNetUpdateFrequency, UnregisterManagedNetUpdateFrequency */
+	std::unordered_set<AActor *> NetUpdateFrequencyManagedActors;
+
 
 	/** Cap the tick rate. Only operates when using fixed time steps (otherwise no-op). */
 	void HandleMaxTickRate( const float MaxTickRate );
 
 	/** Estimate and log the current average tick rate. */
 	void estimateAverageTickRate();
+
+	/** Manage net update frequencies of the registered actors (@see NetUpdateFrequencyManagedActors). */
+	void manageNetUpdateFrequencies( float gameDeltaTime );
 
 
 public:
@@ -48,6 +55,11 @@ public:
 	UPROPERTY( Config )
 	bool CapServerTickRate = false;
 
+	/** Target real-time value for AActor::NetUpdateFrequency (the nominal value must be corrected by the wall clock vs game time fps difference).
+	 ** This is used for actors that have registered for automatic NetUpdateFrequency management. @see RegisterManagedNetUpdateFrequency */
+	UPROPERTY( Config )
+	float RealtimeNetUpdateFrequency = 60.f;
+
 
 	/** Computed estimate of the current average tick rate (averaging window length is controlled by ESTIMATE_TICKRATE_SAMPLES). At least ControlledRagdoll
 	 ** uses this for server-to-client bandwidth capping in replication. */
@@ -59,5 +71,15 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void Tick( float deltaSeconds ) override;
-	
+
+
+	/** Register an actor so as to have its NetUpdateFrequency automatically corrected on each tick, so as to take into account the simulation time vs. wall
+	 ** clock time difference; UE does not take care of this in our case of using fixed time steps. No-op with a logged warning if the actor is already
+	 ** registered. @see UnregisterManagedNetUpdateFrequency */
+	void RegisterManagedNetUpdateFrequency( AActor * actor );
+
+	/** Unregister an actor from receiving automatic NetUpdateFrequency updates. No-op with a logged warning if the actor has not been registered.
+	 ** @see RegisterManagedNetUpdateFrequency */
+	void UnregisterManagedNetUpdateFrequency( AActor * actor );
+
 };

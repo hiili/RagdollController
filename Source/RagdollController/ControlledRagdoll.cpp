@@ -23,14 +23,10 @@
 #include <cmath>
 
 
-/** Target real-time value for AActor::NetUpdateFrequency (the nominal value must be corrected by the wall clock vs game time fps difference). */
-#define NET_UPDATE_FREQUENCY 60.f
-
-
 
 
 AControlledRagdoll::AControlledRagdoll() :
-	lastSendPoseTime( -INFINITY )
+	lastSendPoseWallclockTime( -INFINITY )
 {
 }
 
@@ -76,6 +72,12 @@ void AControlledRagdoll::PostInitializeComponents()
 	}
 
 
+	// init the LevelScriptActor pointer
+	check( GetWorld() );
+	this->LevelScriptActor = dynamic_cast<ARCLevelScriptActor *>(GetWorld()->GetLevelScriptActor());
+	check( this->LevelScriptActor );
+
+
 	if( this->Role >= ROLE_Authority )
 	{
 
@@ -118,6 +120,8 @@ void AControlledRagdoll::PostInitializeComponents()
 	// Initialize the internal state structs
 	InitState();
 
+	// Register for automatic NetUpdateFrequency management
+	this->LevelScriptActor->RegisterManagedNetUpdateFrequency( this );
 }
 
 
@@ -167,9 +171,6 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 
 	/* Handle client-server pose replication */
-
-	// Adjust net update frequency based on the current wall clock vs game time fps difference
-	RecomputeNetUpdateFrequency( deltaSeconds );
 
 	// Store pose so that it can be replicated to client(s)
 	SendPose();
@@ -477,33 +478,12 @@ void AControlledRagdoll::WriteToRemoteController()
 
 
 
-void AControlledRagdoll::RecomputeNetUpdateFrequency( float gameDeltaTime )
-{
-	// get a pointer to our LevelScriptActor instance
-	check( GetWorld() );
-	if( ARCLevelScriptActor * ls = Cast<ARCLevelScriptActor>( GetWorld()->GetLevelScriptActor() ) )
-	{
-		// compute how fast the simulation is running with respect to wall clock time
-		float currentSpeedMultiplier = ls->currentAverageFps / (1.f / gameDeltaTime);
-
-		// apply to AActor::NetUpdateFrequency
-		this->NetUpdateFrequency = NET_UPDATE_FREQUENCY / currentSpeedMultiplier;
-	}
-	else
-	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) Failed to locate our RCLevelScriptActor!" ), TEXT( __FUNCTION__ ) );
-	}
-}
-
-
-
-
 void AControlledRagdoll::SendPose()
 {
-	// cap update rate by 2 * NET_UPDATE_FREQUENCY (UE level replication intervals are not accurate, have a safety margin so as to not miss any replications)
+	// cap update rate by 2 * RealtimeNetUpdateFrequency (UE level replication intervals are not accurate, have a safety margin so as to not miss any replications)
 	double currentTime = FPlatformTime::Seconds();
-	if( currentTime - this->lastSendPoseTime < 1.f / (2.f * NET_UPDATE_FREQUENCY) ) return;
-	this->lastSendPoseTime = currentTime;
+	if( currentTime - this->lastSendPoseWallclockTime < 1.f / (2.f * this->LevelScriptActor->RealtimeNetUpdateFrequency) ) return;
+	this->lastSendPoseWallclockTime = currentTime;
 
 	// check the number of bones and resize the BoneStates array
 	int numBodies = this->SkeletalMeshComponent->Bodies.Num();
