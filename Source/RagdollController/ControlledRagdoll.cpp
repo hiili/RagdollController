@@ -503,11 +503,10 @@ void AControlledRagdoll::SendPose()
 			return;
 		}
 
-		// Replicate pose, skip velocities
-		// (PhysX ignores the velocities if the pose is set during the same tick. Also, we do not want any client-side prediction but just exact replication.)
+		// Replicate pose
 		this->BoneStates[body].GetPxTransform() = pxBody->getGlobalPose();
-		//this->BoneStates[body].GetPxLinearVelocity() = pxBody->getLinearVelocity();
-		//this->BoneStates[body].GetPxAngularVelocity() = pxBody->getAngularVelocity();
+		this->BoneStates[body].GetPxLinearVelocity() = pxBody->getLinearVelocity();
+		this->BoneStates[body].GetPxAngularVelocity() = pxBody->getAngularVelocity();
 	}
 }
 
@@ -545,10 +544,10 @@ void AControlledRagdoll::ReceivePose()
 			return;
 		}
 
-		// Replicate pose, skip velocities (see SendPose())
+		// Replicate pose
 		pxBody->setGlobalPose( this->BoneStates[body].GetPxTransform() );
-		//pxBody->setLinearVelocity( this->BoneStates[body].GetPxLinearVelocity() );
-		//pxBody->setAngularVelocity( this->BoneStates[body].GetPxAngularVelocity() );
+		pxBody->setLinearVelocity( this->BoneStates[body].GetPxLinearVelocity() );
+		pxBody->setAngularVelocity( this->BoneStates[body].GetPxAngularVelocity() );
 	}
 }
 

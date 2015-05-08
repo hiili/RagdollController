@@ -59,10 +59,7 @@ struct FJointState
 
 
 
-/**
-* Replication-ready struct for holding the state of a single bone. Velocity information is commented out as it is not currently being used (PhysX
-* seems to ignore the set velocity if the pose is being set during the same tick; see AControlledRagdoll::SendPose).
-*/
+/** Replication-ready struct for holding the state of a single bone. */
 USTRUCT( Blueprintable )
 struct FBoneState {
 	GENERATED_USTRUCT_BODY()
@@ -73,11 +70,11 @@ private:
 	UPROPERTY()
 	TArray<int8> TransformData;
 
-	//UPROPERTY()
-	//TArray<int8> LinearVelocityData;
+	UPROPERTY()
+	TArray<int8> LinearVelocityData;
 
-	//UPROPERTY()
-	//TArray<int8> AngularVelocityData;
+	UPROPERTY()
+	TArray<int8> AngularVelocityData;
 
 
 public:
@@ -85,8 +82,8 @@ public:
 	FBoneState()
 	{
 		TransformData.SetNumZeroed( sizeof(physx::PxTransform) );
-		//LinearVelocityData.SetNumZeroed( sizeof(physx::PxVec3) );
-		//AngularVelocityData.SetNumZeroed( sizeof(physx::PxVec3) );
+		LinearVelocityData.SetNumZeroed( sizeof(physx::PxVec3) );
+		AngularVelocityData.SetNumZeroed( sizeof(physx::PxVec3) );
 	}
 
 
@@ -96,8 +93,8 @@ public:
 	{
 		return
 			TransformData.Num() == sizeof(physx::PxTransform); // &&
-			//LinearVelocityData.Num() == sizeof(physx::PxVec3) &&
-			//AngularVelocityData.Num() == sizeof(physx::PxVec3);
+			LinearVelocityData.Num() == sizeof(physx::PxVec3) &&
+			AngularVelocityData.Num() == sizeof(physx::PxVec3);
 	}
 
 
@@ -106,15 +103,15 @@ public:
 		return reinterpret_cast<physx::PxTransform &>(TransformData[0]);
 	}
 
-	//physx::PxVec3 & GetPxLinearVelocity()
-	//{
-	//	return reinterpret_cast<physx::PxVec3 &>(LinearVelocityData[0]);
-	//}
+	physx::PxVec3 & GetPxLinearVelocity()
+	{
+		return reinterpret_cast<physx::PxVec3 &>(LinearVelocityData[0]);
+	}
 
-	//physx::PxVec3 & GetPxAngularVelocity()
-	//{
-	//	return reinterpret_cast<physx::PxVec3 &>(AngularVelocityData[0]);
-	//}
+	physx::PxVec3 & GetPxAngularVelocity()
+	{
+		return reinterpret_cast<physx::PxVec3 &>(AngularVelocityData[0]);
+	}
 
 };
 
