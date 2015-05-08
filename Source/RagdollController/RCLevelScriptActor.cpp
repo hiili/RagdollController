@@ -4,6 +4,7 @@
 #include "RCLevelScriptActor.h"
 
 #include <App.h>
+#include <Net/UnrealNetwork.h>
 
 #include <PxPhysics.h>
 #include <PxScene.h>
@@ -17,6 +18,16 @@
 
 // average tick rate logging: frame timestamp window size (must be >= 2)
 #define ESTIMATE_TICKRATE_SAMPLES 10
+
+
+
+
+void ARCLevelScriptActor::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> & OutLifetimeProps ) const
+{
+	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
+
+	DOREPLIFETIME( ARCLevelScriptActor, currentAverageAuthorityTickRate );
+}
 
 
 
@@ -102,6 +113,12 @@ void ARCLevelScriptActor::Tick( float deltaSeconds )
 
 	// estimate the current average frame rate
 	estimateAverageTickRate();
+
+	// if predictive pose replication is enabled an we are not authority, then sync game speed with server
+	if( this->PoseReplicationDoClientsidePrediction && !HasAuthority() )
+	{
+		syncGameSpeedWithServer();
+	}
 
 	// Adjust the net update frequencies of all registered actors
 	manageNetUpdateFrequencies( deltaSeconds );
@@ -202,8 +219,35 @@ void ARCLevelScriptActor::estimateAverageTickRate()
 
 	this->tickTimestamps.push_back( FPlatformTime::Seconds() );
 	this->currentAverageTickRate = (ESTIMATE_TICKRATE_SAMPLES - 1) / (this->tickTimestamps.back() - this->tickTimestamps.front());
+
+	// if authority, then copy this also to currentAverageAuthorityTickRate
+	if( HasAuthority() )
+	{
+		this->currentAverageAuthorityTickRate = this->currentAverageTickRate;
+	}
 }
 
+
+
+
+void ARCLevelScriptActor::syncGameSpeedWithServer()
+{
+	// no point in syncing auth's speed with itself
+	if( HasAuthority() ) return;
+
+	// compute the speed difference
+	float serverSpeedMultiplier = this->currentAverageAuthorityTickRate / this->currentAverageTickRate;
+	
+	// sync using global time dilation
+	AWorldSettings * ws = GetWorldSettings(); check( ws );
+	if( ws )
+	{
+		ws->TimeDilation = serverSpeedMultiplier;
+	}
+	
+	//// sync by modifying fixed dt
+	//FApp::SetFixedDeltaTime( serverSpeedMultiplier * (1.f / this->FixedFps) );
+}
 
 
 

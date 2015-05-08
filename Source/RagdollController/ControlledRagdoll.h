@@ -162,7 +162,7 @@ protected:
 	TArray<FJointState> JointStates;
 
 	/** Data for all bodies of the SkeletalMeshComponent, mainly for server-to-client pose replication. */
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, Replicated, Category = RagdollController )
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, ReplicatedUsing = HandleBoneStatesReplicationEvent, Category = RagdollController )
 	TArray<FBoneState> BoneStates;
 
 
@@ -202,6 +202,10 @@ protected:
 
 	/** Apply replicated pose from the BoneStates array. */
 	void ReceivePose();
+
+	/** Handle pose replication events. */
+	UFUNCTION()
+	void HandleBoneStatesReplicationEvent();
 
 
 public:

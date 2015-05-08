@@ -34,6 +34,9 @@ class RAGDOLLCONTROLLER_API ARCLevelScriptActor : public ALevelScriptActor
 	/** Estimate and log the current average tick rate. */
 	void estimateAverageTickRate();
 
+	/** Re-adjust client game speed so as to match the server game speed. Has no effect if called on server / standalone. */
+	void syncGameSpeedWithServer();
+
 	/** Manage net update frequencies of the registered actors (@see NetUpdateFrequencyManagedActors). */
 	void manageNetUpdateFrequencies( float gameDeltaTime );
 
@@ -60,10 +63,20 @@ public:
 	UPROPERTY( Config )
 	float RealtimeNetUpdateFrequency = 60.f;
 
+	/** If true, then clients are synced to server's speed and the pose is updated on clients only whenever a new pose is received from the server.
+	 ** If false, then the pose is updated on each tick, effectively freezing the actor between pose replications. Game speeds will not be synced in this case.
+	 ** Note that client-side prediction with a non-realtime server might require adjustments of the max physics (sub)step size! */
+	UPROPERTY( Config )
+	bool PoseReplicationDoClientsidePrediction = false;
 
-	/** Computed estimate of the current average tick rate (averaging window length is controlled by ESTIMATE_TICKRATE_SAMPLES). At least ControlledRagdoll
-	 ** uses this for server-to-client bandwidth capping in replication. */
+
+	/** Computed estimate of the current average tick rate (averaging window length is controlled by ESTIMATE_TICKRATE_SAMPLES). */
 	float currentAverageTickRate;
+
+	/** Computed estimate of the current average tick rate of the authoritative world: if server or standalone, then this equals currentAverageTickRate,
+	 ** otherwise this is a replicated copy of the server's currentAverageTickRate. */
+	UPROPERTY( Replicated )
+	float currentAverageAuthorityTickRate;
 
 
 	ARCLevelScriptActor();

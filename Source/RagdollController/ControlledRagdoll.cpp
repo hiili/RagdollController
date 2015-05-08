@@ -140,8 +140,12 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	// If network client, then we are just visualizing the ragdoll that is being simulated on the server
 	if( this->Role < ROLE_Authority )
 	{
-		// Replicate pose from the server
-		ReceivePose();
+		// If client-side prediction is off, then update the pose here on each tick, effectively freezing the skelmesh between bone state replications.
+		// Otherwise update it in HandleBoneStatesReplicationEvent(). @see HandleBoneStatesReplicationEvent()
+		if( !this->LevelScriptActor->PoseReplicationDoClientsidePrediction )
+		{
+			ReceivePose();
+		}
 
 		// Call the tick hook (available for inherited C++ classes), then Super::Tick(), which runs this actor's Blueprint
 		TickHook( deltaSeconds );
@@ -545,5 +549,17 @@ void AControlledRagdoll::ReceivePose()
 		pxBody->setGlobalPose( this->BoneStates[body].GetPxTransform() );
 		//pxBody->setLinearVelocity( this->BoneStates[body].GetPxLinearVelocity() );
 		//pxBody->setAngularVelocity( this->BoneStates[body].GetPxAngularVelocity() );
+	}
+}
+
+
+
+
+void AControlledRagdoll::HandleBoneStatesReplicationEvent()
+{
+	// if client-side prediction is on, then update the pose here only when a new pose has been received. Otherwise update it in Tick(). @see Tick()
+	if( this->LevelScriptActor->PoseReplicationDoClientsidePrediction )
+	{
+		ReceivePose();
 	}
 }
