@@ -4,21 +4,37 @@
 #include "RCLevelScriptActor.h"
 
 #include <App.h>
+#include <Net/UnrealNetwork.h>
 
 #include <PxPhysics.h>
 #include <PxScene.h>
 #include <PhysicsPublic.h>
 #include <extensions/PxVisualDebuggerExt.h>
 
+#include <unordered_set>
+#include <utility>
+#include <algorithm>
 
-// frame rate logging: averaging window size (set to 0 to disable logging)
-#define ESTIMATE_FRAMERATE_SAMPLES 100
+
+// average tick rate logging: frame timestamp window size (must be >= 2)
+#define ESTIMATE_TICKRATE_SAMPLES 10
+
+
+
+
+void ARCLevelScriptActor::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> & OutLifetimeProps ) const
+{
+	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
+
+	DOREPLIFETIME( ARCLevelScriptActor, currentAverageAuthorityTickRate );
+}
 
 
 
 
 ARCLevelScriptActor::ARCLevelScriptActor() :
-	ALevelScriptActor( FObjectInitializer() )
+	ALevelScriptActor( FObjectInitializer() ),
+	tickTimestamps( ESTIMATE_TICKRATE_SAMPLES )
 {
 }
 
@@ -28,6 +44,9 @@ ARCLevelScriptActor::ARCLevelScriptActor() :
 void ARCLevelScriptActor::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	// Register self for automatic NetUpdateFrequency management
+	RegisterManagedNetUpdateFrequency( this );
 }
 
 
@@ -93,7 +112,16 @@ void ARCLevelScriptActor::Tick( float deltaSeconds )
 	}
 
 	// estimate the current average frame rate
-	estimateAverageFrameRate();
+	estimateAverageTickRate();
+
+	// if predictive pose replication is enabled an we are not authority, then sync game speed with server
+	if( this->PoseReplicationDoClientsidePrediction && !HasAuthority() )
+	{
+		syncGameSpeedWithServer();
+	}
+
+	// Adjust the net update frequencies of all registered actors
+	manageNetUpdateFrequencies( deltaSeconds );
 }
 
 
@@ -185,24 +213,86 @@ void ARCLevelScriptActor::HandleMaxTickRate( const float MaxTickRate )
 
 
 
-void ARCLevelScriptActor::estimateAverageFrameRate()
+void ARCLevelScriptActor::estimateAverageTickRate()
 {
-	// fps estimation disabled?
-	if( ESTIMATE_FRAMERATE_SAMPLES == 0 ) return;
+	check( ESTIMATE_TICKRATE_SAMPLES >= 2 );
 
-	static double lastTime = FPlatformTime::Seconds();
-	static int ticksLeft = ESTIMATE_FRAMERATE_SAMPLES;
+	this->tickTimestamps.push_back( FPlatformTime::Seconds() );
+	this->currentAverageTickRate = (ESTIMATE_TICKRATE_SAMPLES - 1) / (this->tickTimestamps.back() - this->tickTimestamps.front());
 
-	--ticksLeft;
-	if( ticksLeft == 0 ) {
+	// if authority, then copy this also to currentAverageAuthorityTickRate
+	if( HasAuthority() )
+	{
+		this->currentAverageAuthorityTickRate = this->currentAverageTickRate;
+	}
+}
 
-		double currentTime = FPlatformTime::Seconds();
-		this->currentAverageFps = ESTIMATE_FRAMERATE_SAMPLES / (currentTime - lastTime);
 
-		UE_LOG( LogRcSystem, Log, TEXT( "Current average frame rate: %g" ), this->currentAverageFps );
 
-		lastTime = currentTime;
-		ticksLeft = ESTIMATE_FRAMERATE_SAMPLES;
 
+void ARCLevelScriptActor::syncGameSpeedWithServer()
+{
+	// no point in syncing auth's speed with itself
+	if( HasAuthority() ) return;
+
+	// compute the speed difference
+	float serverSpeedMultiplier = this->currentAverageAuthorityTickRate / this->currentAverageTickRate;
+	
+	// sync using global time dilation
+	AWorldSettings * ws = GetWorldSettings(); check( ws );
+	if( ws )
+	{
+		ws->TimeDilation = serverSpeedMultiplier;
+	}
+	
+	//// sync by modifying fixed dt
+	//FApp::SetFixedDeltaTime( serverSpeedMultiplier * (1.f / this->FixedFps) );
+}
+
+
+
+void ARCLevelScriptActor::RegisterManagedNetUpdateFrequency( AActor * actor )
+{
+	// check if actor is null
+	if( !actor )
+	{
+		UE_LOG( LogRcSystem, Warning, TEXT("(%s) The provided actor pointer is null! Ignoring."), TEXT(__FUNCTION__) );
+		return;
+	}
+
+	// try to insert the actor to the set
+	if( !this->NetUpdateFrequencyManagedActors.emplace( actor ).second )
+	{
+		// the actor was already in the set; log and ignore
+		UE_LOG( LogRcSystem, Warning, TEXT("(%s) The provided actor (%s) is already registered! Ignoring."),
+			TEXT(__FUNCTION__), *actor->GetHumanReadableName() );
+	}
+}
+
+
+void ARCLevelScriptActor::UnregisterManagedNetUpdateFrequency( AActor * actor )
+{
+	// try to erase the actor from the set
+	if( this->NetUpdateFrequencyManagedActors.erase( actor ) != 1 )
+	{
+		// actor not found, log an error
+		UE_LOG( LogRcSystem, Warning, TEXT( "(%s) The provided actor (%s) is not registered! Ignoring." ),
+			TEXT( __FUNCTION__ ), actor ? *actor->GetHumanReadableName() : TEXT( "(nullptr)" ) );
+	}
+}
+
+
+void ARCLevelScriptActor::manageNetUpdateFrequencies( float gameDeltaTime )
+{
+	// compute how fast the simulation is running with respect to wall clock time
+	float currentSpeedMultiplier = this->currentAverageTickRate / (1.f / gameDeltaTime);
+
+	// compute the new net update frequency
+	float netUpdateFrequency = this->RealtimeNetUpdateFrequency / currentSpeedMultiplier;
+
+	// apply to managed actors
+	for( auto actor : this->NetUpdateFrequencyManagedActors )
+	{
+		actor->NetUpdateFrequency = netUpdateFrequency;
 	}
 }

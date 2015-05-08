@@ -23,14 +23,10 @@
 #include <cmath>
 
 
-/** Target real-time value for AActor::NetUpdateFrequency (the nominal value must be corrected by the wall clock vs game time fps difference). */
-#define NET_UPDATE_FREQUENCY 60.f
-
-
 
 
 AControlledRagdoll::AControlledRagdoll() :
-	lastSendPoseTime( -INFINITY )
+	lastSendPoseWallclockTime( -INFINITY )
 {
 }
 
@@ -76,6 +72,12 @@ void AControlledRagdoll::PostInitializeComponents()
 	}
 
 
+	// init the LevelScriptActor pointer
+	check( GetWorld() );
+	this->LevelScriptActor = dynamic_cast<ARCLevelScriptActor *>(GetWorld()->GetLevelScriptActor());
+	check( this->LevelScriptActor );
+
+
 	if( this->Role >= ROLE_Authority )
 	{
 
@@ -118,6 +120,8 @@ void AControlledRagdoll::PostInitializeComponents()
 	// Initialize the internal state structs
 	InitState();
 
+	// Register for automatic NetUpdateFrequency management
+	this->LevelScriptActor->RegisterManagedNetUpdateFrequency( this );
 }
 
 
@@ -136,8 +140,12 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	// If network client, then we are just visualizing the ragdoll that is being simulated on the server
 	if( this->Role < ROLE_Authority )
 	{
-		// Replicate pose from the server
-		ReceivePose();
+		// If client-side prediction is off, then update the pose here on each tick, effectively freezing the skelmesh between bone state replications.
+		// Otherwise update it in HandleBoneStatesReplicationEvent(). @see HandleBoneStatesReplicationEvent()
+		if( !this->LevelScriptActor->PoseReplicationDoClientsidePrediction )
+		{
+			ReceivePose();
+		}
 
 		// Call the tick hook (available for inherited C++ classes), then Super::Tick(), which runs this actor's Blueprint
 		TickHook( deltaSeconds );
@@ -167,9 +175,6 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 
 	/* Handle client-server pose replication */
-
-	// Adjust net update frequency based on the current wall clock vs game time fps difference
-	RecomputeNetUpdateFrequency( deltaSeconds );
 
 	// Store pose so that it can be replicated to client(s)
 	SendPose();
@@ -477,33 +482,12 @@ void AControlledRagdoll::WriteToRemoteController()
 
 
 
-void AControlledRagdoll::RecomputeNetUpdateFrequency( float gameDeltaTime )
-{
-	// get a pointer to our LevelScriptActor instance
-	check( GetWorld() );
-	if( ARCLevelScriptActor * ls = Cast<ARCLevelScriptActor>( GetWorld()->GetLevelScriptActor() ) )
-	{
-		// compute how fast the simulation is running with respect to wall clock time
-		float currentSpeedMultiplier = ls->currentAverageFps / (1.f / gameDeltaTime);
-
-		// apply to AActor::NetUpdateFrequency
-		this->NetUpdateFrequency = NET_UPDATE_FREQUENCY / currentSpeedMultiplier;
-	}
-	else
-	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) Failed to locate our RCLevelScriptActor!" ), TEXT( __FUNCTION__ ) );
-	}
-}
-
-
-
-
 void AControlledRagdoll::SendPose()
 {
-	// cap update rate by 2 * NET_UPDATE_FREQUENCY (UE level replication intervals are not accurate, have a safety margin so as to not miss any replications)
+	// cap update rate by 2 * RealtimeNetUpdateFrequency (UE level replication intervals are not accurate, have a safety margin so as to not miss any replications)
 	double currentTime = FPlatformTime::Seconds();
-	if( currentTime - this->lastSendPoseTime < 1.f / (2.f * NET_UPDATE_FREQUENCY) ) return;
-	this->lastSendPoseTime = currentTime;
+	if( currentTime - this->lastSendPoseWallclockTime < 1.f / (2.f * this->LevelScriptActor->RealtimeNetUpdateFrequency) ) return;
+	this->lastSendPoseWallclockTime = currentTime;
 
 	// check the number of bones and resize the BoneStates array
 	int numBodies = this->SkeletalMeshComponent->Bodies.Num();
@@ -519,11 +503,10 @@ void AControlledRagdoll::SendPose()
 			return;
 		}
 
-		// Replicate pose, skip velocities
-		// (PhysX ignores the velocities if the pose is set during the same tick. Also, we do not want any client-side prediction but just exact replication.)
+		// Replicate pose
 		this->BoneStates[body].GetPxTransform() = pxBody->getGlobalPose();
-		//this->BoneStates[body].GetPxLinearVelocity() = pxBody->getLinearVelocity();
-		//this->BoneStates[body].GetPxAngularVelocity() = pxBody->getAngularVelocity();
+		this->BoneStates[body].GetPxLinearVelocity() = pxBody->getLinearVelocity();
+		this->BoneStates[body].GetPxAngularVelocity() = pxBody->getAngularVelocity();
 	}
 }
 
@@ -561,9 +544,21 @@ void AControlledRagdoll::ReceivePose()
 			return;
 		}
 
-		// Replicate pose, skip velocities (see SendPose())
+		// Replicate pose
 		pxBody->setGlobalPose( this->BoneStates[body].GetPxTransform() );
-		//pxBody->setLinearVelocity( this->BoneStates[body].GetPxLinearVelocity() );
-		//pxBody->setAngularVelocity( this->BoneStates[body].GetPxAngularVelocity() );
+		pxBody->setLinearVelocity( this->BoneStates[body].GetPxLinearVelocity() );
+		pxBody->setAngularVelocity( this->BoneStates[body].GetPxAngularVelocity() );
+	}
+}
+
+
+
+
+void AControlledRagdoll::HandleBoneStatesReplicationEvent()
+{
+	// if client-side prediction is on, then update the pose here only when a new pose has been received. Otherwise update it in Tick(). @see Tick()
+	if( this->LevelScriptActor->PoseReplicationDoClientsidePrediction )
+	{
+		ReceivePose();
 	}
 }
