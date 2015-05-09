@@ -43,7 +43,7 @@ bool XmlFSocket::IsGood()
 
 
 
-void XmlFSocket::SetBlocking( bool shouldBlock, int blockingTimeoutMs /*= 0*/ )
+void XmlFSocket::SetBlocking( bool shouldBlock, int blockingTimeoutMs /*= max int*/ )
 {
 	ShouldBlock = shouldBlock;
 	BlockingTimeoutMs = blockingTimeoutMs;

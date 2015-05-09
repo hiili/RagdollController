@@ -9,6 +9,7 @@
 
 #include <string>
 #include <memory>
+#include <limits>
 
 #include <Networking.h>
 
@@ -84,8 +85,8 @@ public:
 	 ** parse of the XmlFSocket's internal buffer, with the implication that any subsequent read operation on this XmlFSocket needs to reset it. */
 	pugi::xml_document InXml;
 
-	/** Parse status of InXMl, set by GetXml(). The status pugi::status_no_document_element means that either GetXml() has not been called yet, or InXMl has
-	 ** been reset due to a subsequent (attempted) read operation. */
+	/** Parse status of InXMl, set by GetXml(). If GetXml() has not been called yet or if InXMl has been reset due to a subsequent (attempted) read operation,
+	 ** then InXmlStatus.status is set to pugi::status_no_document_element. */
 	pugi::xml_parse_result InXmlStatus;
 
 	/** A pre-allocated, re-usable xml document that can be sent with SendXml(). If one is sending repeatedly an xml document with the same structure
@@ -104,8 +105,9 @@ public:
 	/** Check whether we have a socket and that it is connected and all-ok. */
 	bool IsGood();
 
-	/** Set whether the read methods should block until success. Timeout is specified in milliseconds. Write methods will never retry upon failure. */
-	void SetBlocking( bool shouldBlock, int timeoutMs = 0 );
+	/** Set whether the read methods should block until success. Timeout is specified in milliseconds. Note that a timeout value of 0 does _not_ mean
+	 ** "no timeout" but "don't block"! Write methods will never retry upon failure. */
+	void SetBlocking( bool shouldBlock, int timeoutMs = std::numeric_limits<int>::max() );
 
 
 	/**
