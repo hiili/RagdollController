@@ -11,6 +11,7 @@
 
 #include <pugixml.hpp>
 
+#include <Engine/GameInstance.h>
 #include <Net/UnrealNetwork.h>
 #include <GenericPlatform/GenericPlatformProperties.h>
 
@@ -562,6 +563,10 @@ void AControlledRagdoll::WriteToRemoteController()
 
 void AControlledRagdoll::SendPose()
 {
+	// no-op if no remote players (i.e., if num_all_players - num_local_players <= 0)
+	check( GetWorld() && GetWorld()->GetGameState() && GetGameInstance() );
+	if( GetWorld()->GetGameState()->PlayerArray.Num() - GetGameInstance()->GetNumLocalPlayers() <= 0 ) return;
+
 	// cap update rate by 2 * RealtimeNetUpdateFrequency (UE level replication intervals are not accurate, have a safety margin so as to not miss any replications)
 	double currentTime = FPlatformTime::Seconds();
 	if( currentTime - this->lastSendPoseWallclockTime < 1.f / (2.f * this->LevelScriptActor->RealtimeNetUpdateFrequency) ) return;
