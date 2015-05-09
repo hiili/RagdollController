@@ -176,11 +176,19 @@ protected:
 
 	/* Inbound data flow, 1st half of Tick() */
 	
+	/** Handle network errors with remote controllers. Currently drops the connection, logs, and sets InXmlStatus.status to pugi::status_no_document_element. */
+	void HandleNetworkError( const std::string & description );
+
+	/** If a remote controller is connected, then read in one xml document and prepare the response document. If success, then RemoteControlSocket->InXml
+	 ** contains the received xml document, RemoteControlSocket->InXmlStatus.status is set to pugi::status_ok, and RemoteControlSocket->OutXml is cleared.
+	 ** On failure, RemoteControlSocket->InXmlStatus.status is set to pugi::status_no_document_element. */
+	void PrepareRemoteControllerCommunication();
+
+	/** If xml data was received from a remote controller, then handle all commands with inbound data (setters). */
+	void ReadFromRemoteController();
+
 	/** Read data from the game engine (PhysX etc). Called during the first half of each tick. */
 	void ReadFromSimulation();
-
-	/** If a remote controller is connected, then receive joint motor command and other data. */
-	void ReadFromRemoteController();
 
 
 	/* Outbound data flow, 2nd half of Tick() */
@@ -188,8 +196,11 @@ protected:
 	/** Write data to the game engine (PhysX etc). Called during the second half of each tick. */
 	void WriteToSimulation();
 
-	/** If a remote controller is connected, then send pose and other data. */
+	/** If xml data was received from a remote controller, then handle all commands that request outbound data (getters). */
 	void WriteToRemoteController();
+
+	/** If xml data was received from a remote controller, then send out the response document. */
+	void FinalizeRemoteControllerCommunication();
 
 
 	/* Client-server replication */

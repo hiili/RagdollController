@@ -162,8 +162,9 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	/* Relay data between the game engine and the remote controller, while calling additional tick functionality in between. */
 
 	// Read inbound data
-	ReadFromSimulation();
+	PrepareRemoteControllerCommunication();
 	ReadFromRemoteController();
+	ReadFromSimulation();
 
 	// Call the tick hook (available for inherited C++ classes), then Super::Tick(), which runs this actor's Blueprint
 	TickHook( deltaSeconds );
@@ -173,6 +174,7 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	// Write outbound data
 	WriteToSimulation();
 	WriteToRemoteController();
+	FinalizeRemoteControllerCommunication();
 
 
 	/* Handle client-server pose replication */
@@ -419,17 +421,6 @@ void AControlledRagdoll::ReadFromSimulation()
 
 
 
-void AControlledRagdoll::ReadFromRemoteController()
-{
-	// no-op if no remote controller
-	if( !this->IRemoteControllable::RemoteControlSocket ) return;
-
-	// ...
-}
-
-
-
-
 void AControlledRagdoll::WriteToSimulation()
 {
 	// init the error cleanup scope guard
@@ -472,12 +463,98 @@ void AControlledRagdoll::WriteToSimulation()
 
 
 
-void AControlledRagdoll::WriteToRemoteController()
+void AControlledRagdoll::HandleNetworkError( const std::string & description )
+{
+	// drop the connection
+	RemoteControlSocket.reset();
+
+	// set InXmlStatus.status to pugi::status_no_document_element
+	RemoteControlSocket->InXmlStatus.status = pugi::status_no_document_element;
+
+	// log
+	UE_LOG( LogRcCr, Error, TEXT( "(%s, %s) Remote controller connection failed: %s! Dropping the connection." ),
+		TEXT( __FUNCTION__ ), *GetHumanReadableName(), *FString( description.c_str() ) );
+}
+
+
+
+
+void AControlledRagdoll::PrepareRemoteControllerCommunication()
 {
 	// no-op if no remote controller
-	if( !this->IRemoteControllable::RemoteControlSocket ) return;
+	if( !this->RemoteControlSocket ) return;
 
-	// ...
+	// check that the connection is good
+	if( !RemoteControlSocket->IsGood() )
+	{
+		// connection failed
+		HandleNetworkError( "network level failure" );
+		return;
+	}
+
+	// read data from socket
+	RemoteControlSocket->SetBlocking( true );   // synchronous mode so block with no timeout; we really want that data on each tick
+	if( !RemoteControlSocket->GetXml() )
+	{
+		// read failed
+		HandleNetworkError( "failed to read xml data from the socket (" + std::string( RemoteControlSocket->InXmlStatus.description() ) + ")" );
+		return;
+	}
+
+	check( RemoteControlSocket->InXmlStatus.status == pugi::status_ok );
+}
+
+
+
+
+void AControlledRagdoll::FinalizeRemoteControllerCommunication()
+{
+	// no-op if no remote controller or no inbound data is available (latter test is redundant, because PrepareRemoteControllerCommunication() drops the
+	// connection in such cases)
+	if( !RemoteControlSocket || RemoteControlSocket->InXmlStatus.status != pugi::status_ok ) return;
+
+	// send OutXml
+	if( !RemoteControlSocket->PutXml() )
+	{
+		// send failed
+		HandleNetworkError( "failed to send the xml response document" );
+	}
+}
+
+
+
+
+void AControlledRagdoll::ReadFromRemoteController()
+{
+	// no-op if we have no valid data from remote
+	if( !RemoteControlSocket || RemoteControlSocket->InXmlStatus.status != pugi::status_ok ) return;
+	
+	UE_LOG( LogTemp, Log, TEXT( "GOT XML DATA" ) );
+
+	// handle all setter commands here and postpone getter handling to WriteToRemoteController()
+	if( pugi::xml_node node = RemoteControlSocket->InXml.child( "setActuators" ) )
+	{
+		//...
+	}
+}
+
+
+
+
+void AControlledRagdoll::WriteToRemoteController()
+{
+	// no-op if we have no valid data from remote
+	if( !RemoteControlSocket || RemoteControlSocket->InXmlStatus.status != pugi::status_ok ) return;
+
+	// handle all getter commands here; getters were handled in ReadFromRemoteController()
+	if( RemoteControlSocket->InXml.child( "getSensors" ) )
+	{
+		//...
+	}
+	if( RemoteControlSocket->InXml.child( "getActuators" ) )
+	{
+		//...
+	}
 }
 
 
