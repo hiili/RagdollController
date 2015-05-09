@@ -89,15 +89,8 @@ void AControlledRagdoll::PostInitializeComponents()
 		std::memcpy( &this->ServerInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(this->ServerInterpretationOfDeadbeef) );
 
 		// make sure that physics simulation is enabled also on a dedicated server
-		if( this->SkeletalMeshComponent )
-		{
-			this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
-			this->SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are enabled also via editor!
-		}
-		else
-		{
-			UE_LOG( LogRcCr, Error, TEXT( "(%s) Failed to enable SkeletalMeshComponent physics on dedicated server!" ), TEXT( __FUNCTION__ ) );
-		}
+		this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
+		this->SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are enabled also via editor!
 
 	}
 	else
@@ -106,15 +99,8 @@ void AControlledRagdoll::PostInitializeComponents()
 		/* We are a network client, assume spectator role (although UE spectator mode is not used explicitly at the moment) */
 
 		// Set the skeletal mesh to kinematic mode, so as to track exactly the pose stream received from the server (we do not want any local physics interactions or simulation)
-		if( this->SkeletalMeshComponent )
-		{
-			// cannot do this, as UE appears to be using internally a different the coordinate system for kinematic skeletons!
-			//this->SkeletalMeshComponent->SetSimulatePhysics( false );
-		}
-		else
-		{
-			UE_LOG( LogRcCr, Error, TEXT( "(%s) Failed to switch SkeletalMeshComponent to kinematic mode on a network client!" ), TEXT( __FUNCTION__ ) );
-		}
+		// cannot do this, as UE appears to be using internally a different the coordinate system for kinematic skeletons!
+		//this->SkeletalMeshComponent->SetSimulatePhysics( false );
 
 	}
 
@@ -291,9 +277,6 @@ void AControlledRagdoll::ReadFromSimulation()
 	} );
 
 
-	// check that we have everything we need, otherwise bail out
-	if( !this->SkeletalMeshComponent || this->JointStates.Num() == 0 ) return;
-
 	// check that the array size matches the skeleton's joint count
 	if( this->JointStates.Num() != this->SkeletalMeshComponent->Constraints.Num() ) return;
 
@@ -345,9 +328,6 @@ void AControlledRagdoll::WriteToSimulation()
 		this->JointStates.Empty();
 	} );
 
-
-	// check that we have everything we need, otherwise bail out
-	if( !this->SkeletalMeshComponent || this->JointStates.Num() == 0 ) return;
 
 	// check that the array size matches the skeleton's joint count
 	if( this->JointStates.Num() != this->SkeletalMeshComponent->Constraints.Num() ) return;

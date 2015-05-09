@@ -135,7 +135,7 @@ class RAGDOLLCONTROLLER_API AControlledRagdoll :
 
 protected:
 
-	/** The SkeletalMeshComponent of the actor to be controlled. */
+	/** The SkeletalMeshComponent of the actor to be controlled. This is guaranteed to be always valid. */
 	USkeletalMeshComponent * SkeletalMeshComponent;
 
 	/** Our LevelScriptActor. This is guaranteed to be always valid. */
