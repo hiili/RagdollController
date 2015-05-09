@@ -227,5 +227,7 @@ public:
 	 ** data structs. During the second stage, outbound data is sent back to the game engine and to the remote controller. TickHook() and the actor's Blueprint
 	 ** are called between these stages. TickHook() is called just before the Blueprint. */
 	virtual void Tick( float deltaSeconds ) override;
+	// Temporary, remove when done testing
+	int tickCounter = -1;
 
 };
