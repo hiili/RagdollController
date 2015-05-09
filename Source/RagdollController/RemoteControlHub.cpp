@@ -51,7 +51,7 @@ void ARemoteControlHub::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	// if authority, then create the main listen socket
-	if( this->Role >= ROLE_Authority )
+	if( HasAuthority() )
 	{
 		CreateListenSocket();
 	} else {

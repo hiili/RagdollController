@@ -80,7 +80,7 @@ void AControlledRagdoll::PostInitializeComponents()
 	check( this->LevelScriptActor );
 
 
-	if( this->Role >= ROLE_Authority )
+	if( HasAuthority() )
 	{
 
 		/* We are standalone or a server */
@@ -140,7 +140,7 @@ void AControlledRagdoll::BeginPlay()
 void AControlledRagdoll::Tick( float deltaSeconds )
 {
 	// If network client, then we are just visualizing the ragdoll that is being simulated on the server
-	if( this->Role < ROLE_Authority )
+	if( !HasAuthority() )
 	{
 		// If client-side prediction is off, then update the pose here on each tick, effectively freezing the skelmesh between bone state replications.
 		// Otherwise update it in HandleBoneStatesReplicationEvent(). @see HandleBoneStatesReplicationEvent()
@@ -204,8 +204,6 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	//this->JointStates[jointInd].Bodies[1]->AddTorque( -200000.f * sin( float( tickCounter ) / 20.f ) * rf1global.RotateVector( FVector( 0.f, 0.f, 1.f ) ) );
 	this->JointStates[jointInd].Bodies[0]->AddForce( FVector( 0.f, 0.f, 10.f ) );
 }
-
-
 
 
 
@@ -554,7 +552,8 @@ void AControlledRagdoll::ReceivePose()
 
 void AControlledRagdoll::HandleBoneStatesReplicationEvent()
 {
-	// if client-side prediction is on, then update the pose here only when a new pose has been received. Otherwise update it in Tick(). @see Tick()
+	// if client-side prediction is on, then update the pose here, so as to do it only when a new pose has been received. Otherwise update it in Tick().
+	// @see Tick()
 	if( this->LevelScriptActor->PoseReplicationDoClientsidePrediction )
 	{
 		ReceivePose();
