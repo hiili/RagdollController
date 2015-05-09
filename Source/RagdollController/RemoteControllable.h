@@ -25,10 +25,6 @@ class IRemoteControllable
 	GENERATED_IINTERFACE_BODY()
 
 
-	/** Reference to this object as an AActor */
-	AActor * ThisActor;
-
-
 protected:
 
 	/** Remote control socket */
