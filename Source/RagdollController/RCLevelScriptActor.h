@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Engine/LevelScriptActor.h"
+#include "RemoteControllable.h"
 
 #include <boost/circular_buffer.hpp>
 #include <unordered_set>
@@ -16,7 +17,9 @@
  * 
  */
 UCLASS( Config = RagdollController )
-class RAGDOLLCONTROLLER_API ARCLevelScriptActor : public ALevelScriptActor
+class RAGDOLLCONTROLLER_API ARCLevelScriptActor :
+	public ALevelScriptActor,
+	public IRemoteControllable
 {
 	GENERATED_BODY()
 
@@ -96,5 +99,8 @@ public:
 	/** Unregister an actor from receiving automatic NetUpdateFrequency updates. No-op with a logged warning if the actor has not been registered.
 	 ** @see RegisterManagedNetUpdateFrequency */
 	void UnregisterManagedNetUpdateFrequency( AActor * actor );
+
+	/** Handle commands from a remote controller. */
+	void HandleRemoteCommands();
 
 };
