@@ -32,8 +32,8 @@ void ARCLevelScriptActor::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> 
 
 
 
-ARCLevelScriptActor::ARCLevelScriptActor() :
-	ALevelScriptActor( FObjectInitializer() ),
+ARCLevelScriptActor::ARCLevelScriptActor( const FObjectInitializer & ObjectInitializer ) :
+	Super( ObjectInitializer ),
 	tickTimestamps( ESTIMATE_TICKRATE_SAMPLES )
 {
 }

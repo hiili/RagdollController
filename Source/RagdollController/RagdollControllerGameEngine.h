@@ -16,7 +16,7 @@ class RAGDOLLCONTROLLER_API URagdollControllerGameEngine : public UGameEngine
 
 public:
 
-	URagdollControllerGameEngine();
+	URagdollControllerGameEngine( const FObjectInitializer & ObjectInitializer );
 
 	/** Override the dedicated server hard-coded tick rate cap. */
 	virtual float GetMaxTickRate( float DeltaTime, bool bAllowFrameRateSmoothing = true ) const override;

@@ -4,8 +4,8 @@
 #include "RagdollControllerGameEngine.h"
 
 
-URagdollControllerGameEngine::URagdollControllerGameEngine()
-	: Super( FObjectInitializer() )
+URagdollControllerGameEngine::URagdollControllerGameEngine( const FObjectInitializer & ObjectInitializer )
+	: Super( ObjectInitializer )
 {
 
 }

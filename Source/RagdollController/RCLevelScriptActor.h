@@ -80,7 +80,7 @@ public:
 
 
 
-	ARCLevelScriptActor();
+	ARCLevelScriptActor( const FObjectInitializer & ObjectInitializer );
 
 
 	virtual void PostInitializeComponents() override;

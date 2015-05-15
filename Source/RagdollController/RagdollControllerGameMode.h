@@ -19,6 +19,6 @@ class RAGDOLLCONTROLLER_API ARagdollControllerGameMode : public AGameMode
 
 public:
 
-	ARagdollControllerGameMode();
+	ARagdollControllerGameMode( const FObjectInitializer & ObjectInitializer );
 
 };

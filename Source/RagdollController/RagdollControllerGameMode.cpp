@@ -6,7 +6,7 @@
 
 
 
-ARagdollControllerGameMode::ARagdollControllerGameMode()
-	: Super( FObjectInitializer() )
+ARagdollControllerGameMode::ARagdollControllerGameMode( const FObjectInitializer & ObjectInitializer )
+	: Super( ObjectInitializer )
 {
 }
