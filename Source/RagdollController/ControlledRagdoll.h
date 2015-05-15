@@ -130,16 +130,16 @@ class RAGDOLLCONTROLLER_API AControlledRagdoll :
 
 
 	/** Last time (wall clock time) that the pose was sent using SendPose(). */
-	double lastSendPoseWallclockTime;
+	double lastSendPoseWallclockTime{ -INFINITY };
 
 
 protected:
 
 	/** The SkeletalMeshComponent of the actor to be controlled. This is guaranteed to be always valid. */
-	USkeletalMeshComponent * SkeletalMeshComponent;
+	USkeletalMeshComponent * SkeletalMeshComponent{};
 
-	/** Our LevelScriptActor. This is guaranteed to be always valid. */
-	ARCLevelScriptActor * LevelScriptActor;
+	/** Our LevelScriptActor. Note that this is always null during an editor session! */
+	ARCLevelScriptActor * LevelScriptActor{};
 
 	/** Server's float interpretation of 0xdeadbeef, for checking float representation compatibility (eg, float endianness). Assume that UE replicates
 	 ** floats always correctly. */
