@@ -167,7 +167,7 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 	/* Handle client-server pose replication */
 
-	// Store pose so that it can be replicated to client(s)
+	// Store pose to BoneStates so that it will be replicated to client(s)
 	SendPose();
 
 
