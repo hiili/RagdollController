@@ -470,9 +470,50 @@ void AControlledRagdoll::SendPose()
 	if( currentTime - this->lastSendPoseWallclockTime < 1.f / (2.f * this->LevelScriptActor->RealtimeNetUpdateFrequency) ) return;
 	this->lastSendPoseWallclockTime = currentTime;
 
+	// store the pose to BoneStates
+	SavePose( this->BoneStates );
+}
+
+
+
+
+void AControlledRagdoll::ReceivePose()
+{
+	// Check for float binary compatibility (eg endianness) and that the PhysX data sizes match. Assume that UE replicates floats always correctly.
+	float ourInterpretationOfDeadbeef;
+	std::memcpy( &ourInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(ourInterpretationOfDeadbeef) );
+	if( std::abs( (this->ServerInterpretationOfDeadbeef / ourInterpretationOfDeadbeef) - 1.f ) > 1e-6f
+		|| (this->BoneStates.Num() > 0 && !this->BoneStates[0].DoDataSizesMatch()) )
+	{
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Floats are not binary compatible or bone state data sizes do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
+		return;
+	}
+
+	LoadPose( this->BoneStates );
+}
+
+
+
+
+void AControlledRagdoll::HandleBoneStatesReplicationEvent()
+{
+	// if client-side prediction is on, then update the pose here, so as to do it only when a new pose has been received. Otherwise update it in Tick().
+	// @see Tick()
+	check( this->LevelScriptActor );
+	if( this->LevelScriptActor->PoseReplicationDoClientsidePrediction )
+	{
+		ReceivePose();
+	}
+}
+
+
+
+
+void AControlledRagdoll::SavePose( TArray<FBoneState> & storage )
+{
 	// check the number of bones and resize the BoneStates array
 	int numBodies = this->SkeletalMeshComponent->Bodies.Num();
-	this->BoneStates.SetNum( numBodies );
+	storage.SetNum( numBodies );
 
 	// loop through bones and write out state data
 	for( int body = 0; body < numBodies; ++body )
@@ -485,33 +526,23 @@ void AControlledRagdoll::SendPose()
 		}
 
 		// Replicate pose
-		this->BoneStates[body].GetPxTransform() = pxBody->getGlobalPose();
-		this->BoneStates[body].GetPxLinearVelocity() = pxBody->getLinearVelocity();
-		this->BoneStates[body].GetPxAngularVelocity() = pxBody->getAngularVelocity();
+		storage[body].GetPxTransform() = pxBody->getGlobalPose();
+		storage[body].GetPxLinearVelocity() = pxBody->getLinearVelocity();
+		storage[body].GetPxAngularVelocity() = pxBody->getAngularVelocity();
 	}
 }
 
 
 
 
-void AControlledRagdoll::ReceivePose()
+void AControlledRagdoll::LoadPose( TArray<FBoneState> & storage )
 {
-	int numBodies = this->BoneStates.Num();
+	int numBodies = storage.Num();
 
 	// Verify that the skeletal meshes have the same number of bones (for example, one might not be initialized yet, or replication might have not yet started).
 	if( numBodies != this->SkeletalMeshComponent->Bodies.Num() )
 	{
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Number of bones do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
-		return;
-	}
-
-	// Check for float binary compatibility (eg endianness) and that the PhysX data sizes match. Assume that UE replicates floats always correctly.
-	float ourInterpretationOfDeadbeef;
-	std::memcpy( &ourInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(ourInterpretationOfDeadbeef) );
-	if( std::abs( (this->ServerInterpretationOfDeadbeef / ourInterpretationOfDeadbeef) - 1.f ) > 1e-6f
-		|| (this->BoneStates.Num() > 0 && !this->BoneStates[0].DoDataSizesMatch()) )
-	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) Floats are not binary compatible or bone state data sizes do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
 		return;
 	}
 
@@ -526,22 +557,8 @@ void AControlledRagdoll::ReceivePose()
 		}
 
 		// Replicate pose
-		pxBody->setGlobalPose( this->BoneStates[body].GetPxTransform() );
-		pxBody->setLinearVelocity( this->BoneStates[body].GetPxLinearVelocity() );
-		pxBody->setAngularVelocity( this->BoneStates[body].GetPxAngularVelocity() );
-	}
-}
-
-
-
-
-void AControlledRagdoll::HandleBoneStatesReplicationEvent()
-{
-	// if client-side prediction is on, then update the pose here, so as to do it only when a new pose has been received. Otherwise update it in Tick().
-	// @see Tick()
-	check( this->LevelScriptActor );
-	if( this->LevelScriptActor->PoseReplicationDoClientsidePrediction )
-	{
-		ReceivePose();
+		pxBody->setGlobalPose( storage[body].GetPxTransform() );
+		pxBody->setLinearVelocity( storage[body].GetPxLinearVelocity() );
+		pxBody->setAngularVelocity( storage[body].GetPxAngularVelocity() );
 	}
 }
