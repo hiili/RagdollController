@@ -216,12 +216,23 @@ protected:
 	 ** acting would exceed this cap. */
 	void SendPose();
 
-	/** Apply replicated pose from the BoneStates array. */
+	/** Apply the pose from the replicated BoneStates array. Performs a binary compatibility check. No rate capping is done here. */
 	void ReceivePose();
 
-	/** Handle pose replication events. */
+	/** Handle pose replication events. This is called by the UE replication system whenever an update for BoneStates is received. */
 	UFUNCTION()
 	void HandleBoneStatesReplicationEvent();
+
+
+	/* serialization support */
+
+	/** Store the current pose to the provided BoneStates array, overwriting its current contents. */
+	void SavePose( TArray<FBoneState> & storage );
+
+	/** Apply the pose from the provided BoneStates array. */
+	void LoadPose( TArray<FBoneState> & storage );
+
+
 
 
 public:
