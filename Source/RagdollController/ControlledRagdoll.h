@@ -119,7 +119,7 @@ public:
 
 
 /**
- * 
+ * Main class for a controlled ragdoll.
  */
 UCLASS()
 class RAGDOLLCONTROLLER_API AControlledRagdoll :
@@ -133,7 +133,12 @@ class RAGDOLLCONTROLLER_API AControlledRagdoll :
 	double lastSendPoseWallclockTime{ -INFINITY };
 
 
+
+
 protected:
+
+
+	/* Class data */
 
 	/** The SkeletalMeshComponent of the actor to be controlled. This is guaranteed to be always valid. */
 	USkeletalMeshComponent * SkeletalMeshComponent{};
@@ -147,7 +152,7 @@ protected:
 	float ServerInterpretationOfDeadbeef;
 
 
-	/* State data */
+	/* Ragdoll state data */
 
 	/** Cached joint names of the actor's SkeletalMeshComponent. When initialized, then JointNames.Num() == JointStates.Num(). */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
@@ -163,11 +168,13 @@ protected:
 	TArray<FBoneState> BoneStates;
 
 
+	/* Miscellaneous methods */
+
 	/** Initialize the state data structs (read static data from the game engine, etc.) */
 	void InitState();
 
 	/** Tick hook that is called from Tick() after internal data structs have been updated but before sending anything out to PhysX and the remote controller.
-	 ** This is called between the 1st and the 2nd half of Tick(), and just before running the actor's Blueprint. */
+	 ** This is called between the 1st and the 2nd half of Tick() (see below), and just before running the actor's Blueprint. */
 	virtual void TickHook( float deltaSeconds ) {};
 
 	/** Run a sanity check on all Blueprint-writable data. */
@@ -205,7 +212,8 @@ protected:
 
 	/* Client-server replication */
 
-	/** Store pose into the replicated BoneStates array. */
+	/** Store pose into the replicated BoneStates array. The update rate is capped by 2 * NET_UPDATE_FREQUENCY: this method returns without doing anything if
+	 ** acting would exceed this cap. */
 	void SendPose();
 
 	/** Apply replicated pose from the BoneStates array. */
