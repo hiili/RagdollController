@@ -14,7 +14,11 @@
 
 
 /**
+ * A custom LevelScriptActor class for managing the tick rate, ragdoll replication and level-wide remote commands (level snapshot and recall, mainly).
  * 
+ * Ticking order:
+ * RCLevelScriptActor is currently designed to be ticked before ControlledRagdoll actors. This must be ensured in such actors by using the
+ * AddTickPrerequisiteActor() method. Note that whether the actors are ticking in the right order is not currently checked anywhere!
  */
 UCLASS( Config = RagdollController )
 class RAGDOLLCONTROLLER_API ARCLevelScriptActor :
