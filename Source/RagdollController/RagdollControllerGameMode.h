@@ -16,6 +16,8 @@ class RAGDOLLCONTROLLER_API ARagdollControllerGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
+	int tmp{ 0 };
+
 
 public:
 
