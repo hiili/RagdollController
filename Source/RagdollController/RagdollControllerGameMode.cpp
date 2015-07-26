@@ -10,3 +10,41 @@ ARagdollControllerGameMode::ARagdollControllerGameMode( const FObjectInitializer
 	: Super( ObjectInitializer )
 {
 }
+
+
+
+
+void ARagdollControllerGameMode::InitGame( const FString & MapName, const FString & Options, FString & ErrorMessage )
+{
+	Super::InitGame( MapName, Options, ErrorMessage );
+}
+
+
+
+
+void ARagdollControllerGameMode::Tick( float DeltaSeconds )
+{
+	Super::Tick( DeltaSeconds );
+
+	// handle remotely sent level commands
+	HandleRemoteCommands();
+}
+
+
+
+
+void ARagdollControllerGameMode::HandleRemoteCommands()
+{
+	++tmp;
+
+	if( tmp == 25 )
+	{
+		UE_LOG( LogTemp, Error, TEXT( "*********************************** SNAPSHOT ********************************************************" ) );
+	}
+
+	if( tmp % 100 == 0 )
+	{
+		UE_LOG( LogTemp, Error, TEXT( "*********************************** RESET ********************************************************" ) );
+		//ALevelScriptActor::LevelReset();
+	}
+}
