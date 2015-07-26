@@ -304,13 +304,16 @@ void ARCLevelScriptActor::manageNetUpdateFrequencies( float gameDeltaTime )
 
 void ARCLevelScriptActor::HandleRemoteCommands()
 {
-	static int x = -1;
-	++x;
+	++tmp;
 
-	if( x == 100 )
+	if( tmp == 25 )
 	{
-		//UE_LOG( LogTemp, Error, TEXT( "*********************************** RESET ********************************************************" ) );
+		UE_LOG( LogTemp, Error, TEXT( "*********************************** SNAPSHOT ********************************************************" ) );
+	}
+
+	if( tmp % 100 == 0 )
+	{
+		UE_LOG( LogTemp, Error, TEXT( "*********************************** RESET ********************************************************" ) );
 		//ALevelScriptActor::LevelReset();
-		x = -1;
 	}
 }
