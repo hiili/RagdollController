@@ -109,18 +109,24 @@ void AControlledRagdoll::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// init the LevelScriptActor pointer
+	// init the RCLevelScriptActor and GameMode pointers
 	check( GetWorld() );
 	this->LevelScriptActor = dynamic_cast<ARCLevelScriptActor *>(GetWorld()->GetLevelScriptActor());
+	this->GameMode = GetWorld()->GetAuthGameMode();
 	
 	// Check that we got a LevelScriptActor. It is unavailable if we are in an editor session, but BeginPlay() should not have been called in that case.
 	check( this->LevelScriptActor );
 
-	// tick after LevelScriptActor
-	AddTickPrerequisiteActor( this->LevelScriptActor );
 
 	// Register for automatic NetUpdateFrequency management
 	this->LevelScriptActor->RegisterManagedNetUpdateFrequency( this );
+
+	// If running on authority, then make sure that we tick after GameMode (both the GameMode and regular actors tick in the same group, TG_PrePhysics)
+	if( HasAuthority() )
+	{
+		check( this->GameMode );
+		AddTickPrerequisiteActor( this->GameMode );
+	}
 }
 
 

@@ -97,9 +97,6 @@ void ARCLevelScriptActor::Tick( float deltaSeconds )
 {
 	Super::Tick( deltaSeconds );
 
-	// handle remotely sent level commands
-	HandleRemoteCommands();
-
 	// If not dedicated server, or CapServerTickRate == true, then cap fps here. The -UseFixedTimeStep commannd line option disables built-in framerate
 	// control in UEngine::UpdateTimeAndHandleMaxTickRate(), and we can't override that method as it is not virtual.
 	UWorld * world = GetWorld();
@@ -296,24 +293,5 @@ void ARCLevelScriptActor::manageNetUpdateFrequencies( float gameDeltaTime )
 	for( auto actor : this->NetUpdateFrequencyManagedActors )
 	{
 		actor->NetUpdateFrequency = netUpdateFrequency;
-	}
-}
-
-
-
-
-void ARCLevelScriptActor::HandleRemoteCommands()
-{
-	++tmp;
-
-	if( tmp == 25 )
-	{
-		UE_LOG( LogTemp, Error, TEXT( "*********************************** SNAPSHOT ********************************************************" ) );
-	}
-
-	if( tmp % 100 == 0 )
-	{
-		UE_LOG( LogTemp, Error, TEXT( "*********************************** RESET ********************************************************" ) );
-		//ALevelScriptActor::LevelReset();
 	}
 }

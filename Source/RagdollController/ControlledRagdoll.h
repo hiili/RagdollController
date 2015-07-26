@@ -4,6 +4,7 @@
 
 #include "GameFramework/Actor.h"
 #include "RCLevelScriptActor.h"
+#include "GameFramework/GameMode.h"
 #include "RemoteControllable.h"
 
 #include <PxTransform.h>
@@ -145,6 +146,9 @@ protected:
 
 	/** Our LevelScriptActor. Note that this is always null during an editor session! */
 	ARCLevelScriptActor * LevelScriptActor{};
+
+	/** The GameMode. Note that this is always null on non-authority, and probably also during an editor session! */
+	AGameMode * GameMode{};
 
 	/** Server's float interpretation of 0xdeadbeef, for checking float representation compatibility (eg, float endianness). Assume that UE replicates
 	 ** floats always correctly. */
