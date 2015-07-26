@@ -47,6 +47,8 @@ class RAGDOLLCONTROLLER_API ARCLevelScriptActor :
 	/** Manage net update frequencies of the registered actors (@see NetUpdateFrequencyManagedActors). */
 	void manageNetUpdateFrequencies( float gameDeltaTime );
 
+	int tmp{ 0 };
+
 
 public:
 
