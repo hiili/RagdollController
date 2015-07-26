@@ -111,15 +111,15 @@ void AControlledRagdoll::BeginPlay()
 
 	// init the RCLevelScriptActor and GameMode pointers
 	check( GetWorld() );
-	this->LevelScriptActor = dynamic_cast<ARCLevelScriptActor *>(GetWorld()->GetLevelScriptActor());
+	this->RCLevelScriptActor = dynamic_cast<ARCLevelScriptActor *>(GetWorld()->GetLevelScriptActor());
 	this->GameMode = GetWorld()->GetAuthGameMode();
 	
-	// Check that we got a LevelScriptActor. It is unavailable if we are in an editor session, but BeginPlay() should not have been called in that case.
-	check( this->LevelScriptActor );
+	// Check that we got a RCLevelScriptActor. It is unavailable if we are in an editor session, but BeginPlay() should not have been called in that case.
+	check( this->RCLevelScriptActor );
 
 
 	// Register for automatic NetUpdateFrequency management
-	this->LevelScriptActor->RegisterManagedNetUpdateFrequency( this );
+	this->RCLevelScriptActor->RegisterManagedNetUpdateFrequency( this );
 
 	// If running on authority, then make sure that we tick after GameMode (both the GameMode and regular actors tick in the same group, TG_PrePhysics)
 	if( HasAuthority() )
@@ -139,8 +139,8 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	{
 		// If client-side prediction is off, then update the pose here on each tick, effectively freezing the skelmesh between bone state replications.
 		// Otherwise update it in HandleBoneStatesReplicationEvent(). @see HandleBoneStatesReplicationEvent()
-		check( this->LevelScriptActor );   // LevelScriptActor is null during an editor session, but Tick() should not be called in that case
-		if( !this->LevelScriptActor->PoseReplicationDoClientsidePrediction )
+		check( this->RCLevelScriptActor );   // RCLevelScriptActor is null during an editor session, but Tick() should not be called in that case
+		if( !this->RCLevelScriptActor->PoseReplicationDoClientsidePrediction )
 		{
 			ReceivePose();
 		}
@@ -471,9 +471,9 @@ void AControlledRagdoll::SendPose()
 	if( GetWorld()->GetGameState()->PlayerArray.Num() - GetGameInstance()->GetNumLocalPlayers() <= 0 ) return;
 
 	// cap update rate by 2 * RealtimeNetUpdateFrequency (UE level replication intervals are not accurate, have a safety margin so as to not miss any replications)
-	check( this->LevelScriptActor );
+	check( this->RCLevelScriptActor );
 	double currentTime = FPlatformTime::Seconds();
-	if( currentTime - this->lastSendPoseWallclockTime < 1.f / (2.f * this->LevelScriptActor->RealtimeNetUpdateFrequency) ) return;
+	if( currentTime - this->lastSendPoseWallclockTime < 1.f / (2.f * this->RCLevelScriptActor->RealtimeNetUpdateFrequency) ) return;
 	this->lastSendPoseWallclockTime = currentTime;
 
 	// store the pose to BoneStates
@@ -505,8 +505,8 @@ void AControlledRagdoll::HandleBoneStatesReplicationEvent()
 {
 	// if client-side prediction is on, then update the pose here, so as to do it only when a new pose has been received. Otherwise update it in Tick().
 	// @see Tick()
-	check( this->LevelScriptActor );
-	if( this->LevelScriptActor->PoseReplicationDoClientsidePrediction )
+	check( this->RCLevelScriptActor );
+	if( this->RCLevelScriptActor->PoseReplicationDoClientsidePrediction )
 	{
 		ReceivePose();
 	}
