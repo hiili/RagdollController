@@ -144,8 +144,8 @@ protected:
 	/** The SkeletalMeshComponent of the actor to be controlled. This is guaranteed to be always valid. */
 	USkeletalMeshComponent * SkeletalMeshComponent{};
 
-	/** Our LevelScriptActor. Note that this is always null during an editor session! */
-	ARCLevelScriptActor * LevelScriptActor{};
+	/** Our custom LevelScriptActor. Note that this is always null during an editor session! */
+	ARCLevelScriptActor * RCLevelScriptActor{};
 
 	/** The GameMode. Note that this is always null on non-authority, and probably also during an editor session! */
 	AGameMode * GameMode{};
