@@ -23,6 +23,9 @@ class RAGDOLLCONTROLLER_API ARagdollControllerGameMode : public AGameMode
 
 	int tmp{ 0 };
 
+	FBufferArchive mArchive{ /*bIsPersistent =*/ false };
+	FObjectAndNameAsStringProxyArchive mProxyArchive{ mArchive, /*bInLoadIfFindFails =*/ false };
+
 
 	/** Handle commands from a remote controller. */
 	void HandleRemoteCommands();
