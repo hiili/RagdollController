@@ -20,4 +20,10 @@ public:
 	*/
 	static FString CleanupName( FString name );
 
+	/** Reinterpret the argument as an lvalue (if it isn't already). Use with care! From https://stackoverflow.com/questions/3731089/ */
+	template<typename T>
+	static T & as_lvalue( T && t )
+	{
+		return t;
+	}
 };
