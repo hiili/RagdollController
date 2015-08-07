@@ -254,4 +254,7 @@ public:
 	// Temporary, remove when done testing
 	int tickCounter = -1;
 
+	UPROPERTY( SaveGame )
+		int64 mTempCounter = -1;
+
 };

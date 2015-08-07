@@ -4,6 +4,7 @@
 #include "RagdollControllerGameMode.h"
 
 #include "Utility.h"
+#include "ControlledRagdoll.h"
 
 
 
@@ -44,16 +45,21 @@ void ARagdollControllerGameMode::HandleRemoteCommands()
 		UE_LOG( LogTemp, Error, TEXT( "*********************************** SNAPSHOT ********************************************************" ) );
 		UE_LOG( LogTemp, Warning, TEXT( "   *** Archive initial size: %d, sizeof(FTransform): %d" ), mArchive.TotalSize(), sizeof(FTransform) );
 
+		mProxyArchive.ArIsSaveGame = true;
+
 		// find all actors tagged with tag "snapshot"
 		check( GetWorld() );
 		for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
 		{
-			if( iter->ActorHasTag( "snapshot" ) )
+			if( iter->ActorHasTag( "snapshotOwen" ) )
 			{
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Found actor with tag 'snapshot', actor name: %s" ), *iter->GetName() );
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Taking snapshot from it.." ) );
 
-				mProxyArchive << Utility::as_lvalue( iter->GetTransform() );
+				//mProxyArchive << Utility::as_lvalue( iter->GetTransform() );
+				
+				// doesn't work without the cast either
+				mProxyArchive << Utility::as_lvalue( dynamic_cast<AControlledRagdoll *>(*iter) );
 
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Done! archive size: %d" ), mArchive.TotalSize() );
 			}
@@ -65,20 +71,19 @@ void ARagdollControllerGameMode::HandleRemoteCommands()
 		UE_LOG( LogTemp, Error, TEXT( "*********************************** RESET ********************************************************" ) );
 		//ALevelScriptActor::LevelReset();
 
-		FMemoryReader archiveReader( mArchive, /*bIsPersistent =*/ false );
-		FTransform t;
+		FMemoryReader archiveReader{ mArchive, /*bIsPersistent =*/ false };
+		FObjectAndNameAsStringProxyArchive proxyArchiveReader{ archiveReader, /*bInLoadIfFindFails =*/ false };
 
 		// find all actors tagged with tag "snapshot"
 		check( GetWorld() );
 		for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
 		{
-			if( iter->ActorHasTag( "snapshot" ) )
+			if( iter->ActorHasTag( "snapshotOwen" ) )
 			{
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Found actor with tag 'snapshot', actor name: %s" ), *iter->GetName() );
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Restoring from snapshot.." ) );
 
-				archiveReader << t;
-				iter->SetActorTransform( t );
+				proxyArchiveReader << Utility::as_lvalue( dynamic_cast<AControlledRagdoll *>(*iter) );
 
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Done! archive size: %d" ), mArchive.TotalSize() );
 			}

@@ -188,6 +188,10 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 	/* temporary test code */
 
+	++mTempCounter;
+	UE_LOG( LogTemp, Error, TEXT( "mTempCounter == %d" ), mTempCounter );
+
+
 	++tickCounter;
 
 	int32 jointInd = this->JointNames.Find( FName( "upperarm_l" ) );
