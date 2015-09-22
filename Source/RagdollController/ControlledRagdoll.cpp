@@ -495,6 +495,7 @@ void AControlledRagdoll::ReceivePose()
 		return;
 	}
 
+	// Load the pose from the replicated array. Validity of the array is checked inside LoadPose().
 	LoadPose( this->BoneStates );
 }
 
@@ -521,7 +522,7 @@ void AControlledRagdoll::SavePose( TArray<FBoneState> & storage )
 	int numBodies = this->SkeletalMeshComponent->Bodies.Num();
 	storage.SetNum( numBodies );
 
-	// loop through bones and write out state data
+	// loop through bones and store their state data
 	for( int body = 0; body < numBodies; ++body )
 	{
 		physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
@@ -531,7 +532,7 @@ void AControlledRagdoll::SavePose( TArray<FBoneState> & storage )
 			return;
 		}
 
-		// Replicate pose
+		// Copy pose from the skeletal mesh to storage
 		storage[body].GetPxTransform() = pxBody->getGlobalPose();
 		storage[body].GetPxLinearVelocity() = pxBody->getLinearVelocity();
 		storage[body].GetPxAngularVelocity() = pxBody->getAngularVelocity();
@@ -545,14 +546,14 @@ void AControlledRagdoll::LoadPose( TArray<FBoneState> & storage )
 {
 	int numBodies = storage.Num();
 
-	// Verify that the skeletal meshes have the same number of bones (for example, one might not be initialized yet, or replication might have not yet started).
+	// Verify that the skeletal meshes have the same number of bones (for example, one might not be initialized yet, or storage could be still uninitialized).
 	if( numBodies != this->SkeletalMeshComponent->Bodies.Num() )
 	{
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Number of bones do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
 		return;
 	}
 
-	// Loop through bones and apply received replication data to each
+	// Loop through bones and apply data from storage to each
 	for( int body = 0; body < numBodies; ++body )
 	{
 		physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
@@ -562,7 +563,7 @@ void AControlledRagdoll::LoadPose( TArray<FBoneState> & storage )
 			return;
 		}
 
-		// Replicate pose
+		// Copy pose from storage to the skeletal mesh
 		pxBody->setGlobalPose( storage[body].GetPxTransform() );
 		pxBody->setLinearVelocity( storage[body].GetPxLinearVelocity() );
 		pxBody->setAngularVelocity( storage[body].GetPxAngularVelocity() );
