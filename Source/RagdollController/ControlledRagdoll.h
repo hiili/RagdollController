@@ -93,7 +93,7 @@ public:
 	bool DoDataSizesMatch()
 	{
 		return
-			TransformData.Num() == sizeof(physx::PxTransform); // &&
+			TransformData.Num() == sizeof(physx::PxTransform) &&
 			LinearVelocityData.Num() == sizeof(physx::PxVec3) &&
 			AngularVelocityData.Num() == sizeof(physx::PxVec3);
 	}
@@ -220,7 +220,8 @@ protected:
 	 ** acting would exceed this cap. */
 	void SendPose();
 
-	/** Apply the pose from the replicated BoneStates array. Performs a binary compatibility check. No rate capping is done here. */
+	/** Apply the pose from the replicated BoneStates array. Performs a binary compatibility check. No-op if no data received yet (logged as error, though).
+	 ** No rate capping is done here. */
 	void ReceivePose();
 
 	/** Handle pose replication events. This is called by the UE replication system whenever an update for BoneStates is received. */
