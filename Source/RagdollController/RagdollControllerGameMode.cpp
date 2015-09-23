@@ -51,15 +51,24 @@ void ARagdollControllerGameMode::HandleRemoteCommands()
 		check( GetWorld() );
 		for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
 		{
-			if( iter->ActorHasTag( "snapshotOwen" ) )
+			if( iter->ActorHasTag( "snapshot" ) )
 			{
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Found actor with tag 'snapshot', actor name: %s" ), *iter->GetName() );
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Taking snapshot from it.." ) );
 
-				//mProxyArchive << Utility::as_lvalue( iter->GetTransform() );
+				mProxyArchive << Utility::as_lvalue( iter->GetTransform() );
 				
-				// doesn't work without the cast either
-				mProxyArchive << Utility::as_lvalue( dynamic_cast<AControlledRagdoll *>(*iter) );
+				//// doesn't work without the cast either
+				//mProxyArchive << Utility::as_lvalue( dynamic_cast<AControlledRagdoll *>(*iter) );
+
+				AActor * currentActor = *iter;
+				const TArray<UActorComponent *> & components = currentActor->GetComponents();
+				for( auto componentIter = components.CreateConstIterator(); componentIter; ++componentIter )
+				{
+					UActorComponent * currentComponent = *componentIter;
+					int x = 0;   // add a breakpoint here to inspect each 'snapshot'-tagged actor and their components
+				}
+
 
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Done! archive size: %d" ), mArchive.TotalSize() );
 			}
@@ -73,17 +82,21 @@ void ARagdollControllerGameMode::HandleRemoteCommands()
 
 		FMemoryReader archiveReader{ mArchive, /*bIsPersistent =*/ false };
 		FObjectAndNameAsStringProxyArchive proxyArchiveReader{ archiveReader, /*bInLoadIfFindFails =*/ false };
+		FTransform t;
 
 		// find all actors tagged with tag "snapshot"
 		check( GetWorld() );
 		for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
 		{
-			if( iter->ActorHasTag( "snapshotOwen" ) )
+			if( iter->ActorHasTag( "snapshot" ) )
 			{
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Found actor with tag 'snapshot', actor name: %s" ), *iter->GetName() );
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Restoring from snapshot.." ) );
 
-				proxyArchiveReader << Utility::as_lvalue( dynamic_cast<AControlledRagdoll *>(*iter) );
+				proxyArchiveReader << t;
+				iter->SetActorTransform( t );
+
+				//proxyArchiveReader << Utility::as_lvalue( dynamic_cast<AControlledRagdoll *>(*iter) );
 
 				UE_LOG( LogTemp, Warning, TEXT( "   *** Done! archive size: %d" ), mArchive.TotalSize() );
 			}
