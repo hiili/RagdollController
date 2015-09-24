@@ -30,7 +30,7 @@ void IRemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 	this->RemoteControlSocket = std::move( socket );
 
 	// log
-	AActor * thisActor = dynamic_cast<AActor *>(this);
-	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Actor: %s" ), TEXT( __FUNCTION__ ),
-		thisActor ? *Utility::CleanupName( thisActor->GetName() ) : TEXT( "(N/A)" ) );
+	UObject * thisAsUObject = dynamic_cast<UObject *>(this);
+	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Target name: %s" ), TEXT( __FUNCTION__ ),
+		thisAsUObject ? *Utility::CleanupName( thisAsUObject->GetName() ) : TEXT( "(N/A: target is not an UObject)" ) );
 }
