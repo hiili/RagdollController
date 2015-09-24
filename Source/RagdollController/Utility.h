@@ -11,7 +11,7 @@ public:
 
 	/** Remove all underscore-delimited suffixes from the name of the object. This can be useful for some editor-placed actors that get some automatically
 	* generated suffixes during startup. For example, "OwenBP" can become "OwenBP_C_1" during startup. Calling this method on such an actor would return the
-	* string "OwenBP". Note that avoiding class names when naming actors can prevent the engine from adding suffixes in some cases.
+	* string "OwenBP". When naming actors, note that you can sometimes prevent the engine from adding suffixes by avoiding existing class names.
 	*
 	* WARNING: During a Play in editor (PIE) session, you must specify the world when iterating over actors:
 	*     TActorIterator<AActor> iter( GetWorld() )
