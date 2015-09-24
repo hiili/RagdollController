@@ -18,10 +18,11 @@ namespace pugi
 /**
  * Helper class for communicating via an XmlFSocket using MbML (Matlab Markup Language, see Almeida et al., 2003).
  * 
- * The class contains only static helper methods and is currently hard-coded to use pugixml.
+ * The class contains only static helper methods and is currently hard-coded to use pugixml. To use this class, you need to first create a pugixml document
+ * object by yourself, after which you can use these helper methods to add MbML elements to that document.
  * 
- * Elements can be added with the element adder methods. Struct elements are created with AddStructArray() and are used to construct a hierarchical document,
- * which converts on the Matlab side to a struct hierarchy. Data elements are created with the AddCellArray(), AddCharArray() and AddMatrix() methods.
+ * Elements can be added with the element adder methods. Struct elements are created with AddStructArray() and are used to construct a hierarchical document
+ * that converts on the Matlab side to a struct hierarchy. Data elements are created with the AddCellArray(), AddCharArray() and AddMatrix() methods.
  * 
  * The data items for multidimensional elements are added linearly, according to Matlab's column-major order (the first dimension is contiguous).
  * The content for multidimensional structs can be added simply by adding all fields of the first struct, then all fields of the second struct, and so on.

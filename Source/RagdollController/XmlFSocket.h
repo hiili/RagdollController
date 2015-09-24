@@ -25,7 +25,11 @@
 *   XML_DOCUMENT_END
 * All outgoing xml documents are preceded by a similar block headers and footers.
 * 
+* If you are going to communicate with Matlab, then you might want to take a look at the Mbml helper class.
+* 
 * Warning: No flood protection! The line buffer size is unlimited.
+* 
+* @see Mbml
 */
 class XmlFSocket
 {
@@ -82,7 +86,7 @@ public:
 
 
 	/** The last XML document received with GetXml(). The document is reset on the next read operation (GetLine or GetXml); the document is an in-situ
-	 ** parse of the XmlFSocket's internal buffer, with the implication that any subsequent read operation on this XmlFSocket needs to reset it. */
+	 ** parse of the XmlFSocket's internal buffer, with the implication that any subsequent read operation on this XmlFSocket needs to reset this document. */
 	pugi::xml_document InXml;
 
 	/** Parse status of InXMl, set by GetXml(). If GetXml() has not been called yet or if InXMl has been reset due to a subsequent (attempted) read operation,

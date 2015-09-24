@@ -16,7 +16,25 @@
 
 
 /**
+ * A hub entity for parsing and forwarding incoming connection requests from remote controllers to RemoteControllable actors.
  * 
+ * The hub is activated by simply dropping one into the Unreal world. It listens on a TCP port (7770, hard-coded at the moment). Once a connection is
+ * received, the remote controller can send command lines to the hub. All incoming lines must be terminated with LF or CRLF; all outgoing lines are terminated
+ * with LF. Currently, only the CONNECT command is supported, and it must be preceded with a proper handshake string. The usage is as follows:
+ *
+ *   <remote> RagdollController RCH: CONNECT Owen
+ *   <hub> OK
+ *   
+ * The connection has now been forwarded to the AActor with the provided name (Owen, in this case). The target actor must inherit from RemoteControllable. Note
+ * that the provided name is matched against UObject names that are cleaned up with Utility::CleanupName, which effectively removes all underscore-delimited
+ * suffixes from the name. In case of an error, the hub responds with the line ERROR. The actual reason for the error is logged in the engine logs. All log
+ * output is placed in the LogRcRch log.
+ * 
+ * From this point on, the communication protocol depends on the target actor; the hub does not intervene in the connection in any further way. However, the
+ * hub wraps the connection socket into an XmlFSocket object, thus providing the basic tools for line-based and XML-based communications.
+ * If you are going to communicate with Matlab, then you might want to use also the Mbml helper class.
+ * 
+ * @see RemoteControllable, XmlFSocket, Mbml
  */
 UCLASS(Blueprintable)
 class RAGDOLLCONTROLLER_API ARemoteControlHub : public AActor
