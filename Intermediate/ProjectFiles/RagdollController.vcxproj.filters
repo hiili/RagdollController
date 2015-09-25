@@ -71,12 +71,6 @@
     <ClInclude Include="..\..\Source\RagdollController\RCLevelScriptActor.h">
       <Filter>Source\RagdollController</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\Source\RagdollController\RemoteControllable.cpp">
-      <Filter>Source\RagdollController</Filter>
-    </ClCompile>
-    <ClInclude Include="..\..\Source\RagdollController\RemoteControllable.h">
-      <Filter>Source\RagdollController</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\RagdollController\ScopeGuard.h">
       <Filter>Source\RagdollController</Filter>
     </ClInclude>
@@ -97,34 +91,40 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\RagdollController\RemoteControlHub.h">
-      <Filter>Source\RagdollController</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\RagdollController\XmlFSocket.h">
-      <Filter>Source\RagdollController</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugiconfig.hpp">
       <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.hpp">
       <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\RagdollController\Mbml.h">
-      <Filter>Source\RagdollController</Filter>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\Mbml.h">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControlHub.h">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllable.h">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\XmlFSocket.h">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\RagdollController\RemoteControlHub.cpp">
-      <Filter>Source\RagdollController</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\RagdollController\XmlFSocket.cpp">
-      <Filter>Source\RagdollController</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.cpp">
       <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\RagdollController\Mbml.cpp">
-      <Filter>Source\RagdollController</Filter>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\Mbml.cpp">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControlHub.cpp">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllable.cpp">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\XmlFSocket.cpp">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +136,9 @@
     </Filter>
     <Filter Include="Source\RagdollController\ThirdParty\pugixml-1.5">
       <UniqueIdentifier>{eea13076-2e3d-4590-9688-dcd382a48461}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RagdollController\RemoteControlSystem">
+      <UniqueIdentifier>{fe30f4be-838e-4e4d-9c51-7756d4bcea79}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
