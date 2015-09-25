@@ -450,7 +450,7 @@ void AControlledRagdoll::WriteToRemoteController()
 	// no-op if we have no valid data from remote
 	if( !RemoteControlSocket || RemoteControlSocket->InXmlStatus.status != pugi::status_ok ) return;
 
-	// handle all getter commands here; getters were handled in ReadFromRemoteController()
+	// handle all getter commands here; setters were handled in ReadFromRemoteController()
 	if( RemoteControlSocket->InXml.child( "getSensors" ) )
 	{
 		//...
