@@ -132,8 +132,35 @@
 		<None Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.hpp">
 			<Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
 		</None >
-        <Filter Include="Source\RagdollController\RemoteControlSystem">
-            <UniqueIdentifier>{fe30f4be-838e-4e4d-9c51-7756d4bcea79}</UniqueIdentifier>
-        </Filter>
-    	</ItemGroup>
+		<ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotBase.h">
+			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\PrimitiveComponentSnapshot.h">
+			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\SkeletalMeshComponentSnapshot.h">
+			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.h">
+			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+		</ClInclude>
+		<ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotBase.cpp">
+			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\PrimitiveComponentSnapshot.cpp">
+			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\SkeletalMeshComponentSnapshot.cpp">
+			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.cpp">
+			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+		</ClCompile>
+		<Filter Include="Source\RagdollController\RemoteControlSystem">
+			<UniqueIdentifier>{fe30f4be-838e-4e4d-9c51-7756d4bcea79}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Source\RagdollController\DeepSnapshotSystem">
+			<UniqueIdentifier>{2c35c841-29cc-4310-acfb-ec9ec2570dfa}</UniqueIdentifier>
+		</Filter>
+		</ItemGroup>
 </Project>
