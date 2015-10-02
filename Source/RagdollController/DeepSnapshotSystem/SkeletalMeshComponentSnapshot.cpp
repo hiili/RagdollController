@@ -6,3 +6,15 @@
 
 
 
+void USkeletalMeshComponentSnapshot::Snapshot()
+{
+	UE_LOG( LogTemp, Error, TEXT( "SkelMeshSnap::Snapshot" ) );
+}
+
+
+
+
+void USkeletalMeshComponentSnapshot::Recall()
+{
+	UE_LOG( LogTemp, Error, TEXT( "SkelMeshSnap::Recall" ) );
+}
