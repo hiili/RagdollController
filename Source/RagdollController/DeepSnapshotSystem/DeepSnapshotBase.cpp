@@ -21,8 +21,17 @@ void UDeepSnapshotBase::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	// ...
-	
+	// try to select a suitable target component
+	if( InitialTargetComponentName.IsNone() )
+	{
+		SelectTargetComponentByType();
+	}
+	else
+	{
+		SelectTargetComponentByName();
+	}
+
+	UE_LOG( LogTemp, Error, TEXT("target ptr: %p, target name: %s"), TargetComponent, TargetComponent ? *TargetComponent->GetName() : TEXT("") );
 }
 
 
@@ -34,3 +43,42 @@ void UDeepSnapshotBase::TickComponent( float DeltaTime, ELevelTick TickType, FAc
 	// ...
 }
 
+
+
+
+bool UDeepSnapshotBase::SelectTargetComponentByName()
+{
+	// no-op if name is not set
+	if( InitialTargetComponentName.IsNone() ) return false;
+
+	// try to find the component with a matching name from the owning actor
+	return SelectTargetComponentByPredicate( [this]( UActorComponent * candidate ){
+		return candidate && candidate->GetFName() == InitialTargetComponentName;
+	} );
+}
+
+
+bool UDeepSnapshotBase::SelectTargetComponentByType()
+{
+	// try to find a type-matching component from the owning actor
+	return SelectTargetComponentByPredicate( [this]( UActorComponent * candidate ){
+		return candidate && IsAcceptableTargetType( candidate );
+	} );
+}
+
+
+
+
+bool UDeepSnapshotBase::SelectTargetComponentByPredicate( std::function<bool( UActorComponent * )> pred )
+{
+	// try to find an accepted component from the owning actor
+	check( GetOwner() );
+	UActorComponent * const * result = GetOwner()->GetComponents().FindByPredicate( pred );
+
+	// return false if not found (double-check that the found component pointer is not null)
+	if( !result || !*result ) return false;
+
+	// target found; assign to TargetComponent and return true
+	TargetComponent = *result;
+	return true;
+}

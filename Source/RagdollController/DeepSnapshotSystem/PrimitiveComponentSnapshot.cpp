@@ -6,3 +6,15 @@
 
 
 
+void UPrimitiveComponentSnapshot::Snapshot()
+{
+
+}
+
+
+
+
+void UPrimitiveComponentSnapshot::Recall()
+{
+
+}
