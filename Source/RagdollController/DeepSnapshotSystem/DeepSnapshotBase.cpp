@@ -63,8 +63,9 @@ void UDeepSnapshotBase::TickComponent( float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	// perform automatic replication if enabled
-	if( AutoReplicationFrequency > 0 )
+	// perform automatic replication if automatic replication is enabled and we have authority
+	check( GetOwner() );
+	if( GetOwner()->HasAuthority() && AutoReplicationFrequency > 0 )
 	{
 		// is it time to replicate?
 		if( AutoReplicationPhase == 0 )
