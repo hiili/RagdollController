@@ -6,15 +6,9 @@
 
 
 
-void USkeletalMeshComponentSnapshot::Snapshot()
+void USkeletalMeshComponentSnapshot::SerializeTarget( FArchive & archive, UActorComponent & target )
 {
-	UE_LOG( LogTemp, Error, TEXT( "SkelMeshSnap::Snapshot" ) );
-}
+	Super::SerializeTarget( archive, target );
 
-
-
-
-void USkeletalMeshComponentSnapshot::Recall()
-{
-	UE_LOG( LogTemp, Error, TEXT( "SkelMeshSnap::Recall" ) );
+	UE_LOG( LogTemp, Error, TEXT( "SkelMeshSnap::SerializeTarget. IsLoading: %d, IsSaving: %d" ), archive.IsLoading(), archive.IsSaving() );
 }

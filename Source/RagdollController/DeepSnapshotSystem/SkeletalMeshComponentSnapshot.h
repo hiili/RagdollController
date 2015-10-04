@@ -14,17 +14,9 @@ class RAGDOLLCONTROLLER_API USkeletalMeshComponentSnapshot : public UPrimitiveCo
 	GENERATED_BODY()
 	
 
-public:
-
-	/* Deep snapshot system interface */
-
-	void Snapshot() override;
-	void Recall() override;
-
-
 protected:
 
-	/* Target selection virtual overrides */
+	virtual void SerializeTarget( FArchive & archive, UActorComponent & target ) override;
 
 	virtual bool IsAcceptableTargetType( UActorComponent * targetCandidate ) override
 	{
