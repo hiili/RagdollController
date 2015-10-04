@@ -14,14 +14,13 @@ class RAGDOLLCONTROLLER_API UPrimitiveComponentSnapshot : public UDeepSnapshotBa
 	GENERATED_BODY()
 	
 	
-public:
-
-	/* Deep snapshot system interface */
-
-	void Snapshot() override;
-	void Recall() override;
 protected:
 
+	virtual void SerializeTarget( FArchive & archive, UActorComponent & target ) override;
 
+	virtual bool IsAcceptableTargetType( UActorComponent * targetCandidate ) override
+	{
+		return dynamic_cast<UPrimitiveComponent *>(targetCandidate) != nullptr;
+	}
 
 };
