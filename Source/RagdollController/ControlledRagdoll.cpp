@@ -466,6 +466,8 @@ void AControlledRagdoll::WriteToRemoteController()
 
 void AControlledRagdoll::SendPose()
 {
+	return;
+
 	// no-op if no remote players (i.e., if num_all_players - num_local_players <= 0)
 	check( GetWorld() && GetWorld()->GetGameState() && GetGameInstance() );
 	if( GetWorld()->GetGameState()->PlayerArray.Num() - GetGameInstance()->GetNumLocalPlayers() <= 0 ) return;
@@ -485,6 +487,8 @@ void AControlledRagdoll::SendPose()
 
 void AControlledRagdoll::ReceivePose()
 {
+	return;
+
 	// Check for float binary compatibility (eg endianness) and that the PhysX data sizes match. Assume that UE replicates floats always correctly.
 	float ourInterpretationOfDeadbeef;
 	std::memcpy( &ourInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(ourInterpretationOfDeadbeef) );
