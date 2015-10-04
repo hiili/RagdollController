@@ -84,7 +84,7 @@ public:
 	/** If set to other than zero, then the network authority will take a snapshot automatically on every n-th frame, where n is the value of this field, and
 	 ** all network clients will apply this snapshot whenever an update is received. (Not yet implemented) */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "DeepSnapshotSystem" )
-	uint32 AutoReplicationFrequency = 0;
+	int32 AutoReplicationFrequency = 0;
 
 
 	/* target component selection */
@@ -152,7 +152,7 @@ private:
 
 
 	/** Phase counter for automatic replication. @see AutoReplicationFrequency */
-	uint32 AutoReplicationPhase = 0;
+	int AutoReplicationPhase = 0;
 
 
 	/** Storage slots for serialized snapshot data. We do not use a TMap on the top level as it is not supported by the UE reflection system. */
