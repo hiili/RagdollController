@@ -76,11 +76,6 @@ public:
 
 	/* automation */
 
-	///** Whether to automatically perform a snapshot or recall when the component is being serialized or deserialized, respectively. The automatic snapshot
-	// ** will be stored with the name 'SerializationAutoSnapshot'. (Not yet implemented) */
-	//UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "DeepSnapshotSystem" )
-	//bool AutoSnapshotOrRecallOnSerialize = false;
-
 	/** If set to other than zero, then the network authority will take a snapshot automatically on every n-th frame, where n is the value of this field, and
 	 ** all network clients will apply this snapshot whenever an update is received. (Not yet implemented) */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "DeepSnapshotSystem" )
@@ -98,18 +93,6 @@ public:
 	/** The current target component for taking and applying snapshots. This can be changed at runtime. */
 	UPROPERTY( EditInstanceOnly, BlueprintReadWrite, Category = "DeepSnapshotSystem" )
 	UActorComponent * TargetComponent;
-
-
-	///* serialization */
-
-	// temporary test
-	virtual void Serialize( FArchive & Ar ) override
-	{ UE_LOG( LogTemp, Error, TEXT( "*** Serialization detected." ) ); Super::Serialize( Ar ); }
-
-	// well, trying to intercept a serialization call might be error-prone, due to the spurious operator<< and Serialize() alternatives. skip for now.
-	///** The serialization operator. Serializes the stored snapshots. Note that you need to use an FNameAsStringProxyArchive (or some derived one), so as to get
-	// ** the snapshot names serialized.*/
-	//friend FArchive & operator<<( FArchive & Ar, DeepSnapshotBase & obj );
 
 
 protected:
