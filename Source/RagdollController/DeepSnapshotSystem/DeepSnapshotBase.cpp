@@ -2,6 +2,8 @@
 
 #include "RagdollController.h"
 
+#include "TickrateManager.h"
+
 #include <Net/UnrealNetwork.h>
 
 #include "DeepSnapshotBase.h"
@@ -34,8 +36,6 @@ UDeepSnapshotBase::UDeepSnapshotBase()
 	// off to improve performance if you don't need them.
 	bWantsInitializeComponent = true;
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 

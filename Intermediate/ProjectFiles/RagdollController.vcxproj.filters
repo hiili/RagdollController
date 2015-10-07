@@ -156,6 +156,12 @@
 		<ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.cpp">
 			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
 		</ClCompile>
+		<ClInclude Include="..\..\Source\RagdollController\TickrateManager.h">
+			<Filter>Source\RagdollController</Filter>
+		</ClInclude>
+		<ClCompile Include="..\..\Source\RagdollController\TickrateManager.cpp">
+			<Filter>Source\RagdollController</Filter>
+		</ClCompile>
 		<Filter Include="Source\RagdollController\RemoteControlSystem">
 			<UniqueIdentifier>{fe30f4be-838e-4e4d-9c51-7756d4bcea79}</UniqueIdentifier>
 		</Filter>

@@ -289,6 +289,8 @@
 		<ClInclude Include="..\..\Source\RagdollController\ScopeGuard.h" />
 		<ClCompile Include="..\..\Source\RagdollController\Utility.cpp" />
 		<ClInclude Include="..\..\Source\RagdollController\Utility.h" />
+    	<ClCompile Include="..\..\Source\RagdollController\TickrateManager.cpp" />
+    	<ClInclude Include="..\..\Source\RagdollController\TickrateManager.h" />
 		<ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\XmlFSocket.cpp" />
 		<ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\XmlFSocket.h" />
 		<ResourceCompile Include="..\..\Source\RagdollController\Resources\Windows\RagdollController.rc" />
