@@ -364,7 +364,9 @@
     <ClCompile Include="..\..\Source\RagdollController\RCLevelScriptActor.cpp" />
     <ClInclude Include="..\..\Source\RagdollController\RCLevelScriptActor.h" />
     <ClInclude Include="..\..\Source\RagdollController\ScopeGuard.h" />
+    <ClCompile Include="..\..\Source\RagdollController\TickrateManager.cpp" />
     <ClCompile Include="..\..\Source\RagdollController\Utility.cpp" />
+    <ClInclude Include="..\..\Source\RagdollController\TickrateManager.h" />
     <ClInclude Include="..\..\Source\RagdollController\Utility.h" />
     <ResourceCompile Include="..\..\Source\RagdollController\Resources\Windows\RagdollController.rc" />
   </ItemGroup>

@@ -4,6 +4,8 @@
 
 #include "Components/ActorComponent.h"
 
+#include "TickrateManager.h"
+
 #include <functional>
 
 #include "DeepSnapshotBase.generated.h"
@@ -76,9 +78,11 @@ public:
 
 	/* automation */
 
-	/** If set to other than zero, then the network authority will take a snapshot automatically on every n-th frame, where n is the value of this field, and
-	 ** all network clients will apply this snapshot whenever an update is received. (Not yet implemented) */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "DeepSnapshotSystem" )
+	/** If set to some positive value, then the network authority will take a snapshot automatically on every n-th frame, where n is the value of this field,
+	 ** and all network clients will apply this snapshot whenever an update is received. If set to -1, then the snapshot frequency will be adjusted adaptively
+	 ** based on the current tick rate and the current replication frequency of the owning actor. Note that you need to set the UseTickrateManager property
+	 ** to true to use the adaptive mode! Set to 0 to disable. @see UseTickrateManager */
 	int32 AutoReplicationFrequency = 0;
 
 
@@ -100,8 +104,13 @@ protected:
 	/* Core snapshot functionality */
 
 	/** Serialize/deserialize the target to/from the provided archive. */
-	virtual void SerializeTarget( FArchive & archive, UActorComponent & target ) PURE_VIRTUAL( UDeepSnapshotBase::Snapshot, return; )
+	virtual void SerializeTarget( FArchive & archive, UActorComponent & target ) PURE_VIRTUAL( UDeepSnapshotBase::SerializeTarget, return; );
 
+	/** Whether to use (and instantiate if necessary) the singleton TickrateManager actor. This is necessary for adaptive replication frequency management,
+	 ** which you can activate using the AutoReplicationFrequency property. This variable is read during BeginPlay; it has no effect later on.
+	 ** @see AutoReplicationFrequency */
+	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem" )
+	bool UseTickrateManager = false;
 
 	/* target component selection */
 

@@ -121,6 +121,9 @@
     <ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.h">
       <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\TickrateManager.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.cpp">
@@ -149,6 +152,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.cpp">
       <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\TickrateManager.cpp">
+      <Filter>Source\RagdollController</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
