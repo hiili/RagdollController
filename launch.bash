@@ -1,10 +1,10 @@
 #!/bin/bash
 
 declare -A ue4editor
-ue4editor_path=X:/GitHub/UnrealEngine-4.7/Engine/Binaries/Win64
-ue4editor[debug]=$ue4editor_path/UE4Editor-Win64-Debug.exe
-ue4editor[debuggame]=$ue4editor_path/UE4Editor.exe
-ue4editor[development]=$ue4editor_path/UE4Editor.exe
+ue4editor_path="C:/Program Files/Unreal Engine/4.9/Engine/Binaries/Win64"
+ue4editor[debug]="$ue4editor_path/UE4Editor-Win64-Debug.exe"
+ue4editor[debuggame]="$ue4editor_path/UE4Editor.exe"
+ue4editor[development]="$ue4editor_path/UE4Editor.exe"
 
 ue4project=RagdollController.uproject
 
@@ -25,7 +25,7 @@ if [[ $# != 2 ]] ; then
 	exit 1
 fi
 
-if [[ -z ${ue4editor[$1]} ]] || [[ -z ${args[$2]} ]] || [[ -z ${args_debug[$1]} ]]; then
+if [[ -z "${ue4editor[$1]}" ]] || [[ -z "${args[$2]}" ]] || [[ -z "${args_debug[$1]}" ]]; then
 	echo "Invalid arguments!"
 	exit 1
 fi
@@ -34,4 +34,4 @@ fi
 dos_wd=$(echo $PWD | sed 's/.cygdrive.\([a-z]\)/\1:/')
 
 echo ${ue4editor[$1]} "\"$dos_wd/$ue4project\"" ${args[$2]} ${args_debug[$1]}
-cmd /C ${ue4editor[$1]} "$dos_wd/$ue4project" ${args[$2]} ${args_debug[$1]}
+cmd /C "${ue4editor[$1]}" $dos_wd/$ue4project ${args[$2]} ${args_debug[$1]}
