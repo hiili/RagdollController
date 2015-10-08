@@ -16,12 +16,12 @@ void UPrimitiveComponentSnapshot::SerializeTarget( FArchive & archive, UActorCom
 
 	if( archive.IsSaving() )
 	{
-		archive << Utility::as_lvalue( uPrimitiveTarget->GetComponentLocation() );
+		archive << Utility::as_lvalue( uPrimitiveTarget->GetComponentTransform() );
 	}
 	else
 	{
-		FVector v;
-		archive << v;
-		uPrimitiveTarget->SetWorldLocation( v );
+		FTransform t;
+		archive << t;
+		uPrimitiveTarget->SetWorldTransform( t, /* bSweep =*/ false, /*OutSweepHitResult =*/ nullptr, ETeleportType::TeleportPhysics );
 	}
 }
