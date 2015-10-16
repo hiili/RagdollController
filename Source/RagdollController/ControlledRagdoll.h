@@ -61,65 +61,6 @@ struct FJointState
 
 
 
-/** Replication-ready struct for holding the state of a single bone. */
-USTRUCT( Blueprintable )
-struct FBoneState {
-	GENERATED_USTRUCT_BODY()
-
-
-private:
-
-	UPROPERTY()
-	TArray<int8> TransformData;
-
-	UPROPERTY()
-	TArray<int8> LinearVelocityData;
-
-	UPROPERTY()
-	TArray<int8> AngularVelocityData;
-
-
-public:
-
-	FBoneState()
-	{
-		TransformData.SetNumZeroed( sizeof(physx::PxTransform) );
-		LinearVelocityData.SetNumZeroed( sizeof(physx::PxVec3) );
-		AngularVelocityData.SetNumZeroed( sizeof(physx::PxVec3) );
-	}
-
-
-	/** Verifies that the size of the data fields match the size of the local PhysX objects. In general, word size of the platform might affect this, although
-	 ** the current contents of this struct probably aren't affected. */
-	bool DoDataSizesMatch()
-	{
-		return
-			TransformData.Num() == sizeof(physx::PxTransform) &&
-			LinearVelocityData.Num() == sizeof(physx::PxVec3) &&
-			AngularVelocityData.Num() == sizeof(physx::PxVec3);
-	}
-
-
-	physx::PxTransform & GetPxTransform()
-	{
-		return reinterpret_cast<physx::PxTransform &>(TransformData[0]);
-	}
-
-	physx::PxVec3 & GetPxLinearVelocity()
-	{
-		return reinterpret_cast<physx::PxVec3 &>(LinearVelocityData[0]);
-	}
-
-	physx::PxVec3 & GetPxAngularVelocity()
-	{
-		return reinterpret_cast<physx::PxVec3 &>(AngularVelocityData[0]);
-	}
-
-};
-
-
-
-
 /**
  * Main class for a controlled ragdoll.
  */
@@ -129,10 +70,6 @@ class RAGDOLLCONTROLLER_API AControlledRagdoll :
 	public IRemoteControllable
 {
 	GENERATED_BODY()
-
-
-	/** Last time (wall clock time) that the pose was sent using SendPose(). */
-	double lastSendPoseWallclockTime{ -INFINITY };
 
 
 
@@ -151,11 +88,6 @@ protected:
 	/** The GameMode. Note that this is always null on non-authority, and probably also during an editor session! */
 	AGameMode * GameMode{};
 
-	/** Server's float interpretation of 0xdeadbeef, for checking float representation compatibility (eg, float endianness). Assume that UE replicates
-	 ** floats always correctly. */
-	UPROPERTY( Replicated )
-	float ServerInterpretationOfDeadbeef;
-
 
 	/* Ragdoll state data */
 
@@ -167,10 +99,6 @@ protected:
 	 ** JointStates.Num() != 0. */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
 	TArray<FJointState> JointStates;
-
-	/** Data for all bodies of the SkeletalMeshComponent, mainly for server-to-client pose replication. */
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, ReplicatedUsing = HandleBoneStatesReplicationEvent, Category = RagdollController )
-	TArray<FBoneState> BoneStates;
 
 
 	/* Miscellaneous methods */
@@ -213,30 +141,6 @@ protected:
 
 	/** If xml data was received from a remote controller, then send out the response document. */
 	void FinalizeRemoteControllerCommunication();
-
-
-	/* Client-server replication */
-
-	/** Store pose into the replicated BoneStates array. The update rate is capped by 2 * NET_UPDATE_FREQUENCY: this method returns without doing anything if
-	 ** acting would exceed this cap. */
-	void SendPose();
-
-	/** Apply the pose from the replicated BoneStates array. Performs a binary compatibility check. No-op if no data received yet (logged as error, though).
-	 ** No rate capping is done here. */
-	void ReceivePose();
-
-	/** Handle pose replication events. This is called by the UE replication system whenever an update for BoneStates is received. */
-	UFUNCTION()
-	void HandleBoneStatesReplicationEvent();
-
-
-	/* serialization support */
-
-	/** Store the current pose to the provided BoneStates array, overwriting its current contents. */
-	void SavePose( TArray<FBoneState> & storage );
-
-	/** Apply the pose from the provided BoneStates array. */
-	void LoadPose( TArray<FBoneState> & storage );
 
 
 

@@ -33,17 +33,6 @@ AControlledRagdoll::AControlledRagdoll()
 
 
 
-void AControlledRagdoll::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> & OutLifetimeProps ) const
-{
-	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
-
-	DOREPLIFETIME( AControlledRagdoll, BoneStates );
-	DOREPLIFETIME( AControlledRagdoll, ServerInterpretationOfDeadbeef );
-}
-
-
-
-
 void AControlledRagdoll::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -78,9 +67,6 @@ void AControlledRagdoll::PostInitializeComponents()
 
 		/* We are standalone or a server */
 		
-		// Store server's interpretation of 0xdeadbeef to a replicated float
-		std::memcpy( &this->ServerInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(this->ServerInterpretationOfDeadbeef) );
-
 		// make sure that physics simulation is enabled also on a dedicated server
 		this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
 		this->SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are enabled also via editor!
@@ -90,10 +76,6 @@ void AControlledRagdoll::PostInitializeComponents()
 	{
 
 		/* We are a network client, assume spectator role (although UE spectator mode is not used explicitly at the moment) */
-
-		// Set the skeletal mesh to kinematic mode, so as to track exactly the pose stream received from the server (we do not want any local physics interactions or simulation)
-		// cannot do this, as UE appears to be using internally a different the coordinate system for kinematic skeletons!
-		//this->SkeletalMeshComponent->SetSimulatePhysics( false );
 
 	}
 
@@ -143,14 +125,6 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	// If network client, then we are just visualizing the ragdoll that is being simulated on the server
 	if( !HasAuthority() )
 	{
-		// If client-side prediction is off, then update the pose here on each tick, effectively freezing the skelmesh between bone state replications.
-		// Otherwise update it in HandleBoneStatesReplicationEvent(). @see HandleBoneStatesReplicationEvent()
-		check( this->RCLevelScriptActor );   // RCLevelScriptActor is null during an editor session, but Tick() should not be called in that case
-		if( !this->RCLevelScriptActor->PoseReplicationDoClientsidePrediction )
-		{
-			ReceivePose();
-		}
-
 		// Call the tick hook (available for inherited C++ classes), then Super::Tick(), which runs this actor's Blueprint
 		TickHook( deltaSeconds );
 		Super::Tick( deltaSeconds );
@@ -178,12 +152,6 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	WriteToSimulation();
 	WriteToRemoteController();
 	FinalizeRemoteControllerCommunication();
-
-
-	/* Handle client-server pose replication */
-
-	// Store pose to BoneStates so that it will be replicated to client(s)
-	SendPose();
 
 
 
@@ -464,118 +432,5 @@ void AControlledRagdoll::WriteToRemoteController()
 	if( RemoteControlSocket->InXml.child( "getActuators" ) )
 	{
 		//...
-	}
-}
-
-
-
-
-void AControlledRagdoll::SendPose()
-{
-	return;
-
-	// no-op if no remote players (i.e., if num_all_players - num_local_players <= 0)
-	check( GetWorld() && GetWorld()->GetGameState() && GetGameInstance() );
-	if( GetWorld()->GetGameState()->PlayerArray.Num() - GetGameInstance()->GetNumLocalPlayers() <= 0 ) return;
-
-	// cap update rate by 2 * RealtimeNetUpdateFrequency (UE level replication intervals are not accurate, have a safety margin so as to not miss any replications)
-	check( this->RCLevelScriptActor );
-	double currentTime = FPlatformTime::Seconds();
-	if( currentTime - this->lastSendPoseWallclockTime < 1.f / (2.f * this->RCLevelScriptActor->RealtimeNetUpdateFrequency) ) return;
-	this->lastSendPoseWallclockTime = currentTime;
-
-	// store the pose to BoneStates
-	SavePose( this->BoneStates );
-}
-
-
-
-
-void AControlledRagdoll::ReceivePose()
-{
-	return;
-
-	// Check for float binary compatibility (eg endianness) and that the PhysX data sizes match. Assume that UE replicates floats always correctly.
-	float ourInterpretationOfDeadbeef;
-	std::memcpy( &ourInterpretationOfDeadbeef, "\xde\xad\xbe\xef", sizeof(ourInterpretationOfDeadbeef) );
-	if( std::abs( (this->ServerInterpretationOfDeadbeef / ourInterpretationOfDeadbeef) - 1.f ) > 1e-6f
-		|| (this->BoneStates.Num() > 0 && !this->BoneStates[0].DoDataSizesMatch()) )
-	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) Floats are not binary compatible or bone state data sizes do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
-		return;
-	}
-
-	// Load the pose from the replicated array. Validity of the array is checked inside LoadPose().
-	LoadPose( this->BoneStates );
-}
-
-
-
-
-void AControlledRagdoll::HandleBoneStatesReplicationEvent()
-{
-	// if client-side prediction is on, then update the pose here, so as to do it only when a new pose has been received. Otherwise update it in Tick().
-	// @see Tick()
-	check( this->RCLevelScriptActor );
-	if( this->RCLevelScriptActor->PoseReplicationDoClientsidePrediction )
-	{
-		ReceivePose();
-	}
-}
-
-
-
-
-void AControlledRagdoll::SavePose( TArray<FBoneState> & storage )
-{
-	// check the number of bones and resize the BoneStates array
-	int numBodies = this->SkeletalMeshComponent->Bodies.Num();
-	storage.SetNum( numBodies );
-
-	// loop through bones and store their state data
-	for( int body = 0; body < numBodies; ++body )
-	{
-		physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
-		if( !pxBody )
-		{
-			UE_LOG( LogRcCr, Error, TEXT( "(%s) GetPxRididDynamic() failed for body %d!" ), TEXT( __FUNCTION__ ), body );
-			return;
-		}
-
-		// Copy pose from the skeletal mesh to storage
-		storage[body].GetPxTransform() = pxBody->getGlobalPose();
-		storage[body].GetPxLinearVelocity() = pxBody->getLinearVelocity();
-		storage[body].GetPxAngularVelocity() = pxBody->getAngularVelocity();
-	}
-}
-
-
-
-
-void AControlledRagdoll::LoadPose( TArray<FBoneState> & storage )
-{
-	int numBodies = storage.Num();
-
-	// Verify that the skeletal meshes have the same number of bones (for example, one might not be initialized yet, or storage could be still uninitialized).
-	if( numBodies != this->SkeletalMeshComponent->Bodies.Num() )
-	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) Number of bones do not match. Cannot replicate pose!" ), TEXT( __FUNCTION__ ) );
-		return;
-	}
-
-	// Loop through bones and apply data from storage to each
-	for( int body = 0; body < numBodies; ++body )
-	{
-		physx::PxRigidDynamic * pxBody = this->SkeletalMeshComponent->Bodies[body]->GetPxRigidDynamic();
-		if( !pxBody )
-		{
-			UE_LOG( LogRcCr, Error, TEXT( "(%s) GetPxRididDynamic() failed for body %d!" ), TEXT( __FUNCTION__ ), body );
-			return;
-		}
-
-		// Copy pose from storage to the skeletal mesh
-		pxBody->setGlobalPose( storage[body].GetPxTransform() );
-		pxBody->setLinearVelocity( storage[body].GetPxLinearVelocity() );
-		pxBody->setAngularVelocity( storage[body].GetPxAngularVelocity() );
 	}
 }
