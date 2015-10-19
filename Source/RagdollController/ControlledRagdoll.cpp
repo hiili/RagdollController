@@ -172,7 +172,7 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 	//this->JointStates[jointInd].Bodies[0]->AddTorque( 200000.f * sin( float( tickCounter ) / 20.f ) * rf1global.RotateVector( FVector( 0.f, 0.f, 1.f ) ) );
 	//this->JointStates[jointInd].Bodies[1]->AddTorque( -200000.f * sin( float( tickCounter ) / 20.f ) * rf1global.RotateVector( FVector( 0.f, 0.f, 1.f ) ) );
-	this->JointStates[jointInd].Bodies[0]->AddForce( FVector( 0.f, 0.f, 10.f ) );
+	this->JointStates[jointInd].Bodies[0]->AddForce( FVector( 0.f, 0.f, 50.f ) );
 }
 
 

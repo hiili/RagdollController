@@ -54,18 +54,18 @@ struct FAutomaticReplication
 	GENERATED_BODY()
 
 	/** If enabled, then the network authority will automatically take a private, replicated snapshot on a certain schedule.
-	 * All network clients will apply this snapshot automatically as soon as it has been transmitted over the network.
-	 * Note that the effective replication frequency depends also on the current NetUpdateFrequency value of the owning actor. */
+	 *  All network clients will apply this snapshot automatically as soon as it has been transmitted over the network.
+	 *  Note that the effective replication frequency depends also on the current NetUpdateFrequency value of the owning actor. */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite )
 	EAutomaticReplicationMode ReplicationMode = EAutomaticReplicationMode::Disabled;
 
 	/** If ReplicationMode == EveryNthFrame, then this field defines how often a replication snapshot is to be taken. For example, setting this to 3 will
-	 * cause a replication snapshot to be taken on every third frame. */
+	 *  cause a replication snapshot to be taken on every third frame. */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", UIMin = "1", UIMax = "60") )
 	int32 FrameSkipMultiplier = 1;
 
 	/** If ReplicationMode == ConstantGameTimeFrequency or ConstantWallTimeFrequency, then this field defines the target frequency (snapshots/second) for
-	 * taking replication snapshots. */
+	 *  taking replication snapshots. */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0.0", UIMin = "1.0", UIMax = "80.0") )
 	float TargetFrequency = 80.f;
 
@@ -162,7 +162,8 @@ public:
 
 protected:
 
-	/** Serialize/deserialize the target to/from the provided archive. */
+	/** Serialize/deserialize the target to/from the provided archive. You can use archive.IsLoading() or archive.IsSaving() to determine whether you should
+	 ** serialize or deserialize. When deserializing, the archive is guaranteed to contain data from an earlier serializing call to this method. */
 	virtual void SerializeTarget( FArchive & archive, UActorComponent & target ) {}
 
 
@@ -206,11 +207,11 @@ private:
 	/** If true, then the first component with a matching type will be selected as the snapshot target during initialization.
 	 * For example, a SkeletalMeshComponentSnapshot component would select the first SkeletalMeshComponent (or a derived type) as the target. */
 	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem", meta = (EditCondition = "!AutoSelectTargetComponentByType") )
-	bool DoAutoSelectTarget = true;
+	bool AutoSelectTarget = true;
 
 	/**	The name of the component that should be selected as the snapshot target during initialization. Using this is mutually exclusive with the
-	 *	DoAutoSelectTarget option. */
-	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem", meta=(EditCondition="!DoAutoSelectTarget") )
+	 *	AutoSelectTarget option. */
+	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem", meta=(EditCondition="!AutoSelectTarget") )
 	FName InitialTargetComponentName;
 
 
@@ -233,7 +234,7 @@ public:
 
 private:
 
-	/** If authority and automatic replication is enabled, then consider taking a new replication snapshot. */
+	/** If authority and automatic replication is enabled, then consider taking a new replication snapshot according to the selected schedule. */
 	void ConsiderTakingAutomaticReplicationSnapshot();
 
 	/** Handle replication events. This is called by the UE replication system whenever an update to the ReplicationData field is received. */

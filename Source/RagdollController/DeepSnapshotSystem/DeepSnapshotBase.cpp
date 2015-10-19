@@ -37,7 +37,7 @@ void UDeepSnapshotBase::InitializeComponent()
 	Super::InitializeComponent();
 
 	// try to select a target component
-	if( DoAutoSelectTarget )
+	if( AutoSelectTarget )
 	{
 		if( !SelectTargetComponentByType() )
 		{
@@ -65,6 +65,7 @@ void UDeepSnapshotBase::TickComponent( float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
+	// automatic replication on authority
 	ConsiderTakingAutomaticReplicationSnapshot();
 }
 
