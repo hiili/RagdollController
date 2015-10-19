@@ -69,6 +69,13 @@ struct FAutomaticReplication
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0.0", UIMin = "1.0", UIMax = "80.0") )
 	float TargetFrequency = 80.f;
 
+	/** If enabled, then network clients will apply the last received snapshot on each tick, effectively locking the state of the target component to that
+	 *  snapshot. If disabled, then the replication snapshot is applied to the target component only whenever a new snapshot has been received. This can permit
+	 *  client-side prediction and related approaches in case that the replication frequency is lower than the frame rate.
+	 *  Note that client-side prediction with a non-realtime server might require adjustments of the max physics (sub)step size! */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	bool HardSync = false;
+
 
 	/** Phase counter for automatic replication when AutomaticReplication == EveryNthFrame. */
 	int FrameSkipPhase = 0;
@@ -236,6 +243,9 @@ private:
 
 	/** If authority and automatic replication is enabled, then consider taking a new replication snapshot according to the selected schedule. */
 	void ConsiderTakingAutomaticReplicationSnapshot();
+
+	/** Apply the snapshot that is currently stored in the replication snapshot field. */
+	void ApplyReplicatedSnapshot();
 
 	/** Handle replication events. This is called by the UE replication system whenever an update to the ReplicationData field is received. */
 	UFUNCTION()

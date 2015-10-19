@@ -67,6 +67,13 @@ void UDeepSnapshotBase::TickComponent( float DeltaTime, ELevelTick TickType, FAc
 
 	// automatic replication on authority
 	ConsiderTakingAutomaticReplicationSnapshot();
+
+	// if network client && HardSync enabled && we have a snapshot -> apply it on each frame
+	check( GetOwner() );
+	if( !GetOwner()->HasAuthority() && AutomaticReplication.HardSync && ReplicationSnapshot.Data.Num() > 0 )
+	{
+		ApplyReplicatedSnapshot();
+	}
 }
 
 
@@ -80,17 +87,27 @@ bool UDeepSnapshotBase::CanEditChange( const UProperty* InProperty ) const
 	static const FName nameAutomaticReplication( "AutomaticReplication" );
 	static const FName nameFrameSkipMultiplier( "FrameSkipMultiplier" );
 	static const FName nameTargetFrequency( "TargetFrequency" );
+	static const FName nameHardSync( "HardSync" );
+
+	// FrameSkipMultiplier
 	if( (InProperty->GetOuter() && InProperty->GetOuter()->GetFName() == nameAutomaticReplication) &&
 		InProperty->GetFName() == nameFrameSkipMultiplier )
 	{
 		result &= AutomaticReplication.ReplicationMode == EAutomaticReplicationMode::EveryNthFrame;
 	}
+	// TargetFrequency
 	else if( (InProperty->GetOuter() && InProperty->GetOuter()->GetFName() == nameAutomaticReplication) &&
 		InProperty->GetFName() == nameTargetFrequency )
 	{
 		result &=
 			AutomaticReplication.ReplicationMode == EAutomaticReplicationMode::ConstantGameTimeFrequency ||
 			AutomaticReplication.ReplicationMode == EAutomaticReplicationMode::ConstantWallTimeFrequency;
+	}
+	// HardSync
+	else if( (InProperty->GetOuter() && InProperty->GetOuter()->GetFName() == nameAutomaticReplication) &&
+		InProperty->GetFName() == nameHardSync )
+	{
+		result &= AutomaticReplication.ReplicationMode != EAutomaticReplicationMode::Disabled;
 	}
 
 	return result;
@@ -284,11 +301,18 @@ void UDeepSnapshotBase::Replicate()
 }
 
 
-void UDeepSnapshotBase::OnReplicationSnapshotUpdate()
+void UDeepSnapshotBase::ApplyReplicatedSnapshot()
 {
 	// create an archive reader for the incoming data and perform a recall from it
 	FMemoryReader reader( ReplicationSnapshot.Data );
 	SerializeTargetIfNotNull( reader );
+}
+
+
+void UDeepSnapshotBase::OnReplicationSnapshotUpdate()
+{
+	// if HardSync is enabled, then this is called from TickComponent()
+	if( !AutomaticReplication.HardSync ) ApplyReplicatedSnapshot();
 }
 
 
