@@ -19,4 +19,11 @@ protected:
 	virtual void SerializeTarget( FArchive & archive, UActorComponent & target ) override;
 	virtual bool IsAcceptableTargetType( UActorComponent * targetCandidate ) const override;
 
+
+private:
+
+	/** If serializing, then write a compatibility check block to the archive. If deserializing, read such a block and runs the test. Return true if
+	 ** compatible, false otherwise. */
+	bool RunBinaryCompatibilityTest( FArchive & archive );
+
 };

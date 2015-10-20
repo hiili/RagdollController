@@ -25,6 +25,7 @@ void USkeletalMeshComponentSnapshot::SerializeTarget( FArchive & archive, UActor
 		return;
 	}
 
+
 	// check the number of bodies in target
 	int32 numBodies = skeletalMeshTarget->Bodies.Num();
 
@@ -36,6 +37,15 @@ void USkeletalMeshComponentSnapshot::SerializeTarget( FArchive & archive, UActor
 	{
 		UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) Number of bones do not match. Cannot recall!" ), TEXT( __FUNCTION__ ) );
 		UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "%s" ), *LogCreateDiagnosticLine() );
+		return;
+	}
+
+	// binary compatibility check
+	if( !RunBinaryCompatibilityTest( archive ) )
+	{
+		// mismatch
+		UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) Server and client PhysX instances are not binary compatible. Cannot replicate pose!" ),
+			TEXT( __FUNCTION__ ) );
 		return;
 	}
 
@@ -95,4 +105,24 @@ void USkeletalMeshComponentSnapshot::SerializeTarget( FArchive & archive, UActor
 bool USkeletalMeshComponentSnapshot::IsAcceptableTargetType( UActorComponent * targetCandidate ) const
 {
 	return dynamic_cast<USkeletalMeshComponent *>(targetCandidate) != nullptr;
+}
+
+
+
+
+bool USkeletalMeshComponentSnapshot::RunBinaryCompatibilityTest( FArchive & archive )
+{
+	uint8 isLittleEndian = *reinterpret_cast<uint8 *>(&Utility::as_lvalue( uint32( 1 ) ));
+	uint8 sizeOfPxTransform = sizeof(physx::PxTransform);
+	uint8 sizeOfPxVec3 = sizeof(physx::PxVec3);
+
+	archive << isLittleEndian;
+	archive << sizeOfPxTransform;
+	archive << sizeOfPxVec3;
+	archive << Utility::as_lvalue( uint8( 0 ) );   // maintain at least some alignment
+
+	return archive.IsSaving() ||
+		(isLittleEndian == *reinterpret_cast<uint8 *>(&Utility::as_lvalue( uint32( 1 ) )) &&
+		sizeOfPxTransform == sizeof(physx::PxTransform) &&
+		sizeOfPxVec3 == sizeof(physx::PxVec3));
 }

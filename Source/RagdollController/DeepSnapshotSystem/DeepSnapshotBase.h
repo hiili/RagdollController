@@ -95,6 +95,17 @@ UCLASS( Abstract )
 class RAGDOLLCONTROLLER_API UDeepSnapshotBase : public UActorComponent
 {
 	/*
+	 * On binary compatibility:
+	 * 
+	 * In principle, deriving classes should make proper checks on binary compatibility with respect to replication. If you use UE types, serialize them
+	 * through the serialization operator (or the FArchive::Serialize() method), and access all data in the target component through well-defined API functions,
+	 * you should be pretty safe. However, if accessing the internals of the target using non-standard ways and/or if serializing data at the raw memory level,
+	 * endianness and software version mismatches might interfere.
+	 * 
+	 * @todo: It might be a good idea to make this kind of checks in a centralized fashion, so as to avoid performing redundant checks for every replicated
+	 * component on every replication tick. Maybe via DeepSnapshotManager, somehow?
+	 * 
+	 *
 	 * Note on deriving new subclasses:
 	 * 
 	 * We permit automatic matching between snapshot components and target components. This is done by calling the IsAcceptableTargetType() pure virtual
