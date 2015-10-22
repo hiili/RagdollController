@@ -68,8 +68,8 @@ void AControlledRagdoll::PostInitializeComponents()
 	}
 	else
 	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) No USkeletalMeshComponents found! Aborting." ), TEXT( __FUNCTION__ ) );
-		check( false );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) No USkeletalMeshComponent found!" ), TEXT( __FUNCTION__ ) );
+		return;
 	}
 
 
@@ -134,6 +134,12 @@ void AControlledRagdoll::BeginPlay()
 
 void AControlledRagdoll::Tick( float deltaSeconds )
 {
+	// sanity check
+	if( !this->SkeletalMeshComponent )
+	{
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error: invalid state! Skipping this tick." ), TEXT(__FUNCTION__) );
+	}
+
 	// If network client, then we are just visualizing the ragdoll that is being simulated on the server
 	if( !HasAuthority() )
 	{
