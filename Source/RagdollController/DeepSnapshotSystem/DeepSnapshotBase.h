@@ -12,6 +12,9 @@
 #include "DeepSnapshotBase.generated.h"
 
 
+DECLARE_LOG_CATEGORY_EXTERN( LogDeepSnapshotSystem, Log, All );
+
+
 
 
 USTRUCT()

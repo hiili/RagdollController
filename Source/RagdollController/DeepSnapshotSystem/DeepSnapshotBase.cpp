@@ -9,6 +9,9 @@
 #include "DeepSnapshotBase.h"
 
 
+DEFINE_LOG_CATEGORY( LogDeepSnapshotSystem );
+
+
 
 
 void UDeepSnapshotBase::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> & OutLifetimeProps ) const
