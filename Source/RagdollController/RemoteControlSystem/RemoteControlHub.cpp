@@ -41,6 +41,9 @@ ARemoteControlHub::ARemoteControlHub()
 {
 	// enable ticking
 	PrimaryActorTick.bCanEverTick = true;
+
+	// create a dummy root component and a sprite for the editor
+	Utility::AddDefaultRootComponent( this, "/Game/Assets/Gears128" );
 }
 
 

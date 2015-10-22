@@ -38,6 +38,9 @@ AFramerateManager::AFramerateManager() :
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// create a dummy root component and a sprite for the editor
+	Utility::AddDefaultRootComponent( this, "/Game/Assets/Gears128" );
+
 	// we need replication for syncing the server's estimated frame rate to clients
 	bReplicates = true;
 
