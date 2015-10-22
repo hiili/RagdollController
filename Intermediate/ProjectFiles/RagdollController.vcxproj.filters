@@ -1,172 +1,181 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<ItemGroup>
-		<None Include="..\..\RagdollController.uproject" />
-		<Filter Include="Source">
-			<UniqueIdentifier>{F873892E-EE0D-4068-A2F9-5BE27791C4BD}</UniqueIdentifier>
-		</Filter>
-		<None Include="..\..\Source\RagdollController.Target.cs">
-			<Filter>Source</Filter>
-		</None >
-		<None Include="..\..\Source\RagdollControllerEditor.Target.cs">
-			<Filter>Source</Filter>
-		</None >
-		<Filter Include="Config">
-			<UniqueIdentifier>{E3F63A6F-37E3-44E6-8BE3-BA30AE52DFEB}</UniqueIdentifier>
-		</Filter>
-		<None Include="..\..\Config\DefaultDeviceProfiles.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultEditor.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultEngine.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultGame.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultInput.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultLightmass.ini">
-			<Filter>Config</Filter>
-		</None >
-		<None Include="..\..\Config\DefaultRagdollController.ini">
-			<Filter>Config</Filter>
-		</None >
-		<Filter Include="Source\RagdollController">
-			<UniqueIdentifier>{E4D529E5-4106-466A-93F6-E05BD40F044A}</UniqueIdentifier>
-		</Filter>
-		<ClCompile Include="..\..\Source\RagdollController\ControlledRagdoll.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\ControlledRagdoll.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\Mbml.cpp">
-			<Filter>Source\RagdollController\RemoteControlSystem</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\Mbml.h">
-			<Filter>Source\RagdollController\RemoteControlSystem</Filter>
-		</ClInclude >
-		<None Include="..\..\Source\RagdollController\RagdollController.Build.cs">
-			<Filter>Source\RagdollController</Filter>
-		</None >
-		<ClCompile Include="..\..\Source\RagdollController\RagdollController.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RagdollController.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RagdollControllerGameEngine.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RagdollControllerGameEngine.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RagdollControllerGameMode.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RagdollControllerGameMode.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RCLevelScriptActor.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RCLevelScriptActor.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControlHub.cpp">
-			<Filter>Source\RagdollController\RemoteControlSystem</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControlHub.h">
-			<Filter>Source\RagdollController\RemoteControlSystem</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllable.cpp">
-			<Filter>Source\RagdollController\RemoteControlSystem</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllable.h">
-			<Filter>Source\RagdollController\RemoteControlSystem</Filter>
-		</ClInclude >
-		<ClInclude Include="..\..\Source\RagdollController\ScopeGuard.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\Utility.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\Utility.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude >
-		<ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\XmlFSocket.cpp">
-			<Filter>Source\RagdollController\RemoteControlSystem</Filter>
-		</ClCompile >
-		<ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\XmlFSocket.h">
-			<Filter>Source\RagdollController\RemoteControlSystem</Filter>
-		</ClInclude >
-		<Filter Include="Source\RagdollController\Resources">
-			<UniqueIdentifier>{21AE0CD7-5922-42FF-9512-3911F6641C8F}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source\RagdollController\Resources\Windows">
-			<UniqueIdentifier>{61CC8A2A-2BFC-41C0-B11E-7D40CA8DE74A}</UniqueIdentifier>
-		</Filter>
-		<ResourceCompile Include="..\..\Source\RagdollController\Resources\Windows\RagdollController.rc">
-			<Filter>Source\RagdollController\Resources\Windows</Filter>
-		</ResourceCompile >
-		<Filter Include="Source\RagdollController\ThirdParty">
-			<UniqueIdentifier>{4A6CBF30-C3EE-4631-9C7E-7794D33889FE}</UniqueIdentifier>
-		</Filter>
-		<None Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5-patch.txt">
-			<Filter>Source\RagdollController\ThirdParty</Filter>
-		</None >
-		<Filter Include="Source\RagdollController\ThirdParty\pugixml-1.5">
-			<UniqueIdentifier>{E820DAFF-9EFB-4C62-90A6-1D86310F6B8F}</UniqueIdentifier>
-		</Filter>
-		<None Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugiconfig.hpp">
-			<Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
-		</None >
-		<ClCompile Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.cpp">
-			<Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
-		</ClCompile >
-		<None Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.hpp">
-			<Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
-		</None >
-		<ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotBase.h">
-			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
-		</ClInclude>
-		<ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\PrimitiveComponentSnapshot.h">
-			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
-		</ClInclude>
-		<ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\SkeletalMeshComponentSnapshot.h">
-			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
-		</ClInclude>
-		<ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.h">
-			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
-		</ClInclude>
-		<ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotBase.cpp">
-			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
-		</ClCompile>
-		<ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\PrimitiveComponentSnapshot.cpp">
-			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
-		</ClCompile>
-		<ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\SkeletalMeshComponentSnapshot.cpp">
-			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
-		</ClCompile>
-		<ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.cpp">
-			<Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
-		</ClCompile>
-		<ClInclude Include="..\..\Source\RagdollController\TickrateManager.h">
-			<Filter>Source\RagdollController</Filter>
-		</ClInclude>
-		<ClCompile Include="..\..\Source\RagdollController\TickrateManager.cpp">
-			<Filter>Source\RagdollController</Filter>
-		</ClCompile>
-		<Filter Include="Source\RagdollController\RemoteControlSystem">
-			<UniqueIdentifier>{fe30f4be-838e-4e4d-9c51-7756d4bcea79}</UniqueIdentifier>
-		</Filter>
-		<Filter Include="Source\RagdollController\DeepSnapshotSystem">
-			<UniqueIdentifier>{2c35c841-29cc-4310-acfb-ec9ec2570dfa}</UniqueIdentifier>
-		</Filter>
-		</ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\RagdollController.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{F873892E-EE0D-4068-A2F9-5BE27791C4BD}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\RagdollController.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\RagdollControllerEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <Filter Include="Config">
+      <UniqueIdentifier>{E3F63A6F-37E3-44E6-8BE3-BA30AE52DFEB}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultDeviceProfiles.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultLightmass.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultRagdollController.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\RagdollController">
+      <UniqueIdentifier>{E4D529E5-4106-466A-93F6-E05BD40F044A}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\RagdollController\ControlledRagdoll.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\ControlledRagdoll.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\Mbml.cpp">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\Mbml.h">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClInclude>
+    <None Include="..\..\Source\RagdollController\RagdollController.Build.cs">
+      <Filter>Source\RagdollController</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\RagdollController\RagdollController.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RagdollController.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RagdollControllerGameEngine.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RagdollControllerGameEngine.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RagdollControllerGameMode.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RagdollControllerGameMode.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RCLevelScriptActor.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RCLevelScriptActor.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControlHub.cpp">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControlHub.h">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllable.cpp">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllable.h">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\ScopeGuard.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\Utility.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\Utility.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\XmlFSocket.cpp">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\XmlFSocket.h">
+      <Filter>Source\RagdollController\RemoteControlSystem</Filter>
+    </ClInclude>
+    <Filter Include="Source\RagdollController\Resources">
+      <UniqueIdentifier>{21AE0CD7-5922-42FF-9512-3911F6641C8F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RagdollController\Resources\Windows">
+      <UniqueIdentifier>{61CC8A2A-2BFC-41C0-B11E-7D40CA8DE74A}</UniqueIdentifier>
+    </Filter>
+    <ResourceCompile Include="..\..\Source\RagdollController\Resources\Windows\RagdollController.rc">
+      <Filter>Source\RagdollController\Resources\Windows</Filter>
+    </ResourceCompile>
+    <Filter Include="Source\RagdollController\ThirdParty">
+      <UniqueIdentifier>{4A6CBF30-C3EE-4631-9C7E-7794D33889FE}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5-patch.txt">
+      <Filter>Source\RagdollController\ThirdParty</Filter>
+    </None>
+    <Filter Include="Source\RagdollController\ThirdParty\pugixml-1.5">
+      <UniqueIdentifier>{E820DAFF-9EFB-4C62-90A6-1D86310F6B8F}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugiconfig.hpp">
+      <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.cpp">
+      <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
+    </ClCompile>
+    <None Include="..\..\Source\RagdollController\ThirdParty\pugixml-1.5\pugixml.hpp">
+      <Filter>Source\RagdollController\ThirdParty\pugixml-1.5</Filter>
+    </None>
+    <ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotBase.h">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\PrimitiveComponentSnapshot.h">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\SkeletalMeshComponentSnapshot.h">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.h">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotBase.cpp">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\PrimitiveComponentSnapshot.cpp">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\SkeletalMeshComponentSnapshot.cpp">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.cpp">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClCompile>
+    <Filter Include="Source\RagdollController\RemoteControlSystem">
+      <UniqueIdentifier>{fe30f4be-838e-4e4d-9c51-7756d4bcea79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RagdollController\DeepSnapshotSystem">
+      <UniqueIdentifier>{2c35c841-29cc-4310-acfb-ec9ec2570dfa}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Source\RagdollController\DeepSnapshotSystem\StaticMeshComponentSnapshot.h">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\FramerateManager.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\StaticMeshComponentSnapshot.cpp">
+      <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\FramerateManager.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+  </ItemGroup>
 </Project>
