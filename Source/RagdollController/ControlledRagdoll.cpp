@@ -100,9 +100,6 @@ void AControlledRagdoll::BeginPlay()
 	check( this->RCLevelScriptActor );
 
 
-	// Register for automatic NetUpdateFrequency management
-	this->RCLevelScriptActor->RegisterManagedNetUpdateFrequency( this );
-
 	// If running on authority, then make sure that we tick after GameMode (both the GameMode and regular actors tick in the same group, TG_PrePhysics)
 	if( HasAuthority() )
 	{
