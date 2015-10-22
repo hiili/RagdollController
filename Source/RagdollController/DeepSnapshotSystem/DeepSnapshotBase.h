@@ -3,8 +3,9 @@
 #pragma once
 
 #include "Components/ActorComponent.h"
+#include "OutputDevice.h"
 
-#include "TickrateManager.h"
+#include "FramerateManager.h"
 
 #include <functional>
 
@@ -16,7 +17,7 @@
 USTRUCT()
 struct FSnapshotData
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 
 	UPROPERTY()
 	FName Name;
@@ -28,13 +29,83 @@ struct FSnapshotData
 
 
 
+UENUM()
+enum class EAutomaticReplicationMode : uint8
+{
+	/** No automatic replication. */
+	Disabled,
+
+	/** Replicate every n-th frame. The frame skip multiplier n can be set using the FrameSkipMultiplier field. */
+	EveryNthFrame,
+
+	/** Replicate with a constant game time frequency irrespective of the current frame rate. The target frequency can be set using the
+	 * TargetFrequency field. */
+	ConstantGameTimeFrequency,
+
+	/** Replicate with a constant wall time frequency irrespective of the current frame rate or game speed. The target frequency can be set using the
+	 * TargetFrequency field. */
+	ConstantWallTimeFrequency
+};
+
+
+USTRUCT()
+struct FAutomaticReplication
+{
+	GENERATED_BODY()
+
+	/** If enabled, then the network authority will automatically take a private, replicated snapshot on a certain schedule.
+	 * All network clients will apply this snapshot automatically as soon as it has been transmitted over the network.
+	 * Note that the effective replication frequency depends also on the current NetUpdateFrequency value of the owning actor. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite )
+	EAutomaticReplicationMode ReplicationMode = EAutomaticReplicationMode::Disabled;
+
+	/** If ReplicationMode == EveryNthFrame, then this field defines how often a replication snapshot is to be taken. For example, setting this to 3 will
+	 * cause a replication snapshot to be taken on every third frame. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "1", UIMin = "1", UIMax = "60") )
+	int32 FrameSkipMultiplier = 1;
+
+	/** If ReplicationMode == ConstantGameTimeFrequency or ConstantWallTimeFrequency, then this field defines the target frequency (snapshots/second) for
+	 * taking replication snapshots. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0.0", UIMin = "1.0", UIMax = "80.0") )
+	float TargetFrequency = 80.f;
+
+
+	/** Phase counter for automatic replication when AutomaticReplication == EveryNthFrame. */
+	int FrameSkipPhase = 0;
+
+	/** Last wall clock time when an automatic replication snapshot was taken. */
+	double lastReplicationTime = 0.0;
+
+};
+
+
+
+
 /**
- * The abstract base class for storage components of the deep snapshot system.
+ * The abstract base class of deep snapshot system storage components.
  */
 UCLASS( Abstract )
 class RAGDOLLCONTROLLER_API UDeepSnapshotBase : public UActorComponent
 {
+	/*
+	 * Note on deriving new subclasses:
+	 * 
+	 * We permit automatic matching between snapshot components and target components. This is done by calling the IsAcceptableTargetType() pure virtual
+	 * method, which the derived snapshot components then implement. There is a pitfall: a more general snapshot component might match and accept a more derived
+	 * target component, for which the user did add a separate snapshot component. For example, consider that you have an Actor with a StaticMeshComponent and a
+	 * SkeletalMeshComponent. Then you drop in a PrimitiveComponentSnapshot and a SkeletalMeshComponentSnapshot component, with auto matching enabled in both.
+	 * It could happen that both snapshot components pick the SkeletalMeshComponent as their target, which is not what the user probably wanted.
+	 * 
+	 * To avoid this, you should make only leaf classes non-abstract, so as to remove any ambiguity.
+	 * 
+	 * An alternative solution would be to enhance the auto-matching logic so as to reject targets for which a better-matching snapshot class exists.
+	 * This would be probably trivial to implement without hard-coding a class tree if the UE reflection system were a bit better documented.
+	 */
+
 	GENERATED_BODY()
+
+
+	/* constructors/destructor */
 
 
 public:
@@ -43,7 +114,12 @@ public:
 	UDeepSnapshotBase();
 
 
-	/* UActorComponent interface overrides */
+
+
+	/* UE interface overrides */
+
+
+public:
 
 	// Called when the game starts
 	virtual void InitializeComponent() override;
@@ -51,78 +127,43 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
+	// Called by the editor to query which properties are currently editable
+	virtual bool CanEditChange( const UProperty* InProperty ) const override;
 
-	/* Deep snapshot system interface */
+
+
+
+	/* core snapshot functionality */
+
+
+public:
 
 	/** Take and store a snapshot of the current state of the component pointed by TargetComponent.
-	 ** @param	slotName	The name of the snapshot slot to be used */
+	 * @param	slotName	The name of the snapshot slot to be used */
 	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
 	void Snapshot( FName slotName );
 
 	/** Apply a stored snapshot to the component pointed by TargetComponent. Return true on success, otherwise false.
-	 ** @param	slotName	The name of the snapshot slot to be used
-	 ** @param	success		Returns true on success, otherwise false */
+	 * @param	slotName	The name of the snapshot slot to be used
+	 * @param	success		Returns true on success, otherwise false */
 	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
 	void Recall( FName slotName, bool & success );
 
 	/** Erase the snapshot labeled with 'name'. Return true on success, otherwise false.
-	 ** @param	slotName	The name of the snapshot slot to be used
-	 ** @param	success		Returns true on success, otherwise false */
+	 * @param	slotName	The name of the snapshot slot to be used
+	 * @param	success		Returns true on success, otherwise false */
 	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
-	void Erase( FName name, bool & success  );
+	void Erase( FName name, bool & success );
 
 	/** Erase all stored snapshots. */
 	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
 	void EraseAll();
 
 
-	/* automation */
-
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "DeepSnapshotSystem" )
-	/** If set to some positive value, then the network authority will take a snapshot automatically on every n-th frame, where n is the value of this field,
-	 ** and all network clients will apply this snapshot whenever an update is received. If set to -1, then the snapshot frequency will be adjusted adaptively
-	 ** based on the current tick rate and the current replication frequency of the owning actor. Note that you need to set the UseTickrateManager property
-	 ** to true to use the adaptive mode! Set to 0 to disable. @see UseTickrateManager */
-	int32 AutoReplicationFrequency = 0;
-
-
-	/* target component selection */
-
-	/**	The name of the component that should be selected as the snapshot target during initialization. If 'None', then the first component with a matching
-	 **	type will be selected. For example, a SkeletalMeshComponentSnapshot component would select the first SkeletalMeshComponent (or a derived type) as the
-	 **	target. */
-	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem" )
-	FName InitialTargetComponentName;
-
-	/** The current target component for taking and applying snapshots. This can be changed at runtime. */
-	UPROPERTY( EditInstanceOnly, BlueprintReadWrite, Category = "DeepSnapshotSystem" )
-	UActorComponent * TargetComponent;
-
-
 protected:
 
-	/* Core snapshot functionality */
-
 	/** Serialize/deserialize the target to/from the provided archive. */
-	virtual void SerializeTarget( FArchive & archive, UActorComponent & target ) PURE_VIRTUAL( UDeepSnapshotBase::SerializeTarget, return; );
-
-	/** Whether to use (and instantiate if necessary) the singleton TickrateManager actor. This is necessary for adaptive replication frequency management,
-	 ** which you can activate using the AutoReplicationFrequency property. This variable is read during BeginPlay; it has no effect later on.
-	 ** @see AutoReplicationFrequency */
-	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem" )
-	bool UseTickrateManager = false;
-
-	/* target component selection */
-
-	/** If InitialTargetComponentName is set, then look up the corresponding component and assign it to TargetComponent. Return true if the target was found. */
-	bool SelectTargetComponentByName();
-
-	/** Find the first component with a matching type and assign it to TargetComponent. Return true if a matching component was found.
-	 ** @see InitialTargetComponentName */
-	bool SelectTargetComponentByType();
-
-	/** Test whether the type of a target candidate component matches the nominal target type of this snapshot storage component. */
-	virtual bool IsAcceptableTargetType( UActorComponent * targetCandidate ) PURE_VIRTUAL( UDeepSnapshotBase::IsAcceptableTargetType, return false; );
+	virtual void SerializeTarget( FArchive & archive, UActorComponent & target ) {}
 
 
 private:
@@ -130,29 +171,106 @@ private:
 	/** Check that a target component exists, then serialize/deserialize the target to/from the provided archive. */
 	void SerializeTargetIfNotNull( FArchive & archive );
 
+	/** Storage slots for serialized snapshot data. We do not use a TMap on the top level as it is not supported by the UE reflection system. */
+	UPROPERTY()
+	TArray<FSnapshotData> Snapshots;
+
+
+
+
+	/* target component selection */
+
+
+public:
+
+	/** The current target component for taking and applying snapshots. This can be changed at runtime. */
+	UPROPERTY( BlueprintReadWrite, Category = "DeepSnapshotSystem" )
+	UActorComponent * TargetComponent;
+
+
+protected:
+
+	/** If InitialTargetComponentName is set, then look up the corresponding component and assign it to TargetComponent. Return true if the target was found. */
+	bool SelectTargetComponentByName();
+
+	/** Find the first component with a matching type and assign it to TargetComponent. Return true if a matching component was found.
+	 *	@see InitialTargetComponentName */
+	bool SelectTargetComponentByType();
+
+	/** Test whether the type of a target candidate component matches the nominal target type of this snapshot storage component. */
+	virtual bool IsAcceptableTargetType( UActorComponent * targetCandidate ) const PURE_VIRTUAL( UDeepSnapshotBase::IsAcceptableTargetType, return false; );
+
+
+private:
+
+	/** If true, then the first component with a matching type will be selected as the snapshot target during initialization.
+	 * For example, a SkeletalMeshComponentSnapshot component would select the first SkeletalMeshComponent (or a derived type) as the target. */
+	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem", meta = (EditCondition = "!AutoSelectTargetComponentByType") )
+	bool DoAutoSelectTarget = true;
+
+	/**	The name of the component that should be selected as the snapshot target during initialization. Using this is mutually exclusive with the
+	 *	DoAutoSelectTarget option. */
+	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem", meta=(EditCondition="!DoAutoSelectTarget") )
+	FName InitialTargetComponentName;
+
+
+
+
+	/* replication */
+
+
+public:
+
+	/** Deep replicate the current state of the component pointed by TargetComponent. This has an effect only on network authority. Network clients will
+	 * automatically apply the state as soon as it is received. */
+	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
+	void Replicate();
+
+	/** Automatic replication functionality. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "DeepSnapshotSystem" )
+	FAutomaticReplication AutomaticReplication;
+
+
+private:
+
+	/** If authority and automatic replication is enabled, then consider taking a new replication snapshot. */
+	void ConsiderTakingAutomaticReplicationSnapshot();
+
+	/** Handle replication events. This is called by the UE replication system whenever an update to the ReplicationData field is received. */
+	UFUNCTION()
+	void OnReplicationSnapshotUpdate();
+
+	/** Special storage array for replication. This array is not affected by any snapshot bulk operations, nor is it serialized. */
+	UPROPERTY( ReplicatedUsing = OnReplicationSnapshotUpdate )
+	FSnapshotData ReplicationSnapshot;
+
+
+
+
+	/* logging */
+
+
+protected:
+
+	/** Log, with diagnostics, a failed attempt to downcast the target component. Verbosity: Error. */
+	void LogFailedDowncast( const char * functionName ) const;
+
+	/** Create a diagnostics string for logging purposes. */
+	FString LogCreateDiagnosticLine() const;
+
+
+
+
+	/* utility */
+
+
+private:
 
 	/** Find the specified snapshot slot from the 'Snapshots' field. Return null if not found. */
 	FSnapshotData * FindSnapshotByName( FName name );
 
 	/** Look for a component in the owning actor that matches the predicate 'pred'. If found, then assign it to TargetComponent and return true.
-	 ** Otherwise return false. */
+	 * Otherwise return false. */
 	bool SelectTargetComponentByPredicate( std::function<bool( UActorComponent * )> pred );
-
-	/** Handle pose replication events. This is called by the UE replication system whenever an update for BoneStates is received. */
-	UFUNCTION()
-	void OnReplicationSnapshotUpdate();
-
-
-	/** Phase counter for automatic replication. @see AutoReplicationFrequency */
-	int AutoReplicationPhase = 0;
-
-
-	/** Storage slots for serialized snapshot data. We do not use a TMap on the top level as it is not supported by the UE reflection system. */
-	UPROPERTY()
-	TArray<FSnapshotData> Snapshots;
-
-	/** Special storage array for replication. This array is not affected by any snapshot bulk operations, nor is it serialized. */
-	UPROPERTY( ReplicatedUsing = OnReplicationSnapshotUpdate )
-	TArray<uint8> ReplicationData;
 
 };

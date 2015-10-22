@@ -6,7 +6,7 @@
 #include "PrimitiveComponentSnapshot.generated.h"
 
 /**
- * Abstract middle type for snapshot storage components that target PrimitiveComponent-derived classes.
+ * Abstract middle type for deep snapshot storage components that target PrimitiveComponent-derived classes.
  */
 UCLASS( Abstract )
 class RAGDOLLCONTROLLER_API UPrimitiveComponentSnapshot : public UDeepSnapshotBase
@@ -17,10 +17,5 @@ class RAGDOLLCONTROLLER_API UPrimitiveComponentSnapshot : public UDeepSnapshotBa
 protected:
 
 	virtual void SerializeTarget( FArchive & archive, UActorComponent & target ) override;
-
-	virtual bool IsAcceptableTargetType( UActorComponent * targetCandidate ) override
-	{
-		return dynamic_cast<UPrimitiveComponent *>(targetCandidate) != nullptr;
-	}
 
 };

@@ -3,16 +3,16 @@
 #pragma once
 
 #include "DeepSnapshotSystem/PrimitiveComponentSnapshot.h"
-#include "SkeletalMeshComponentSnapshot.generated.h"
+#include "StaticMeshComponentSnapshot.generated.h"
 
 /**
- * Deep snapshot storage component for SkeletalMeshComponent targets.
+ * Deep snapshot storage component for StaticMeshComponent targets.
  */
 UCLASS( ClassGroup = (Custom), meta = (BlueprintSpawnableComponent) )
-class RAGDOLLCONTROLLER_API USkeletalMeshComponentSnapshot : public UPrimitiveComponentSnapshot
+class RAGDOLLCONTROLLER_API UStaticMeshComponentSnapshot : public UPrimitiveComponentSnapshot
 {
 	GENERATED_BODY()
-	
+
 
 protected:
 

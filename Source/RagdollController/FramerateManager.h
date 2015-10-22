@@ -3,16 +3,16 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "TickrateManager.generated.h"
+#include "FramerateManager.generated.h"
 
 UCLASS()
-class RAGDOLLCONTROLLER_API ATickrateManager : public AActor
+class RAGDOLLCONTROLLER_API AFramerateManager : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATickrateManager();
+	AFramerateManager();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

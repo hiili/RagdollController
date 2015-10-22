@@ -2,7 +2,7 @@
 
 #include "RagdollController.h"
 
-#include "TickrateManager.h"
+#include "FramerateManager.h"
 
 #include <Net/UnrealNetwork.h>
 
@@ -15,15 +15,7 @@ void UDeepSnapshotBase::GetLifetimeReplicatedProps( TArray<FLifetimeProperty> & 
 {
 	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
 
-	DOREPLIFETIME( UDeepSnapshotBase, ReplicationData );
-}
-
-
-void UDeepSnapshotBase::OnReplicationSnapshotUpdate()
-{
-	// create an archive reader for the incoming data and perform a recall from it
-	FMemoryReader reader( ReplicationData );
-	SerializeTargetIfNotNull( reader );
+	DOREPLIFETIME( UDeepSnapshotBase, ReplicationSnapshot );
 }
 
 
@@ -44,17 +36,27 @@ void UDeepSnapshotBase::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	// try to select a suitable target component
-	if( InitialTargetComponentName.IsNone() )
+	// try to select a target component
+	if( DoAutoSelectTarget )
 	{
-		SelectTargetComponentByType();
+		if( !SelectTargetComponentByType() )
+		{
+			UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) Automatic target component selection was requested but no matching component was found!" ),
+				TEXT( __FUNCTION__ ) );
+			UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
+		}
 	}
-	else
+	else if( !InitialTargetComponentName.IsNone() )
 	{
-		SelectTargetComponentByName();
+		if( !SelectTargetComponentByName() )
+		{
+			UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) InitialTargetComponentName = %s, but no such component was found!" ),
+				TEXT( __FUNCTION__ ) );
+			UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
+		}
 	}
 
-	UE_LOG( LogTemp, Error, TEXT("target ptr: %p, target name: %s"), TargetComponent, TargetComponent ? *TargetComponent->GetName() : TEXT("") );
+	UE_LOG( LogDeepSnapshotSystem, Log, TEXT( "(%s) Initialization finished. %s" ), TEXT( __FUNCTION__ ), *LogCreateDiagnosticLine() );
 }
 
 
@@ -63,24 +65,34 @@ void UDeepSnapshotBase::TickComponent( float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	// perform automatic replication if automatic replication is enabled and we have authority
-	check( GetOwner() );
-	if( GetOwner()->HasAuthority() && AutoReplicationFrequency > 0 )
+	ConsiderTakingAutomaticReplicationSnapshot();
+}
+
+
+
+
+bool UDeepSnapshotBase::CanEditChange( const UProperty* InProperty ) const
+{
+	bool result = Super::CanEditChange(InProperty);
+
+	// should use GET_MEMBER_NAME_CHECKED()
+	static const FName nameAutomaticReplication( "AutomaticReplication" );
+	static const FName nameFrameSkipMultiplier( "FrameSkipMultiplier" );
+	static const FName nameTargetFrequency( "TargetFrequency" );
+	if( (InProperty->GetOuter() && InProperty->GetOuter()->GetFName() == nameAutomaticReplication) &&
+		InProperty->GetFName() == nameFrameSkipMultiplier )
 	{
-		// is it time to replicate?
-		if( AutoReplicationPhase == 0 )
-		{
-			// erase existing replication data (keep slack for the new data)
-			ReplicationData.SetNum( 0, /*bAllowShrinking =*/ false );
-
-			// create an archive writer and perform a snapshot to it
-			FMemoryWriter writer( ReplicationData );
-			SerializeTargetIfNotNull( writer );
-		}
-
-		// increment the phase counter
-		AutoReplicationPhase = (AutoReplicationPhase + 1) % AutoReplicationFrequency;
+		result &= AutomaticReplication.ReplicationMode == EAutomaticReplicationMode::EveryNthFrame;
 	}
+	else if( (InProperty->GetOuter() && InProperty->GetOuter()->GetFName() == nameAutomaticReplication) &&
+		InProperty->GetFName() == nameTargetFrequency )
+	{
+		result &=
+			AutomaticReplication.ReplicationMode == EAutomaticReplicationMode::ConstantGameTimeFrequency ||
+			AutomaticReplication.ReplicationMode == EAutomaticReplicationMode::ConstantWallTimeFrequency;
+	}
+
+	return result;
 }
 
 
@@ -205,7 +217,99 @@ bool UDeepSnapshotBase::SelectTargetComponentByPredicate( std::function<bool( UA
 
 
 
-//FArchive & operator<<( FArchive & Ar, DeepSnapshotBase & obj )
-//{
-//	Ar << &obj;
-//}
+void UDeepSnapshotBase::ConsiderTakingAutomaticReplicationSnapshot()
+{
+	// no-op if not authority
+	check( GetOwner() );
+	if( !GetOwner()->HasAuthority() ) return;
+
+	// time to replicate?
+	switch( AutomaticReplication.ReplicationMode )
+	{
+	case EAutomaticReplicationMode::EveryNthFrame:
+	
+		// replicate if the frame skip counter has wrapped
+		if( AutomaticReplication.FrameSkipPhase == 0 ) Replicate();
+
+		// increment the phase counter
+		AutomaticReplication.FrameSkipPhase = (AutomaticReplication.FrameSkipPhase + 1) % AutomaticReplication.FrameSkipMultiplier;
+
+		return;
+
+	case EAutomaticReplicationMode::ConstantGameTimeFrequency:
+	case EAutomaticReplicationMode::ConstantWallTimeFrequency:
+	{
+		// get current time, either game time or wall clock time
+		// (we use FPlatformTime::Seconds() in place of UWorld::GetRealTimeSeconds() because the latter does not return the _real_ real-time value when
+		// running with a fixed step size)
+		check( GetWorld() );
+		double currentTime = AutomaticReplication.ReplicationMode == EAutomaticReplicationMode::ConstantGameTimeFrequency ?
+			GetWorld()->GetTimeSeconds() : FPlatformTime::Seconds();
+
+		// sanity check on the last replication timestamp (might be needed if mode has been switched run-time)
+		if( currentTime < AutomaticReplication.lastReplicationTime ) AutomaticReplication.lastReplicationTime = 0.0;
+
+		// early return if enough time has not yet passed
+		if( currentTime - AutomaticReplication.lastReplicationTime < 1.f / AutomaticReplication.TargetFrequency ) return;
+
+		// replicate and update the last replication timestamp
+		Replicate();
+		AutomaticReplication.lastReplicationTime = currentTime;
+
+		return;
+	}
+	case EAutomaticReplicationMode::Disabled:
+		return;
+	default:
+		return;
+	}
+}
+
+
+
+
+void UDeepSnapshotBase::Replicate()
+{
+	// no-op if not authority
+	check( GetOwner() );
+	if( !GetOwner()->HasAuthority() ) return;
+
+	// erase existing replication data (keep slack for the new data)
+	ReplicationSnapshot.Data.SetNum( 0, /*bAllowShrinking =*/ false );
+
+	// create an archive writer and perform a snapshot to it
+	FMemoryWriter writer( ReplicationSnapshot.Data );
+	SerializeTargetIfNotNull( writer );
+}
+
+
+void UDeepSnapshotBase::OnReplicationSnapshotUpdate()
+{
+	// create an archive reader for the incoming data and perform a recall from it
+	FMemoryReader reader( ReplicationSnapshot.Data );
+	SerializeTargetIfNotNull( reader );
+}
+
+
+
+
+void UDeepSnapshotBase::LogFailedDowncast( const char * functionName ) const
+{
+	UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) Downcast failed: target component is of wrong type!" ),
+		*FString(functionName) );
+	UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
+}
+
+
+FString UDeepSnapshotBase::LogCreateDiagnosticLine() const
+{
+#if NO_LOGGING
+	return FString();
+#else
+	return FString::Printf( TEXT("snapshot component: name=%s, owner=%s; target component: name=%s, owner=%s"),
+		*GetName(),
+		GetOwner() ? *GetOwner()->GetName() : *FString( "(no owner)" ),
+		TargetComponent ? *TargetComponent->GetName() : *FString( "(no target)" ),
+		TargetComponent && TargetComponent->GetOwner() ? *TargetComponent->GetOwner()->GetName() : *FString( "(target has no owner)" ) );
+#endif
+}

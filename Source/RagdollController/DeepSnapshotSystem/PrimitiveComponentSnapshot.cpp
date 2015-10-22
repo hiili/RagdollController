@@ -11,17 +11,37 @@
 
 void UPrimitiveComponentSnapshot::SerializeTarget( FArchive & archive, UActorComponent & target )
 {
-	UPrimitiveComponent * uPrimitiveTarget = dynamic_cast<UPrimitiveComponent *>(&target);
-	if( !uPrimitiveTarget ) return;
+	Super::SerializeTarget( archive, target );
+
+	// downcast the target, log and return if wrong type
+	UPrimitiveComponent * primitiveTarget = dynamic_cast<UPrimitiveComponent *>(&target);
+	if( !primitiveTarget )
+	{
+		LogFailedDowncast( __FUNCTION__ );
+		return;
+	}
 
 	if( archive.IsSaving() )
 	{
-		archive << Utility::as_lvalue( uPrimitiveTarget->GetComponentTransform() );
+		// snapshot: serialize
+		archive << Utility::as_lvalue( primitiveTarget->GetComponentTransform() );
+		archive << Utility::as_lvalue( primitiveTarget->GetPhysicsLinearVelocity() );
+		archive << Utility::as_lvalue( primitiveTarget->GetPhysicsAngularVelocity() );
 	}
 	else
 	{
+		// recall: deserialize
+
 		FTransform t;
+		FVector v;
+
 		archive << t;
-		uPrimitiveTarget->SetWorldTransform( t, /* bSweep =*/ false, /*OutSweepHitResult =*/ nullptr, ETeleportType::TeleportPhysics );
+		primitiveTarget->SetWorldTransform( t, /* bSweep =*/ false, /*OutSweepHitResult =*/ nullptr, ETeleportType::TeleportPhysics );
+
+		archive << v;
+		primitiveTarget->SetPhysicsLinearVelocity( v );
+
+		archive << v;
+		primitiveTarget->SetPhysicsAngularVelocity( v );
 	}
 }
