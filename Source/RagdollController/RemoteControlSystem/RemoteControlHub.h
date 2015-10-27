@@ -24,11 +24,11 @@
  *
  *   <remote> RagdollController RCH: CONNECT Owen
  *   <hub> OK
- *   
- * The connection has now been forwarded to the AActor with the provided name (Owen, in this case). The target actor must inherit from RemoteControllable. Note
- * that the provided name is matched against UObject names that are cleaned up with Utility::CleanupName, which effectively removes all underscore-delimited
- * suffixes from the name. In case of an error, the hub responds with the line ERROR. The actual reason for the error is logged in the engine logs. All log
- * output is placed in the LogRcRch log.
+ * 
+ * The connection has now been forwarded to the AActor with the provided name (Owen, in this case). The target name can be a ?*-pattern. Keep in mind that
+ * UE occasionally adds an underscore-delimited suffix to actor names. You can mostly avoid this by using actor names that do not collide with existing class
+ * names. The target actor must inherit from RemoteControllable. In case of an error, the hub responds with the line ERROR. The actual reason for the error is
+ * logged in the engine logs. All log output is placed in the LogRcRch log.
  * 
  * From this point on, the communication protocol depends on the target actor; the hub does not intervene in the connection in any further way. However, the
  * hub wraps the connection socket into an XmlFSocket object, thus providing the basic tools for line-based and XML-based communications.

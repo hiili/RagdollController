@@ -214,18 +214,18 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 	check( GetWorld() );
 	for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
 	{
-		if( Utility::CleanupName( iter->GetName() ) == FString( args.c_str() ) )
+		if( FWildcardString( args.c_str() ).IsMatch( iter->GetName() ) )
 		{
 			/* target actor found */
 
-			UE_LOG( LogRcRch, Log, TEXT( "(%s) Target actor found, forwarding the connection. Target: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+			UE_LOG( LogRcRch, Log, TEXT( "(%s) Target actor found, forwarding the connection. Target: %s" ), TEXT( __FUNCTION__ ), *iter->GetName() );
 
 			// check that the actor is RemoteControllable
 			IRemoteControllable * target = Cast<IRemoteControllable>( *iter );
 			if( !target )
 			{
 				// no: log and let the connection drop
-				UE_LOG( LogRcRch, Error, TEXT( "(%s) Target actor is not RemoteControllable! Target: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+				UE_LOG( LogRcRch, Error, TEXT( "(%s) Target actor is not RemoteControllable! Target: %s" ), TEXT( __FUNCTION__ ), *iter->GetName() );
 				socket->PutLine( RCH_ERROR_STRING );
 				return;
 			}

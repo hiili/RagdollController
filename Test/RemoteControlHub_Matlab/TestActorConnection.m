@@ -4,7 +4,7 @@ t = tcpip('localhost', 7770);
 set( t, 'InputBufferSize', 65536 );
 fopen(t);
 t.Status
-fprintf(t, 'RagdollController RCH: CONNECT Owen');
+fprintf(t, 'RagdollController RCH: CONNECT Owe*');
 
 
 outData = struct();
