@@ -13,6 +13,6 @@ function yml=simplify_mbml(xml)
 %1. remove size for char and double when they are null, elements or
 %horizontal vectors
 
-yml=regexprep(xml,' class=(("double")|("char")|("struct")|("cell")) size="[01] \d*"',' class=$1','tokenize');
+yml=regexprep(xml,' class=(("double")|("char")|("struct")|("cell")) size="[01] \d*"',' class=$1');
 yml=regexprep(yml,' class="char">','>');
 

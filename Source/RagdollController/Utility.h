@@ -27,6 +27,6 @@ public:
 		return t;
 	}
 
-
 	static void AddDefaultRootComponent( AActor * actor, FString spriteName );
+
 };

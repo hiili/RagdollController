@@ -31,6 +31,6 @@ void IRemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 
 	// log
 	UObject * thisAsUObject = dynamic_cast<UObject *>(this);
-	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Target name: %s" ), TEXT( __FUNCTION__ ),
 		thisAsUObject ? *Utility::CleanupName( thisAsUObject->GetName() ) : TEXT( "(N/A: target is not an UObject)" ) );
+	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Target: %s" ), TEXT( __FUNCTION__ ),
 }

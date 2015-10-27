@@ -208,6 +208,8 @@ void ARemoteControlHub::DispatchSocket( std::string command, std::unique_ptr<Xml
 
 void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket> socket )
 {
+	UE_LOG( LogRcRch, Log, TEXT( "(%s) Processing CONNECT command. Target pattern: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+
 	// find the target actor based on its FName
 	check( GetWorld() );
 	for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
@@ -232,7 +234,7 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 			if( !socket->PutLine( RCH_ACK_STRING ) )
 			{
 				// failed: log and let the connection drop (no point in sending an error string to the already failed TCP stream)
-				UE_LOG( LogRcRch, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+				UE_LOG( LogRcRch, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ) );
 				return;
 			}
 

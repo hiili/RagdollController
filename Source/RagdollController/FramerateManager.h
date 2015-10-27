@@ -14,8 +14,6 @@
 
 /**
  * Perform frame rate management operations, including overall frame rate management and NetUpdateFrequency management of all registered actors.
- * 
- * 
  */
 UCLASS()
 class RAGDOLLCONTROLLER_API AFramerateManager : public AActor

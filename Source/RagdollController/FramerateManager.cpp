@@ -2,6 +2,7 @@
 
 #include "RagdollController.h"
 #include "FramerateManager.h"
+#include "Utility.h"
 
 #include <App.h>
 #include <Net/UnrealNetwork.h>
@@ -43,9 +44,6 @@ AFramerateManager::AFramerateManager() :
 
 	// we need replication for syncing the server's estimated frame rate to clients
 	bReplicates = true;
-
-	// Register self for automatic NetUpdateFrequency management
-	RegisterManagedNetUpdateFrequency( this );
 }
 
 
@@ -56,6 +54,9 @@ void AFramerateManager::BeginPlay()
 	
 	// apply the fixed dt (remember to use the -UseFixedTimeStep command line option!)
 	SetFixedFps( GetFixedFps() );
+
+	// Register self for automatic NetUpdateFrequency management
+	RegisterManagedNetUpdateFrequency( this );
 }
 
 
