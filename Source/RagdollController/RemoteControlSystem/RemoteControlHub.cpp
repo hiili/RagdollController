@@ -211,12 +211,25 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 	UE_LOG( LogRcRch, Log, TEXT( "(%s) Processing CONNECT command. Target pattern: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 
 	// find the target actor based on its FName
+	bool found = false;
 	check( GetWorld() );
 	for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
 	{
 		if( FWildcardString( args.c_str() ).IsMatch( iter->GetName() ) )
 		{
 			/* target actor found */
+
+			// make sure to log a warning if multiple matches are found
+			if( found )
+			{
+				// target has been already found; we have multiple matches
+				UE_LOG( LogRcRch, Warning, TEXT("(%s) Multiple matching actors found for pattern '%s'! Ignoring: %s"),
+					TEXT( __FUNCTION__ ), *FString( args.c_str() ), *iter->GetName() );
+				continue;
+			}
+
+			// first hit: raise flag
+			found = true;
 
 			UE_LOG( LogRcRch, Log, TEXT( "(%s) Target actor found, forwarding the connection. Target: %s" ), TEXT( __FUNCTION__ ), *iter->GetName() );
 
@@ -238,11 +251,16 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 				return;
 			}
 
-			// forward the connection and return
+			// forward the connection, then continue looping to detect and log possible multiple matches
 			target->ConnectWith( std::move( socket ) );
-			return;
 		}
 	}
+
+	// return if target found; note that 'socket' has been moved in this case!
+	if( found ) return;
+
+	// invariant: we should still have 'socket' at this point because no match was found
+	check( socket );
 
 	// target not found, log and let the connection drop
 	UE_LOG( LogRcRch, Error, TEXT( "(%s) Target actor not found: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
