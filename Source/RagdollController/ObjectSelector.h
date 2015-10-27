@@ -244,7 +244,10 @@ bool FComponentSelector::IsMatching( const UActorComponent & component ) const
 		if( component.ComponentHasTag( tag ) ) return true;
 	}
 
-	// IncludeByFilter
+	// IncludeByFilter:
+	//   - for each filter
+	//     - no match: continue with next filter
+	//     - have match: return true (filters combine in an OR fashion, so we require only one filter to match)
 	for( const FObjectSelectorFilter & filter : IncludeByFilter )
 	{
 		// NarrowByTag
@@ -253,18 +256,39 @@ bool FComponentSelector::IsMatching( const UActorComponent & component ) const
 		// NarrowByClass
 		if( filter.NarrowByClass && !component.IsA( filter.NarrowByClass ) ) continue;
 
-		// NarrowByMobility
+		// NarrowByMobility: reject if not a USceneComponent (thus no mobility) or has a different mobility than required here
 		if( filter.NarrowByMobility != EObjectSelectorMobilityFilter::Any )
 		{
 			const USceneComponent * sceneComponent = dynamic_cast<const USceneComponent *>(&component);
-			if( sceneComponent &&
+			if( !sceneComponent ||
 				OurMobilityToUEMobilityMap[static_cast<std::size_t>(filter.NarrowByMobility)] != sceneComponent->Mobility ) continue;
 		}
 
-		check( filter.NarrowByNamePattern.IsEmpty() );   // TODO
-		check( filter.NarrowByTagPattern.IsEmpty() );   // TODO
+		// NarrowByNamePattern
+		if( !filter.NarrowByNamePattern.IsEmpty() && !FWildcardString( filter.NarrowByNamePattern ).IsMatch( component.GetName() ) ) continue;
+
+		// NarrowByTagPattern
+		if( !filter.NarrowByTagPattern.IsEmpty() )
+		{
+			bool found = false;
+			for( const FName & tag : component.ComponentTags )
+			{
+				if( FWildcardString( filter.NarrowByTagPattern ).IsMatch( tag.ToString() ) )
+				{
+					found = true;
+					break;
+				}
+			}
+
+			// we have a tag pattern but no matches: have to keep trying with following filters
+			if( !found ) continue;
+		}
+
+		// all narrowing checks passed: this filter has a match
+		return true;
 	}
 
+	// no explicit matches, and none of the filters matched: no match
 	return false;
 }
 
