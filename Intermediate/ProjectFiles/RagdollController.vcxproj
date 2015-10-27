@@ -260,7 +260,9 @@
     <None Include="..\..\Config\DefaultInput.ini" />
     <None Include="..\..\Config\DefaultLightmass.ini" />
     <None Include="..\..\Config\DefaultRagdollController.ini" />
+    <ClCompile Include="..\..\Source\RagdollController\ObjectSelector.cpp" />
     <ClCompile Include="..\..\Source\RagdollController\ControlledRagdoll.cpp" />
+    <ClInclude Include="..\..\Source\RagdollController\ObjectSelector.h" />
     <ClInclude Include="..\..\Source\RagdollController\ControlledRagdoll.h" />
     <ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotBase.cpp" />
     <ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\DeepSnapshotManager.cpp" />

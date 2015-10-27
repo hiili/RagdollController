@@ -169,12 +169,18 @@
     <ClInclude Include="..\..\Source\RagdollController\FramerateManager.h">
       <Filter>Source\RagdollController</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\RagdollController\ObjectSelector.h">
+      <Filter>Source\RagdollController</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\RagdollController\DeepSnapshotSystem\StaticMeshComponentSnapshot.cpp">
       <Filter>Source\RagdollController\DeepSnapshotSystem</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\RagdollController\FramerateManager.cpp">
+      <Filter>Source\RagdollController</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\RagdollController\ObjectSelector.cpp">
       <Filter>Source\RagdollController</Filter>
     </ClCompile>
   </ItemGroup>
