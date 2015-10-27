@@ -94,11 +94,6 @@ struct FComponentSelector
 	/** Include all objects that match any of these filters. */
 	UPROPERTY( EditAnywhere )
 	TArray<FObjectSelectorFilter> IncludeByFilter;
-
-	/** Whether to ignore everything after the first underscore when matching object names.
-	 *  This can be useful if suffixes added by the engine interfere with matching, as long as you do not use underscores in the actual object names. */
-	UPROPERTY( EditAnywhere )
-	bool IgnoreSuffixInNames = false;
 	
 
 	/* C++ interface; see blueprint helper section below for the Blueprint interface */
@@ -238,7 +233,6 @@ public:
 
 bool FComponentSelector::IsMatching( const UActorComponent & component ) const
 {
-	check( !IgnoreSuffixInNames );   // TODO
 	UE_LOG( LogTemp, Error, TEXT( "Component IsMatching: %s" ), *component.GetName() );
 
 	// IncludeByName
