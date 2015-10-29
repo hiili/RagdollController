@@ -6,9 +6,9 @@
 
 
 
-const std::array<EComponentMobility::Type, 4> FComponentSelector::OurMobilityToUEMobilityMap = FComponentSelector::InitializeMobilityMap();
+const std::array<EComponentMobility::Type, 4> FObjectSelector::OurMobilityToUEMobilityMap = FObjectSelector::InitializeOurMobilityToUEMobilityMap();
 
-std::array<EComponentMobility::Type, 4> FComponentSelector::InitializeMobilityMap()
+std::array<EComponentMobility::Type, 4> FObjectSelector::InitializeOurMobilityToUEMobilityMap()
 {
 	static_assert(static_cast<std::size_t>(EObjectSelectorMobilityFilter::ENUM_LAST) - 1 < 4, "Mobility enumeration has too many enumerators!");
 
@@ -18,6 +18,10 @@ std::array<EComponentMobility::Type, 4> FComponentSelector::InitializeMobilityMa
 	result[static_cast<std::size_t>(EObjectSelectorMobilityFilter::Movable)] = EComponentMobility::Movable;
 	return result;
 }
+
+
+
+
 
 
 
