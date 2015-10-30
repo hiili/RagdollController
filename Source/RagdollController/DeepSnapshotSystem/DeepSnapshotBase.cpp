@@ -161,13 +161,13 @@ void UDeepSnapshotBase::Recall( FName slotName, bool & success )
 }
 
 
-void UDeepSnapshotBase::Erase( FName name, bool & success )
+void UDeepSnapshotBase::Erase( FName slotName, bool & success )
 {
 	int32 numBefore = Snapshots.Num();
 
 	// try to erase matching slots
-	Snapshots.RemoveAllSwap( [name]( FSnapshotData & candidate ){
-		return candidate.Name == name;
+	Snapshots.RemoveAllSwap( [slotName]( FSnapshotData & candidate ){
+		return candidate.Name == slotName;
 	} );
 
 	// return true if something was erased

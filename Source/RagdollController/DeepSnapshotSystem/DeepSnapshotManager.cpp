@@ -18,12 +18,14 @@ ADeepSnapshotManager::ADeepSnapshotManager()
 	Utility::AddDefaultRootComponent( this, "/Game/Assets/Gears128" );
 }
 
+
 // Called when the game starts or when spawned
 void ADeepSnapshotManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
+
 
 // Called every frame
 void ADeepSnapshotManager::Tick( float DeltaTime )

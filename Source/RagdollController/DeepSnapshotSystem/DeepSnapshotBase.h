@@ -100,10 +100,11 @@ class RAGDOLLCONTROLLER_API UDeepSnapshotBase : public UActorComponent
 	/*
 	 * On binary compatibility:
 	 * 
-	 * In principle, deriving classes should make proper checks on binary compatibility with respect to replication. If you use UE types, serialize them
-	 * through the serialization operator (or the FArchive::Serialize() method), and access all data in the target component through well-defined API functions,
-	 * you should be pretty safe. However, if accessing the internals of the target using non-standard ways and/or if serializing data at the raw memory level,
-	 * endianness and software version mismatches might interfere.
+	 * In principle, deriving classes should make proper checks on binary compatibility with respect to replication. You should be pretty safe if you use UE
+	 * types, serialize them through the serialization operator (or the FArchive::Serialize() method), make sure that you have the ArIsPersistent flag raised on
+	 * the archiver, and access all data in the target component through well-defined API functions.
+	 * However, if accessing the internals of the target using non-standard ways and/or if serializing data at the raw memory level, endianness and software
+	 * version mismatches might interfere.
 	 * 
 	 * @todo: It might be a good idea to make this kind of checks in a centralized fashion, so as to avoid performing redundant checks for every replicated
 	 * component on every replication tick. Maybe via DeepSnapshotManager, somehow?
@@ -164,17 +165,17 @@ public:
 	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
 	void Snapshot( FName slotName );
 
-	/** Apply a stored snapshot to the component pointed by TargetComponent. Return true on success, otherwise false.
+	/** Apply a stored snapshot to the component pointed by TargetComponent.
 	 * @param	slotName	The name of the snapshot slot to be used
 	 * @param	success		Returns true on success, otherwise false */
 	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
 	void Recall( FName slotName, bool & success );
 
-	/** Erase the snapshot labeled with 'name'. Return true on success, otherwise false.
-	 * @param	slotName	The name of the snapshot slot to be used
+	/** Erase the specified snapshot slot.
+	 * @param	slotName	The name of the snapshot slot to be erased
 	 * @param	success		Returns true on success, otherwise false */
 	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
-	void Erase( FName name, bool & success );
+	void Erase( FName slotName, bool & success );
 
 	/** Erase all stored snapshots. */
 	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
@@ -226,7 +227,7 @@ protected:
 private:
 
 	/** If true, then the first component with a matching type will be selected as the snapshot target during initialization.
-	 * For example, a SkeletalMeshComponentSnapshot component would select the first SkeletalMeshComponent (or a derived type) as the target. */
+	 *  For example, a SkeletalMeshComponentSnapshot component would select the first SkeletalMeshComponent (or a derived type) as the target. */
 	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem", meta = (EditCondition = "!AutoSelectTargetComponentByType") )
 	bool AutoSelectTarget = true;
 

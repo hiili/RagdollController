@@ -356,8 +356,6 @@ TArray<T *> & FActorSelector::FilterArray( TArray<T *> & array ) const
 template<typename this_t, typename object_t>
 bool FObjectSelector::IsMatching( const object_t & object ) const
 {
-	UE_LOG( LogTemp, Error, TEXT( "Object IsMatching: %s" ), *object.GetName() );
-
 	// IncludeByName
 	if( IncludeByName.Contains( object.GetFName() ) ) return true;
 
@@ -442,9 +440,8 @@ TArray<T *> & FObjectSelector::FilterArray( TArray<T *> & array ) const
 
 
 
-template<typename T /*= UActorComponent*/>
-TArray<T *>
-FComponentSelector::GetAllMatchingComponents( const AActor & actor ) const
+template<typename T>
+TArray<T *> FComponentSelector::GetAllMatchingComponents( const AActor & actor ) const
 {
 	TArray<T *> result;
 	actor.GetComponents( result );

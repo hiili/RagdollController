@@ -69,7 +69,7 @@ void AControlledRagdoll::PostInitializeComponents()
 		
 		// make sure that physics simulation is enabled also on a dedicated server
 		this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
-		this->SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are enabled also via editor!
+		this->SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are already enabled via editor!
 
 	}
 	else
@@ -116,7 +116,7 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	// sanity check
 	if( !this->SkeletalMeshComponent )
 	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error: invalid state! Skipping this tick." ), TEXT(__FUNCTION__) );
+		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error: invalid state! Skipping tick." ), TEXT(__FUNCTION__) );
 	}
 
 	// If network client, then we are just visualizing the ragdoll that is being simulated on the server
