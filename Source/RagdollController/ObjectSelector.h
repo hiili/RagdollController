@@ -320,6 +320,10 @@ bool FComponentSelector::IsMatching( const UActorComponent & component ) const
 
 bool FActorSelector::IsMatching( const AActor & actor ) const
 {
+	// IncludeByReference
+	if( IncludeByReference.Contains( &actor ) ) return true;
+
+	// no reference match, proceed with conditions in the base class
 	return FObjectSelector::IsMatching<FActorSelector>( actor );
 }
 
