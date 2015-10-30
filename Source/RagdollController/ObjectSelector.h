@@ -30,12 +30,13 @@ enum class EObjectSelectorMobilityFilter : uint8
 };
 
 
+/** A set of filter conditions for matching against AActor and UActorComponent objects. */
 USTRUCT()
 struct FObjectSelectorFilter
 {
 	GENERATED_BODY()
 
-	/** Include only objects that have this tag. */
+	/** Include only objects that have this tag (not case sensitive, fast; involves only an index comparison). */
 	UPROPERTY( EditAnywhere )
 	FName NarrowByTag;
 
@@ -43,33 +44,35 @@ struct FObjectSelectorFilter
 	UPROPERTY( EditAnywhere )
 	EObjectSelectorMobilityFilter NarrowByMobility = EObjectSelectorMobilityFilter::Any;
 
-	/** Include only objects whose name matches this ?*-pattern. */
+	/** Include only objects whose name matches this ?*-pattern (is case sensitive, slow; involves full string matching). */
 	UPROPERTY( EditAnywhere )
 	FString NarrowByNamePattern;
 
-	/** Include only objects that have a tag that matches this ?*-pattern. */
+	/** Include only objects that have a tag that matches this ?*-pattern (is case sensitive, slow; involves full string matching). */
 	UPROPERTY( EditAnywhere )
 	FString NarrowByTagPattern;
 };
 
 
-USTRUCT( BlueprintType, Category = "Object Selector" )
+/** A set of filter conditions for matching against UActorComponent objects. This is not intended to be used directly; use FActorSelector instead! */
+USTRUCT()
 struct FComponentSelectorFilter : public FObjectSelectorFilter
 {
 	GENERATED_BODY()
 
-	/** Include only objects that are of this or a derived type. */
+	/** Include only components that are derived from this type. */
 	UPROPERTY( EditAnywhere )
 	TSubclassOf<UActorComponent> NarrowByClass;
 };
 
 
-USTRUCT( BlueprintType, Category = "Object Selector" )
+/** A set of filter conditions for matching against AActor objects. This is not intended to be used directly; use FActorSelector instead! */
+USTRUCT()
 struct FActorSelectorFilter : public FObjectSelectorFilter
 {
 	GENERATED_BODY()
 
-	/** Include only objects that are of this or a derived type. */
+	/** Include only actors that are derived from this type. */
 	UPROPERTY( EditAnywhere )
 	TSubclassOf<AActor> NarrowByClass;
 };
@@ -109,11 +112,15 @@ struct FObjectSelector
 {
 	GENERATED_BODY()
 
-	/** Include all objects that have their name listed here. */
+	/** Include all objects that have their name listed here (not case sensitive, fast; involves only an index comparison).
+	 *  
+	 *  Note that inclusion by this field requires an exact match and the engine tends to internally add an underscore-delimited suffix to most objects!
+	 *  Such suffixing can be avoided sometimes by using object names that do not collide with known class names.
+	 *  If you are not sure whether your object's name will get suffixed, you might want to use wildcard matching, which is available under Include By Filter. */
 	UPROPERTY( EditAnywhere )
 	TArray<FName> IncludeByName;
 
-	/** Include all objects that have any of these tags. */
+	/** Include all objects that have any of these tags (not case sensitive, fast; involves only an index comparison). */
 	UPROPERTY( EditAnywhere )
 	TArray<FName> IncludeByTag;
 
@@ -145,7 +152,7 @@ protected:
 
 
 	/** A mapping from our mobility type to UE mobility type (our mobility enum cannot match UE's because we want the 'Any' mobility to be the first one, so
-	 ** that it becomes the default in the editor. we could compute an offset and static_assert some things, but this is more robust and no more complex) */
+	 *  that it becomes the default in the editor. we could compute an offset and static_assert some things, but this is more robust and no more complex) */
 	static const std::array<EComponentMobility::Type, 4> OurMobilityToUEMobilityMap;
 
 	static std::array<EComponentMobility::Type, 4> InitializeOurMobilityToUEMobilityMap();
@@ -180,9 +187,7 @@ private:
 };
 
 
-/**
- * 
- */
+/** Class for selecting a set of actor components based on various selection criteria. */
 USTRUCT( BlueprintType, Category = "Object Selector" )
 struct FComponentSelector : public FObjectSelector
 {
@@ -214,9 +219,7 @@ struct FComponentSelector : public FObjectSelector
 };
 
 
-/**
- * 
- */
+/** Class for selecting a set of actors based on various selection criteria. */
 USTRUCT( BlueprintType, Category = "Object Selector" )
 struct FActorSelector : public FObjectSelector
 {
@@ -226,7 +229,7 @@ struct FActorSelector : public FObjectSelector
 	UPROPERTY( EditAnywhere )
 	TArray<FActorSelectorFilter> IncludeByFilter;
 
-	/** Include all actors that are referenced here. */
+	/** Include all actors that are directly referenced here. */
 	UPROPERTY( EditAnywhere )
 	TArray<AActor *> IncludeByReference;
 
@@ -269,7 +272,7 @@ public:
 	UFUNCTION( BlueprintCallable, BlueprintPure, Category = "Object Selector" )
 	static bool IsMatchingComponent( const FComponentSelector & ComponentSelector, const UActorComponent * Component );
 
-	/** Filter an array by removing all elements that do not match the selection criteria. The array order of the objects left is not preserved. */
+	/** Filter an array by removing all elements that do not match the selection criteria. The array order of the remaining objects is not preserved. */
 	UFUNCTION( BlueprintCallable, Category = "Object Selector" )
 	static void FilterComponentArray( const FComponentSelector & ComponentSelector, UPARAM( ref ) TArray<UActorComponent *> & Array );
 
@@ -298,7 +301,7 @@ public:
 	UFUNCTION( BlueprintCallable, BlueprintPure, Category = "Object Selector" )
 	static bool IsMatchingActor( const FActorSelector & ActorSelector, const AActor * Actor );
 
-	/** Filter an array by removing all elements that do not match the selection criteria. The array order of the objects left is not preserved. */
+	/** Filter an array by removing all elements that do not match the selection criteria. The array order of the remaining objects is not preserved. */
 	UFUNCTION( BlueprintCallable, Category = "Object Selector" )
 	static void FilterActorArray( const FActorSelector & ActorSelector, UPARAM( ref ) TArray<AActor *> & Array );
 
