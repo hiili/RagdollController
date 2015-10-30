@@ -307,47 +307,6 @@ public:
 
 
 
-/* method dispatchers for methods that use the statically polymorphic template method pattern */
-
-
-
-
-bool FComponentSelector::IsMatching( const UActorComponent & component ) const
-{
-	return FObjectSelector::IsMatching<FComponentSelector>( component );
-}
-
-
-bool FActorSelector::IsMatching( const AActor & actor ) const
-{
-	// IncludeByReference
-	if( IncludeByReference.Contains( &actor ) ) return true;
-
-	// no reference match, proceed with conditions in the base class
-	return FObjectSelector::IsMatching<FActorSelector>( actor );
-}
-
-
-template<typename T>
-TArray<T *> & FComponentSelector::FilterArray( TArray<T *> & array ) const
-{
-	return FObjectSelector::FilterArray<FComponentSelector>( array );
-}
-
-
-template<typename T>
-TArray<T *> & FActorSelector::FilterArray( TArray<T *> & array ) const
-{
-	return FObjectSelector::FilterArray<FActorSelector>( array );
-}
-
-
-
-
-
-
-
-
 /* implementations for templated and/or inlined functions */
 
 
@@ -412,6 +371,22 @@ bool FObjectSelector::IsMatching( const object_t & object ) const
 }
 
 
+bool FComponentSelector::IsMatching( const UActorComponent & component ) const
+{
+	return FObjectSelector::IsMatching<FComponentSelector>( component );
+}
+
+
+bool FActorSelector::IsMatching( const AActor & actor ) const
+{
+	// IncludeByReference
+	if( IncludeByReference.Contains( &actor ) ) return true;
+
+	// no reference match, proceed with conditions in the base class
+	return FObjectSelector::IsMatching<FActorSelector>( actor );
+}
+
+
 
 
 template<typename this_t, typename T>
@@ -435,6 +410,20 @@ TArray<T *> & FObjectSelector::FilterArray( TArray<T *> & array ) const
 	array.Shrink();
 
 	return array;
+}
+
+
+template<typename T>
+TArray<T *> & FComponentSelector::FilterArray( TArray<T *> & array ) const
+{
+	return FObjectSelector::FilterArray<FComponentSelector>( array );
+}
+
+
+template<typename T>
+TArray<T *> & FActorSelector::FilterArray( TArray<T *> & array ) const
+{
+	return FObjectSelector::FilterArray<FActorSelector>( array );
 }
 
 
