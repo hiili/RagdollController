@@ -89,16 +89,6 @@ struct FActorSelectorFilter : public FObjectSelectorFilter
 
 
 
-template<typename T>
-struct SelectorFilterTrait { typedef T type; };
-
-template<>
-struct SelectorFilterTrait<UActorComponent> { typedef FComponentSelectorFilter type; };
-
-template<>
-struct SelectorFilterTrait<AActor> { typedef FActorSelectorFilter type; };
-
-
 /**
 * A common base type for the component and actor selector types. Treat this as an abstract base class.
 * 
@@ -140,13 +130,12 @@ protected:
 	const this_t * statically_polymorphic_this() const   { return static_cast<const this_t *>(this); }
 
 
-	/** Common IsMatching() implementation. Uses a statically polymorphic template method pattern (dispatch on object_t). */
-	template<typename object_t>
-	bool IsMatching( const UObject & object ) const;
+	/** Common IsMatching() implementation.
+	 *  Use a statically polymorphic template method pattern (we cannot do class-level CRTP due to Unreal Header Tool limitations). */
+	template<typename this_t, typename object_t>
+	bool IsMatching( const object_t & object ) const;
 
-	/** Common FilterArray() implementation. Uses a statically polymorphic (CRTP-based) template method pattern.
-	 *  We cannot dispatch by the type of the array because it can be almost anything.
-	 *  Also, we cannot do class-level CRTP due to Unreal Header Tool limitations. */
+	/** Common FilterArray() implementation. (see comments of IsMatching()) */
 	template<typename this_t, typename T>
 	TArray<T *> & FilterArray( TArray<T *> & array ) const;
 
@@ -159,16 +148,6 @@ protected:
 
 
 private:
-
-	template<typename object_t>
-	const TArray<typename SelectorFilterTrait<object_t>::type> & GetFilters() const { }
-
-	template<>
-	const TArray<typename SelectorFilterTrait<UActorComponent>::type> & GetFilters<UActorComponent>() const;
-
-	template<>
-	const TArray<typename SelectorFilterTrait<AActor>::type> & GetFilters<AActor>() const;
-
 
 	/* object accessors */
 
@@ -335,13 +314,13 @@ public:
 
 bool FComponentSelector::IsMatching( const UActorComponent & component ) const
 {
-	return FObjectSelector::IsMatching<UActorComponent>( component );
+	return FObjectSelector::IsMatching<FComponentSelector>( component );
 }
 
 
 bool FActorSelector::IsMatching( const AActor & actor ) const
 {
-	return FObjectSelector::IsMatching<AActor>( actor );
+	return FObjectSelector::IsMatching<FActorSelector>( actor );
 }
 
 
@@ -370,26 +349,8 @@ TArray<T *> & FActorSelector::FilterArray( TArray<T *> & array ) const
 
 
 
-template<>
-const TArray<typename SelectorFilterTrait<UActorComponent>::type> & FObjectSelector::GetFilters<UActorComponent>() const
-{
-	//delete new TArray<FComponentSelectorFilter>;   // linker fails without this if the implementation is in the cpp file. why?
-	return statically_polymorphic_this<FComponentSelector>()->IncludeByFilter;
-}
-
-
-template<>
-const TArray<typename SelectorFilterTrait<AActor>::type> & FObjectSelector::GetFilters<AActor>() const
-{
-	//delete new TArray<FActorSelectorFilter>;   // linker fails without this if the implementation is in the cpp file. why?
-	return statically_polymorphic_this<FActorSelector>()->IncludeByFilter;
-}
-
-
-
-
-template<typename object_t>
-bool FObjectSelector::IsMatching( const UObject & object ) const
+template<typename this_t, typename object_t>
+bool FObjectSelector::IsMatching( const object_t & object ) const
 {
 	UE_LOG( LogTemp, Error, TEXT( "Object IsMatching: %s" ), *object.GetName() );
 
@@ -399,17 +360,17 @@ bool FObjectSelector::IsMatching( const UObject & object ) const
 	// IncludeByTag
 	for( const FName & tag : IncludeByTag )
 	{
-		if( HasTag( static_cast<const object_t &>(object), tag ) ) return true;
+		if( HasTag( object, tag ) ) return true;
 	}
 
 	// IncludeByFilter:
 	//   - for each filter
 	//     - no match: continue with next filter
 	//     - have match: return true (filters combine in an OR fashion, so we require only one filter to match)
-	for( const auto & filter : GetFilters<object_t>() )
+	for( const auto & filter : statically_polymorphic_this<this_t>()->IncludeByFilter )
 	{
 		// NarrowByTag
-		if( !filter.NarrowByTag.IsNone() && !HasTag( static_cast<const object_t &>(object), filter.NarrowByTag ) ) continue;
+		if( !filter.NarrowByTag.IsNone() && !HasTag( object, filter.NarrowByTag ) ) continue;
 
 		// NarrowByClass
 		if( filter.NarrowByClass && !object.IsA( filter.NarrowByClass ) ) continue;
@@ -417,7 +378,7 @@ bool FObjectSelector::IsMatching( const UObject & object ) const
 		// NarrowByMobility: reject if not a USceneComponent (thus no mobility) or has a different mobility than required here
 		if( filter.NarrowByMobility != EObjectSelectorMobilityFilter::Any )
 		{
-			if( OurMobilityToUEMobilityMap[static_cast<std::size_t>(filter.NarrowByMobility)] != GetMobility( static_cast<const object_t &>(object) ) ) continue;
+			if( OurMobilityToUEMobilityMap[static_cast<std::size_t>(filter.NarrowByMobility)] != GetMobility( object ) ) continue;
 		}
 
 		// NarrowByNamePattern
@@ -427,7 +388,7 @@ bool FObjectSelector::IsMatching( const UObject & object ) const
 		if( !filter.NarrowByTagPattern.IsEmpty() )
 		{
 			bool found = false;
-			for( const FName & tag : GetTags( static_cast<const object_t &>(object) ) )
+			for( const FName & tag : GetTags( object ) )
 			{
 				if( FWildcardString( filter.NarrowByTagPattern ).IsMatch( tag.ToString() ) )
 				{
