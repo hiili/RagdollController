@@ -57,6 +57,13 @@ void AFramerateManager::BeginPlay()
 
 	// Register self for automatic NetUpdateFrequency management
 	RegisterManagedNetUpdateFrequency( this );
+
+	// register actors from InitialNetUpdateFrequencyManagedActors
+	check( GetWorld() );
+	for( auto actor : InitialNetUpdateFrequencyManagedActors.GetAllMatchingActors( *GetWorld() ) )
+	{
+		RegisterManagedNetUpdateFrequency( actor );
+	}
 }
 
 

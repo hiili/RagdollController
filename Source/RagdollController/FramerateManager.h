@@ -4,6 +4,8 @@
 
 #include "GameFramework/Actor.h"
 
+#include "ObjectSelector.h"
+
 #include <boost/circular_buffer.hpp>
 #include <unordered_set>
 
@@ -139,5 +141,9 @@ private:
 
 	/** Actors registered for managed NetUpdateFrequency. @see RegisterManagedNetUpdateFrequency, UnregisterManagedNetUpdateFrequency */
 	std::unordered_set<AActor *> netUpdateFrequencyManagedActors;
+
+	/** The set of actors to be added to the netUpdateFrequencyManagedActors list on BeginPlay(). */
+	UPROPERTY( EditAnywhere, Category = "NetUpdateFrequency management" )
+	FActorSelector InitialNetUpdateFrequencyManagedActors;
 
 };
