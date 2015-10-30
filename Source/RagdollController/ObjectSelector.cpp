@@ -39,7 +39,15 @@ void UComponentSelectorBlueprintHelpers::FilterComponentArray( const FComponentS
 	ComponentSelector.FilterArray( Array );
 }
 
-void UComponentSelectorBlueprintHelpers::GetAllMatchingComponentsInWorld( const FComponentSelector & ComponentSelector, const UObject * WorldContextObject, TSubclassOf<UActorComponent> Class, TArray<UActorComponent *> & Out )
+void UComponentSelectorBlueprintHelpers::GetAllMatchingComponentsInActor( const FComponentSelector & ComponentSelector, const AActor * actor,
+	TSubclassOf<UActorComponent> OutType, TArray<UActorComponent *> & Out )
+{
+	if( !actor ) return;
+	Out = ComponentSelector.GetAllMatchingComponents( *actor );
+}
+
+void UComponentSelectorBlueprintHelpers::GetAllMatchingComponentsInWorld( const FComponentSelector & ComponentSelector, const UObject * WorldContextObject,
+	TSubclassOf<AActor> OwnerActorClass, TSubclassOf<UActorComponent> OutType, TArray<UActorComponent *> & Out )
 {
 	if( !WorldContextObject ) return;
 
@@ -47,13 +55,7 @@ void UComponentSelectorBlueprintHelpers::GetAllMatchingComponentsInWorld( const 
 	UWorld * world = GEngine->GetWorldFromContextObject( WorldContextObject );
 	if( !world ) return;
 
-	Out = ComponentSelector.GetAllMatchingComponents( *world );
-}
-
-void UComponentSelectorBlueprintHelpers::GetAllMatchingComponentsInActor( const FComponentSelector & ComponentSelector, const AActor * actor, TSubclassOf<UActorComponent> Class, TArray<UActorComponent *> & Out )
-{
-	if( !actor ) return;
-	Out = ComponentSelector.GetAllMatchingComponents( *actor );
+	Out = ComponentSelector.GetAllMatchingComponents( *world, OwnerActorClass );
 }
 
 bool UActorSelectorBlueprintHelpers::IsMatchingActor( const FActorSelector & ActorSelector, const AActor * Actor )
@@ -74,5 +76,5 @@ void UActorSelectorBlueprintHelpers::GetAllMatchingActors( const FActorSelector 
 	UWorld * world = GEngine->GetWorldFromContextObject( WorldContextObject );
 	if( !world ) return;
 
-	Out = ActorSelector.GetAllMatchingActors( *world );
+	Out = ActorSelector.GetAllMatchingActors( *world, Class );
 }

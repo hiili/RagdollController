@@ -212,9 +212,10 @@ struct FComponentSelector : public FObjectSelector
 	template<typename T = UActorComponent>
 	TArray<T *> GetAllMatchingComponents( const AActor & actor ) const;
 
-	/** Returns an array containing all matching components in the provided world, regardless of the owning actor. */
+	/** Returns an array containing all matching components in the provided world, regardless of the owning actor.
+	 *  Only actors derived form ownerActorClass are included in the actual search; this can provide a considerable speedup. */
 	template<typename T = UActorComponent>
-	TArray<T *> GetAllMatchingComponents( UWorld & world ) const;
+	TArray<T *> GetAllMatchingComponents( UWorld & world, UClass * ownerActorClass = AActor::StaticClass() ) const;
 
 };
 
@@ -244,9 +245,10 @@ struct FActorSelector : public FObjectSelector
 	template<typename T>
 	TArray<T *> & FilterArray( TArray<T *> & array ) const;
 
-	/** Returns an array containing all matching actors in the provided world. */
+	/** Returns an array containing all matching actors in the provided world. Only actors derived form uClass are included in the actual search; this can
+	 * provide a considerable speedup. */
 	template<typename T = AActor>
-	TArray<T *> GetAllMatchingActors( UWorld & world ) const;
+	TArray<T *> GetAllMatchingActors( UWorld & world, UClass * uClass = AActor::StaticClass() ) const;
 };
 
 
@@ -276,17 +278,23 @@ public:
 	UFUNCTION( BlueprintCallable, Category = "Object Selector" )
 	static void FilterComponentArray( const FComponentSelector & ComponentSelector, UPARAM( ref ) TArray<UActorComponent *> & Array );
 
-	/** Returns an array containing all matching components in the world, regardless of the owning actor.
-	 *  @param Class Narrow the search to include only objects of this type. Also defines the type of the output array.
-	 *         Must be specified or the result array will be empty. */
-	UFUNCTION( BlueprintCallable, Category = "Object Selector", meta = (WorldContext = "WorldContextObject", DeterminesOutputType = "Class", DynamicOutputParam = "Out") )
-	static void GetAllMatchingComponentsInWorld( const FComponentSelector & ComponentSelector, const UObject * WorldContextObject, TSubclassOf<UActorComponent> Class, TArray<UActorComponent *> & Out );
-
 	/** Returns an array containing all matching components in the provided actor.
-	 *  @param Class Narrow the search to include only objects of this type. Also defines the type of the output array.
-	 *         Must be specified or the result array will be empty. */
-	UFUNCTION( BlueprintCallable, Category = "Object Selector", meta = (DeterminesOutputType = "Class", DynamicOutputParam = "Out") )
-	static void GetAllMatchingComponentsInActor( const FComponentSelector & ComponentSelector, const AActor * actor, TSubclassOf<UActorComponent> Class, TArray<UActorComponent *> & Out );
+	 *  @param OutType   Defines the type of the output array. Note that this does not narrow the search;
+	 *                   make sure that the found components actually fit this type!
+	 *                   Can be empty, in which case the output array becomes an Actor Component array. */
+	UFUNCTION( BlueprintCallable, Category = "Object Selector", meta = (DeterminesOutputType = "OutType", DynamicOutputParam = "Out") )
+	static void GetAllMatchingComponentsInActor( const FComponentSelector & ComponentSelector, const AActor * actor,
+		TSubclassOf<UActorComponent> OutType, TArray<UActorComponent *> & Out );
+
+	/** Returns an array containing all matching components in the world, regardless of the owning actor.
+	 *  @param OwnerActorClass   Narrow the search to include only components from actors of this type. This can provide a considerable speedup.
+	 *                           Can be empty, in which case all actors are considered.
+	 *  @param OutType   Defines the type of the output array. Note that this does not narrow the search;
+	 *                   make sure that the found components actually fit this type!
+	 *                   Can be empty, in which case the output array becomes an Actor Component array. */
+	UFUNCTION( BlueprintCallable, Category = "Object Selector", meta = (WorldContext = "WorldContextObject", DeterminesOutputType = "OutType", DynamicOutputParam = "Out") )
+	static void GetAllMatchingComponentsInWorld( const FComponentSelector & ComponentSelector, const UObject * WorldContextObject,
+		TSubclassOf<AActor> OwnerActorClass, TSubclassOf<UActorComponent> OutType, TArray<UActorComponent *> & Out );
 };
 
 
@@ -306,8 +314,9 @@ public:
 	static void FilterActorArray( const FActorSelector & ActorSelector, UPARAM( ref ) TArray<AActor *> & Array );
 
 	/** Returns an array containing all matching actors in the world.
-	 *  @param Class Narrow the search to include only objects of this type. Also defines the type of the output array.
-	 *         Must be specified or the result array will be empty. */
+	 *  @param Class   Narrow the search to include only objects of this type. Also defines the type of the output array.
+	 *                 Can be empty, in which case all actors are considered and the output array becomes an AActor array.
+	 *                 Narrowing the search already here can provide a considerable speedup. */
 	UFUNCTION( BlueprintCallable, Category = "Object Selector", meta = (WorldContext = "WorldContextObject", DeterminesOutputType = "Class", DynamicOutputParam = "Out") )
 	static void GetAllMatchingActors( const FActorSelector & ActorSelector, const UObject * WorldContextObject, TSubclassOf<AActor> Class, TArray<AActor *> & Out );
 };
@@ -480,15 +489,15 @@ FComponentSelector::GetAllMatchingComponents( const AActor & actor ) const
 
 
 
-template<typename T /*= UActorComponent*/>
-TArray<T *>
-FComponentSelector::GetAllMatchingComponents( UWorld & world ) const
+template<typename T>
+TArray<T *> FComponentSelector::GetAllMatchingComponents( UWorld & world, UClass * ownerActorClass/* = AActor::StaticClass()*/ ) const
 {
 	TArray<T *> result;
 
-	// We could just use GetObjectsOfClass and filter the result, but we would have to be careful to filter the components properly to avoid components from
-	// the editor world, from hidden levels, etc. Play safe and avoid possible inconsistencies: do this by enumerating actors via the standard actor iterator
-	for( TActorIterator<AActor> it( &world ); it; ++it )
+	// We could just use GetObjectsOfClass (or ForEachObjectOfClass) and filter the result, but we would have to be careful to filter the components properly
+	// to avoid components from the editor world, from hidden levels, etc.
+	// Play safe and avoid possible inconsistencies: do this by enumerating actors via the standard actor iterator
+	for( TActorIterator<AActor> it( &world, ownerActorClass ? TSubclassOf<AActor>(ownerActorClass) : AActor::StaticClass() ); it; ++it )
 	{
 		result.Append( GetAllMatchingComponents( **it ) );
 	}
@@ -499,13 +508,15 @@ FComponentSelector::GetAllMatchingComponents( UWorld & world ) const
 
 
 
-template<typename T /*= AActor*/>
-TArray<T *>
-FActorSelector::GetAllMatchingActors( UWorld & world ) const
+template<typename T>
+TArray<T *> FActorSelector::GetAllMatchingActors( UWorld & world, UClass * uClass ) const
 {
 	TArray<T *> result;
 
-	for( TActorIterator<AActor> it( &world ); it; ++it )
+	// We could use ForEachObjectOfClass() to avoid one temporary copy of the candidate actor list, but we would have to be careful to filter the
+	// actors properly to avoid actors from the editor world, from hidden levels, etc.
+	// Play safe and avoid possible inconsistencies: do this by enumerating actors via the standard actor iterator
+	for( TActorIterator<AActor> it( &world, uClass ? TSubclassOf<T>(uClass) : AActor::StaticClass() ); it; ++it )
 	{
 		if( IsMatching( **it ) )
 		{
