@@ -151,17 +151,17 @@ private:
 
 	/* object accessors */
 
-	FORCEINLINE bool HasTag( const UActorComponent & component, const FName & tag ) const;
-	FORCEINLINE bool HasTag( const AActor & actor, const FName & tag ) const;
+	inline bool HasTag( const UActorComponent & component, const FName & tag ) const;
+	inline bool HasTag( const AActor & actor, const FName & tag ) const;
 	
-	FORCEINLINE const TArray<FName> & GetTags( const UActorComponent & component ) const;
-	FORCEINLINE const TArray<FName> & GetTags( const AActor & actor ) const;
+	inline const TArray<FName> & GetTags( const UActorComponent & component ) const;
+	inline const TArray<FName> & GetTags( const AActor & actor ) const;
 
 	/** Return the component's mobility if it is a USceneComponent. Otherwise return 0xff to signal the lack of mobility data. */
-	FORCEINLINE EComponentMobility::Type GetMobility( const UActorComponent & component ) const;
+	inline EComponentMobility::Type GetMobility( const UActorComponent & component ) const;
 
 	/** Return the mobility of the actor's root component if one exists. Otherwise return 0xff to signal the lack of mobility data. */
-	FORCEINLINE EComponentMobility::Type GetMobility( const AActor & actor ) const;
+	inline EComponentMobility::Type GetMobility( const AActor & actor ) const;
 
 };
 
@@ -180,7 +180,7 @@ struct FComponentSelector : public FObjectSelector
 	/* C++ interface; see blueprint helper section below for the Blueprint interface */
 
 	/** Test whether a component matches the selection criteria. */
-	FORCEINLINE bool IsMatching( const UActorComponent & component ) const;
+	inline bool IsMatching( const UActorComponent & component ) const;
 
 	/** Filter an array by removing all elements that do not match the selection criteria. The array order of the objects left is not preserved. A reference
 	 *  to the same array is returned. */
@@ -217,7 +217,7 @@ struct FActorSelector : public FObjectSelector
 	/* C++ interface; see blueprint helper section below for the Blueprint interface */
 
 	/** Test whether an actor matches the selection criteria. */
-	FORCEINLINE bool IsMatching( const AActor & actor ) const;
+	inline bool IsMatching( const AActor & actor ) const;
 
 	/** Filter an array by removing all elements that do not match the selection criteria. The array order of the objects left is not preserved. A reference
 	 *  to the same array is returned. */
@@ -307,7 +307,7 @@ public:
 
 
 
-/* implementations for templated and/or inlined functions */
+/* implementations for templated and inlined functions */
 
 
 
