@@ -22,7 +22,7 @@ class URemoteControllable : public UInterface
 
 
 /**
- * Interface class for actors that wish to be reachable via a RemoteControlHub actor.
+ * Interface class for objects that wish to be reachable via a RemoteControlHub actor.
  * Once your class inherits from this interface, it can be reached via a RemoteControlHub actor by its UObject name.
  * 
  * Upon a connection request, the hub actor calls the ConnectWith() method, which in turn stores the connection socket in the RemoteControlSocket field.

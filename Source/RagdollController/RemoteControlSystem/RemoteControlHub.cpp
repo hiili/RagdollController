@@ -210,20 +210,21 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 {
 	UE_LOG( LogRcRch, Log, TEXT( "(%s) Processing CONNECT command. Target pattern: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 
-	// find the target actor based on its FName
+	// find the target object based on its FName. unfortunately it seems that we cannot narrow the iterator to just our interface, or even interfaces in general.
 	bool found = false;
-	check( GetWorld() );
-	for( TActorIterator<AActor> iter( GetWorld() ); iter; ++iter )
+	for( TObjectIterator<UObject> iter; iter; ++iter )
 	{
-		if( FWildcardString( args.c_str() ).IsMatch( iter->GetName() ) )
+
+		// match names; also make sure that the object is from our world
+		if( iter->GetWorld() == GetWorld() && FWildcardString( args.c_str() ).IsMatch( iter->GetName() ) )
 		{
-			/* target actor found */
+			/* target object found */
 
 			// make sure to log a warning if multiple matches are found
 			if( found )
 			{
 				// target has been already found; we have multiple matches
-				UE_LOG( LogRcRch, Warning, TEXT("(%s) Multiple matching actors found for pattern '%s'! Ignoring: %s"),
+				UE_LOG( LogRcRch, Warning, TEXT("(%s) Multiple matching objects found for pattern '%s'! Ignoring: %s"),
 					TEXT( __FUNCTION__ ), *FString( args.c_str() ), *iter->GetName() );
 				continue;
 			}
@@ -231,14 +232,14 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 			// first hit: raise flag
 			found = true;
 
-			UE_LOG( LogRcRch, Log, TEXT( "(%s) Target actor found, forwarding the connection. Target: %s" ), TEXT( __FUNCTION__ ), *iter->GetName() );
+			UE_LOG( LogRcRch, Log, TEXT( "(%s) Target object found, forwarding the connection. Target: %s" ), TEXT( __FUNCTION__ ), *iter->GetName() );
 
-			// check that the actor is RemoteControllable
-			IRemoteControllable * target = Cast<IRemoteControllable>( *iter );
+			// check that the object is RemoteControllable
+			IRemoteControllable * target = dynamic_cast<IRemoteControllable *>( *iter );
 			if( !target )
 			{
 				// no: log and let the connection drop
-				UE_LOG( LogRcRch, Error, TEXT( "(%s) Target actor is not RemoteControllable! Target: %s" ), TEXT( __FUNCTION__ ), *iter->GetName() );
+				UE_LOG( LogRcRch, Error, TEXT( "(%s) Target object is not RemoteControllable! Target: %s" ), TEXT( __FUNCTION__ ), *iter->GetName() );
 				socket->PutLine( RCH_ERROR_STRING );
 				return;
 			}
@@ -263,6 +264,6 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 	check( socket );
 
 	// target not found, log and let the connection drop
-	UE_LOG( LogRcRch, Error, TEXT( "(%s) Target actor not found: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+	UE_LOG( LogRcRch, Error, TEXT( "(%s) Target object not found: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 	socket->PutLine( RCH_ERROR_STRING );
 }
