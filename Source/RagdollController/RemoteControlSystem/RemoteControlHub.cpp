@@ -210,60 +210,69 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 {
 	UE_LOG( LogRcRch, Log, TEXT( "(%s) Processing CONNECT command. Target pattern: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 
-	// find the target object based on its FName. unfortunately it seems that we cannot narrow the iterator to just our interface, or even interfaces in general.
-	bool found = false;
-	for( TObjectIterator<UObject> iter; iter; ++iter )
-	{
+	// find the target object based on its name. unfortunately it seems that we cannot narrow this to our interface, or even to interfaces in general.
+	FWildcardString pattern( args.c_str() );
+	IRemoteControllable * selected = nullptr;
+	ForEachObjectOfClass( UObject::StaticClass(), [this, &pattern, &selected]( UObject * candidate ) -> void {
 
 		// match names; also make sure that the object is from our world
-		if( iter->GetWorld() == GetWorld() && FWildcardString( args.c_str() ).IsMatch( iter->GetName() ) )
+		if( candidate->GetWorld() == GetWorld() && pattern.IsMatch( candidate->GetName() ) )
 		{
-			/* target object found */
+			/* object with a matching name found */
 
 			// make sure to log a warning if multiple matches are found
-			if( found )
+			if( selected )
 			{
 				// target has been already found; we have multiple matches
-				UE_LOG( LogRcRch, Warning, TEXT("(%s) Multiple matching objects found for pattern '%s'! Ignoring: %s"),
-					TEXT( __FUNCTION__ ), *FString( args.c_str() ), *iter->GetName() );
-				continue;
+				UE_LOG( LogRcRch, Warning, TEXT( "(ARemoteControlHub::CmdConnect) Multiple matching objects found for pattern '%s'! Ignoring: %s" ),
+					*pattern, *candidate->GetName() );
+				return;
 			}
-
-			// first hit: raise flag
-			found = true;
-
-			UE_LOG( LogRcRch, Log, TEXT( "(%s) Target object found, forwarding the connection. Target: %s" ), TEXT( __FUNCTION__ ), *iter->GetName() );
 
 			// check that the object is RemoteControllable
-			IRemoteControllable * target = dynamic_cast<IRemoteControllable *>( *iter );
-			if( !target )
+			selected = dynamic_cast<IRemoteControllable *>(candidate);
+			if( !selected )
 			{
-				// no: log and let the connection drop
-				UE_LOG( LogRcRch, Error, TEXT( "(%s) Target object is not RemoteControllable! Target: %s" ), TEXT( __FUNCTION__ ), *iter->GetName() );
-				socket->PutLine( RCH_ERROR_STRING );
+				// no: log and keep searching
+				UE_LOG( LogRcRch, Warning, TEXT( "(ARemoteControlHub::CmdConnect) Matching object found but it is not IRemoteControllable! Ignoring: %s" ),
+					*candidate->GetName() );
 				return;
 			}
 
-			// send ack to socket
-			if( !socket->PutLine( RCH_ACK_STRING ) )
-			{
-				// failed: log and let the connection drop (no point in sending an error string to the already failed TCP stream)
-				UE_LOG( LogRcRch, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ) );
-				return;
-			}
+			// invariant: we have a target selected && it must be an UObject, because we just found it by iterating all UObjects
+			check( selected && dynamic_cast<UObject *>(selected) );
 
-			// forward the connection, then continue looping to detect and log possible multiple matches
-			target->ConnectWith( std::move( socket ) );
+			UE_LOG( LogRcRch, Log, TEXT( "(ARemoteControlHub::CmdConnect) Target object found. Target: %s" ),
+				*dynamic_cast<UObject *>(selected)->GetName() );
 		}
+
+	} );
+
+	// did we find the target object?
+	if( selected )
+	{
+		// yes: send ack to socket
+		if( !socket->PutLine( RCH_ACK_STRING ) )
+		{
+			// failed: log and let the connection drop (no point in sending an error string to the already failed TCP stream)
+			UE_LOG( LogRcRch, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ) );
+			return;
+		}
+
+		// forward the connection and return
+		selected->ConnectWith( std::move( socket ) );
+		return;
 	}
+	else
+	{
+		// no target found
 
-	// return if target found; note that 'socket' has been moved in this case!
-	if( found ) return;
+		// invariant: we should still have the socket unmoved at this point
+		check( socket );
 
-	// invariant: we should still have 'socket' at this point because no match was found
-	check( socket );
-
-	// target not found, log and let the connection drop
-	UE_LOG( LogRcRch, Error, TEXT( "(%s) Target object not found: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
-	socket->PutLine( RCH_ERROR_STRING );
+		// log, send error to socket, and let the connection drop
+		UE_LOG( LogRcRch, Error, TEXT( "(%s) Target object not found: %s" ), TEXT( __FUNCTION__ ), *pattern );
+		socket->PutLine( RCH_ERROR_STRING );
+		return;
+	}
 }
