@@ -34,3 +34,25 @@ void ADeepSnapshotManager::Tick( float DeltaTime )
 
 }
 
+
+
+
+void ADeepSnapshotManager::RegisterSnapshotComponent( UDeepSnapshotBase * component )
+{
+	if( !component )
+	{
+		// null pointer: log and return
+		UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) The provided component pointer is null!" ), TEXT( __FUNCTION__ ) );
+		return;
+	}
+
+	bool isAlreadyInSet;
+	RegisteredSnapshotComponents.Emplace( component, &isAlreadyInSet );
+
+	if( isAlreadyInSet )
+	{
+		// multiple registration: log
+		UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) A deep snapshot component is trying to register multiple times! Component name: %s" ),
+			TEXT( __FUNCTION__ ), *component->GetName() );
+	}
+}
