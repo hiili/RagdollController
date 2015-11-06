@@ -15,6 +15,9 @@
 DECLARE_LOG_CATEGORY_EXTERN( LogDeepSnapshotSystem, Log, All );
 
 
+class ADeepSnapshotManager;
+
+
 
 
 USTRUCT()
@@ -235,6 +238,28 @@ private:
 	 *	AutoSelectTarget option. */
 	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem", meta=(EditCondition="!AutoSelectTarget") )
 	FName InitialTargetComponentName;
+
+
+
+
+	/* snapshot manager integration */
+
+
+private:
+
+	/** Whether to try to register with a Deep Snapshot Manager instance when the game starts. This registration is necessary only if one wishes to
+	 *  group several snapshot components together and use them as a group via the manager interface.
+	 *  Multiple snapshot groups can be created by having several managers and registering some snapshot components with different managers.
+	 *  A warning is logged if this is set to true and no snapshot manager is found.
+	 *  @see ManagerInstance */
+	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem" )
+	bool RegisterWithManager = true;
+	
+	/** Select which Deep Snapshot Manager instance to register with. If left to None and only a single snapshot manager exists in the world, then that manager
+	 *  will be selected. An error is logged if this is left to None and multiple managers exist.
+	 *  @see RegisterWithManager */
+	UPROPERTY( EditAnywhere, Category = "DeepSnapshotSystem", meta = (EditCondition = "RegisterWithManager") )
+	ADeepSnapshotManager * ManagerInstance = 0;
 
 
 

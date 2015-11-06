@@ -3,6 +3,7 @@
 #include "RagdollController.h"
 
 #include "FramerateManager.h"
+#include "DeepSnapshotManager.h"
 
 #include <Net/UnrealNetwork.h>
 
@@ -56,6 +57,43 @@ void UDeepSnapshotBase::InitializeComponent()
 			UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) InitialTargetComponentName = %s, but no such component was found!" ),
 				TEXT( __FUNCTION__ ) );
 			UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
+		}
+	}
+
+	// consider registering with a manager
+	if( RegisterWithManager )
+	{
+		// we should register: make sure that we have a manager selected
+		if( !ManagerInstance )
+		{
+			// we have no manager: get a list of all existing managers
+			TArray<AActor *> managers;
+			UGameplayStatics::GetAllActorsOfClass( this, ADeepSnapshotManager::StaticClass(), managers );
+
+			// see if there exists exactly one
+			if( managers.Num() == 1 )
+			{
+				// exactly one exists; select that
+				ManagerInstance = dynamic_cast<ADeepSnapshotManager *>(managers[0]);   // should always succeed, because we searched only actors of this class
+
+				// invariant: we should now have a non-null manager
+				check( ManagerInstance );
+			}
+			else
+			{
+				// none or several managers exist; cannot auto-select -> log an error
+				UE_LOG( LogDeepSnapshotSystem, Error,
+					TEXT("(%s) Auto-selection of a host DeepSnapshotManager was requested (RegisterWithManager = true and ManagerInstance = None), ")
+					TEXT("in which case there should exist exactly one such manager. Number of found DeepSnapshotManager actors: %d"),
+					TEXT( __FUNCTION__ ), managers.Num() );
+				UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
+			}
+		}
+
+		// now register if we have a manager selected
+		if( ManagerInstance )
+		{
+			ManagerInstance->RegisterSnapshotComponent( this );
 		}
 	}
 
@@ -334,10 +372,11 @@ FString UDeepSnapshotBase::LogCreateDiagnosticLine() const
 #if NO_LOGGING
 	return FString();
 #else
-	return FString::Printf( TEXT("snapshot component: name=%s, owner=%s; target component: name=%s, owner=%s"),
+	return FString::Printf( TEXT("snapshot component: name=%s, owner=%s; target component: name=%s, owner=%s, manager: name=%s"),
 		*GetName(),
 		GetOwner() ? *GetOwner()->GetName() : *FString( "(no owner)" ),
 		TargetComponent ? *TargetComponent->GetName() : *FString( "(no target)" ),
-		TargetComponent && TargetComponent->GetOwner() ? *TargetComponent->GetOwner()->GetName() : *FString( "(target has no owner)" ) );
+		TargetComponent && TargetComponent->GetOwner() ? *TargetComponent->GetOwner()->GetName() : *FString( "(target has no owner)" ),
+		ManagerInstance ? *ManagerInstance->GetName() : *FString( "(no manager)" ) );
 #endif
 }
