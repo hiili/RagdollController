@@ -32,27 +32,51 @@ void ADeepSnapshotManager::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
+	UE_LOG( LogTemp, Error, TEXT( "************* Reg comp names num: %d, SNgr1 num: %d, SNgr2 num: %d, SNgr3 num: %d, SNgr10 num: %d" ),
+		registeredSnapshotComponentsByGroup.Num(),
+		registeredSnapshotComponentsByGroup[FName( "SNgr1" )].Num(), 
+		registeredSnapshotComponentsByGroup[FName( "SNgr2" )].Num(),
+		registeredSnapshotComponentsByGroup[FName( "SNgr3" )].Num(),
+		registeredSnapshotComponentsByGroup[FName( "SNgr10" )].Num()
+	);
 }
 
 
 
 
-void ADeepSnapshotManager::RegisterSnapshotComponent( UDeepSnapshotBase * component )
+void ADeepSnapshotManager::RegisterSnapshotComponent( UDeepSnapshotBase * component, const TArray<FName> & snapshotGroups )
 {
+	// null pointer?
 	if( !component )
 	{
-		// null pointer: log and return
+		// log and return
 		UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) The provided component pointer is null!" ), TEXT( __FUNCTION__ ) );
 		return;
 	}
 
-	bool isAlreadyInSet;
-	RegisteredSnapshotComponents.Emplace( component, &isAlreadyInSet );
-
-	if( isAlreadyInSet )
+	// register for all specified snapshot groups
+	for( auto & groupName : snapshotGroups )
 	{
-		// multiple registration: log
-		UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) A deep snapshot component is trying to register multiple times! Component name: %s" ),
-			TEXT( __FUNCTION__ ), *component->GetName() );
+		// does this group already exist?
+		if( !registeredSnapshotComponentsByGroup.Contains( groupName ) )
+		{
+			// no: create an empty group
+			registeredSnapshotComponentsByGroup.Emplace( groupName );
+		}
+
+		// add to the group list
+		bool isAlreadyInSet;
+		registeredSnapshotComponentsByGroup[groupName].Emplace( component, &isAlreadyInSet );
+
+		// multiple registration?
+		if( isAlreadyInSet )
+		{
+			// log
+			UE_LOG( LogDeepSnapshotSystem, Error,
+				TEXT( "(%s) A deep snapshot component is trying to register multiple times! Component: name=%s, owner=%s. Snapshot group name: %s" ),
+				TEXT( __FUNCTION__ ),
+				*component->GetName(), component->GetOwner() ? *component->GetOwner()->GetName() : TEXT("(no owner)"),
+				*groupName.ToString() );
+		}
 	}
 }

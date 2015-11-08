@@ -60,40 +60,27 @@ void UDeepSnapshotBase::InitializeComponent()
 		}
 	}
 
-	// consider registering with a manager
-	if( RegisterWithManager )
+	// register with a manager, if one exists
+	TArray<AActor *> managers;
+	UGameplayStatics::GetAllActorsOfClass( this, ADeepSnapshotManager::StaticClass(), managers );
+	if( managers.Num() > 0 )
 	{
-		// we should register: make sure that we have a manager selected
-		if( !ManagerInstance )
+		// manager(s) exist. make sure that there is only one.
+		if( managers.Num() >= 2 )
 		{
-			// we have no manager: get a list of all existing managers
-			TArray<AActor *> managers;
-			UGameplayStatics::GetAllActorsOfClass( this, ADeepSnapshotManager::StaticClass(), managers );
-
-			// see if there exists exactly one
-			if( managers.Num() == 1 )
-			{
-				// exactly one exists; select that
-				ManagerInstance = dynamic_cast<ADeepSnapshotManager *>(managers[0]);   // should always succeed, because we searched only actors of this class
-
-				// invariant: we should now have a non-null manager
-				check( ManagerInstance );
-			}
-			else
-			{
-				// none or several managers exist; cannot auto-select -> log an error
-				UE_LOG( LogDeepSnapshotSystem, Error,
-					TEXT("(%s) Auto-selection of a host DeepSnapshotManager was requested (RegisterWithManager = true and ManagerInstance = None), ")
-					TEXT("in which case there should exist exactly one such manager. Number of found DeepSnapshotManager actors: %d"),
-					TEXT( __FUNCTION__ ), managers.Num() );
-				UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
-			}
+			// several managers exist -> log an error
+			UE_LOG( LogDeepSnapshotSystem, Error,
+				TEXT( "(%s) There should exist at most one DeepSnapshotManager actor in the world! Number of found DeepSnapshotManager actors: %d" ),
+				TEXT( __FUNCTION__ ), managers.Num() );
+			UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
 		}
-
-		// now register if we have a manager selected
-		if( ManagerInstance )
+		else
 		{
-			ManagerInstance->RegisterSnapshotComponent( this );
+			// exactly one exists; register with that
+			check( managers.Num() == 1 );
+			ADeepSnapshotManager * manager = dynamic_cast<ADeepSnapshotManager *>(managers[0]);
+			check( manager );   // the cast should always succeed, because we searched only actors of this class
+			manager->RegisterSnapshotComponent( this, SnapshotGroups );
 		}
 	}
 
@@ -372,11 +359,10 @@ FString UDeepSnapshotBase::LogCreateDiagnosticLine() const
 #if NO_LOGGING
 	return FString();
 #else
-	return FString::Printf( TEXT("snapshot component: name=%s, owner=%s; target component: name=%s, owner=%s, manager: name=%s"),
+	return FString::Printf( TEXT("snapshot component: name=%s, owner=%s; target component: name=%s, owner=%s"),
 		*GetName(),
 		GetOwner() ? *GetOwner()->GetName() : *FString( "(no owner)" ),
 		TargetComponent ? *TargetComponent->GetName() : *FString( "(no target)" ),
-		TargetComponent && TargetComponent->GetOwner() ? *TargetComponent->GetOwner()->GetName() : *FString( "(target has no owner)" ),
-		ManagerInstance ? *ManagerInstance->GetName() : *FString( "(no manager)" ) );
+		TargetComponent && TargetComponent->GetOwner() ? *TargetComponent->GetOwner()->GetName() : *FString( "(target has no owner)" ) );
 #endif
 }
