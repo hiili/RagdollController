@@ -11,6 +11,9 @@
 
 
 
+/**
+ * 
+ */
 UCLASS()
 class RAGDOLLCONTROLLER_API ADeepSnapshotManager : public AActor
 {
@@ -18,9 +21,25 @@ class RAGDOLLCONTROLLER_API ADeepSnapshotManager : public AActor
 
 	/** Permit deep snapshot components to have private access during initialization, so that they can register themselves with us. */
 	friend void UDeepSnapshotBase::InitializeComponent();
+
+
+
+
+	/* constructors/destructor */
+
+
 public:	
+
 	// Sets default values for this actor's properties
 	ADeepSnapshotManager();
+
+
+
+
+	/* UE interface overrides */
+
+
+public:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -30,6 +49,51 @@ public:
 
 	
 	
+
+	/* core snapshot functionality */
+
+
+public:
+
+	/** Return true if the specified snapshot group is not empty, otherwise return false. Always returns true if the group name is 'None'. */
+	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
+	bool IsGroupNonEmpty( FName groupName );
+
+	/** Call Snapshot() on each deep snapshot component that belongs to the specified snapshot group.
+	 * @param	groupName	The snapshot group on which to perform the operation. Can be 'None', in which case the operation is performed on all
+	 *						snapshot components in the world. Note that in C++, the default FName constructor produces a 'None' name.
+	 * @param	slotName	The name of the snapshot slot to be used
+	 * @param	success		Return true if the group is not empty (ignore this check if group is 'None'), otherwise return false */
+	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
+	void Snapshot( FName groupName, FName slotName, bool & success );
+
+	/** Call Recall() on each deep snapshot component that belongs to the specified snapshot group.
+	 * @param	groupName	The snapshot group on which to perform the operation. Can be 'None', in which case the operation is performed on all
+	 *						snapshot components in the world. Note that in C++, the default FName constructor produces a 'None' name.
+	 * @param	slotName	The name of the snapshot slot to be used
+	 * @param	success		Return true if the group is not empty (ignore this check if group is 'None') and all recall operations succeeded,
+	 *						otherwise return false */
+	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
+	void Recall( FName groupName, FName slotName, bool & success );
+
+	/** Erase the specified snapshot slot from all deep snapshot components that belong to the specified snapshot group.
+	 * @param	groupName	The snapshot group on which to perform the operation. Can be 'None', in which case the operation is performed on all
+	 *						snapshot components in the world. Note that in C++, the default FName constructor produces a 'None' name.
+	 * @param	slotName	The name of the snapshot slot to be used
+	 * @param	success		Return true if the group is not empty (ignore this check if group is 'None') and all erase operations succeeded,
+	 *						otherwise return false */
+	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
+	void Erase( FName groupName, FName slotName, bool & success );
+
+	/** Erase all stored snapshots from all deep snapshot components that belong to the specified snapshot group.
+	 * @param	groupName	The snapshot group on which to perform the operation. Can be 'None', in which case the operation is performed on all
+	 *						snapshot components in the world. Note that in C++, the default FName constructor produces a 'None' name.
+	 * @param	success		Return true if the group is not empty (ignore this check if group is 'None'), otherwise return false */
+	UFUNCTION( BlueprintCallable, Category = "DeepSnapshotSystem" )
+	void EraseAll( FName groupName, bool & success );
+
+
+
 
 	/* deep snapshot component management */
 
@@ -50,4 +114,95 @@ private:
 	 *  actually take full copies of the content during construction). */
 	TMap< FName, TSet< TWeakObjectPtr<UDeepSnapshotBase> > > registeredSnapshotComponentsByGroup;
 
+
+
+
+	/* utility */
+
+private:
+
+	/** Perform an operation on all components that have been registered with the given snapshot group. Prunes all encountered stale pointers.
+	 *  @param	groupName	Name of the snapshot group. Can be 'None' (FName()), in which case the operation is performed on all registered components.
+	 *  @param	function	The function to apply on the components. Required signature: void function( UDeepSnapshotBase & component )
+	 *  @return				Return true if the specified group was found and it has at least one non-stale pointer, false otherwise. */
+	template<typename Function>
+	bool ForEachInGroup( FName groupName, Function function );
+
+	/** Perform an operation on all components in the given snapshot group container. Prunes all encountered stale pointers.
+	 *  @param	group		The snapshot group.
+	 *  @param	function	The function to apply on the components. Required signature: void function( UDeepSnapshotBase & component )
+	 *  @return				Return true if the specified group has at least one non-stale pointer, false otherwise. */
+	template<typename Function>
+	bool ForEachInGroup( TSet< TWeakObjectPtr<UDeepSnapshotBase> > & group, Function function );
+
 };
+
+
+
+
+
+
+
+
+/* inline and template method implementations */
+
+
+
+
+template<typename Function>
+bool ADeepSnapshotManager::ForEachInGroup( FName groupName, Function function )
+{
+	// was a group name provided?
+	if( groupName.IsNone() )
+	{
+		// no: loop through all groups, always return success
+		for( auto & groupEntry : registeredSnapshotComponentsByGroup )
+		{
+			ForEachInGroup( groupEntry.Value, function );
+		}
+		return true;
+	}
+	else
+	{
+		// yes: only apply to components in the specified group
+		TSet< TWeakObjectPtr<UDeepSnapshotBase> > * groupPtr = registeredSnapshotComponentsByGroup.Find( groupName );
+		if( groupPtr )
+		{
+			// group found -> apply and return success if there were non-stale pointers to call
+			if( ForEachInGroup( *groupPtr, function ) ) return true;
+		}
+
+		// group not found or there were no non-stale pointers -> log and return failure
+		UE_LOG( LogDeepSnapshotSystem, Warning, TEXT( "(%s) The specified snapshot group is empty! Group name: %s" ),
+			TEXT( __FUNCTION__ ), *groupName.ToString() );
+		return false;
+	}
+}
+
+
+template<typename Function>
+bool ADeepSnapshotManager::ForEachInGroup( TSet< TWeakObjectPtr<UDeepSnapshotBase> > & group, Function function )
+{
+	// collect a list of stale pointers and remove them at the end
+	TArray< TWeakObjectPtr<UDeepSnapshotBase> > stalePointers;
+
+	// loop through components in this group
+	for( TWeakObjectPtr<UDeepSnapshotBase> & componentWeakPtr : group )
+	{
+		// stale pointer? record for later erasing, then continue with next
+		if( !componentWeakPtr.IsValid() )
+		{
+			stalePointers.Emplace( componentWeakPtr );
+			continue;
+		}
+
+		// call the function
+		function( *componentWeakPtr.Get() );
+	}
+
+	// erase stale pointers
+	for( auto stalePointer : stalePointers ) group.Remove( stalePointer );
+
+	// stale pointers are now pruned out; return success if the group is still non-empty
+	return group.Num() > 0;
+}

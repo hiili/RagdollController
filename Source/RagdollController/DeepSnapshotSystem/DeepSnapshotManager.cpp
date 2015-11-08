@@ -37,6 +37,74 @@ void ADeepSnapshotManager::Tick( float DeltaTime )
 
 
 
+bool ADeepSnapshotManager::IsGroupNonEmpty( FName groupName )
+{
+	if( groupName.IsNone() ) return true;
+
+	// find the group set
+	TSet< TWeakObjectPtr<UDeepSnapshotBase> > * groupPtr = registeredSnapshotComponentsByGroup.Find( groupName );
+	if( !groupPtr ) return false;
+
+	// check that it contains at least one non-stale pointer
+	for( TWeakObjectPtr<UDeepSnapshotBase> & componentWeakPtr : *groupPtr )
+	{
+		if( componentWeakPtr.IsValid() ) return true;
+	}
+
+	// no non-stale pointers: take the opportunity to prune fast, then return false
+	groupPtr->Empty();
+	return false;
+}
+
+
+
+
+void ADeepSnapshotManager::Snapshot( FName groupName, FName slotName, bool & success )
+{
+	success = ForEachInGroup( groupName, [slotName]( UDeepSnapshotBase & component ){
+		component.Snapshot( slotName );
+	} );
+}
+
+
+
+
+void ADeepSnapshotManager::Recall( FName groupName, FName slotName, bool & success )
+{
+	bool foreachSuccess = true;
+	success = ForEachInGroup( groupName, [slotName, &foreachSuccess]( UDeepSnapshotBase & component ){
+		bool thisSuccess;
+		component.Recall( slotName, thisSuccess );
+		foreachSuccess &= thisSuccess;
+	} );
+
+	success &= foreachSuccess;
+}
+
+
+void ADeepSnapshotManager::Erase( FName groupName, FName slotName, bool & success )
+{
+	bool foreachSuccess = true;
+	success = ForEachInGroup( groupName, [slotName, &foreachSuccess]( UDeepSnapshotBase & component ){
+		bool thisSuccess;
+		component.Erase( slotName, thisSuccess );
+		foreachSuccess &= thisSuccess;
+	} );
+
+	success &= foreachSuccess;
+}
+
+
+void ADeepSnapshotManager::EraseAll( FName groupName, bool & success )
+{
+	success = ForEachInGroup( groupName, []( UDeepSnapshotBase & component ){
+		component.EraseAll();
+	} );
+}
+
+
+
+
 void ADeepSnapshotManager::RegisterSnapshotComponent( UDeepSnapshotBase * component, const TArray<FName> & snapshotGroups )
 {
 	// null pointer?
