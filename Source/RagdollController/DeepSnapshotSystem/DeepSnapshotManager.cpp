@@ -32,13 +32,6 @@ void ADeepSnapshotManager::Tick( float DeltaTime )
 {
 	Super::Tick( DeltaTime );
 
-	UE_LOG( LogTemp, Error, TEXT( "************* Reg comp names num: %d, SNgr1 num: %d, SNgr2 num: %d, SNgr3 num: %d, SNgr10 num: %d" ),
-		registeredSnapshotComponentsByGroup.Num(),
-		registeredSnapshotComponentsByGroup[FName( "SNgr1" )].Num(), 
-		registeredSnapshotComponentsByGroup[FName( "SNgr2" )].Num(),
-		registeredSnapshotComponentsByGroup[FName( "SNgr3" )].Num(),
-		registeredSnapshotComponentsByGroup[FName( "SNgr10" )].Num()
-	);
 }
 
 
