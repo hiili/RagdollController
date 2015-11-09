@@ -42,15 +42,21 @@ class RAGDOLLCONTROLLER_API ARemoteControlHub : public AActor
 	GENERATED_BODY()
 
 	
-protected:
-	
-	/** Main listen socket */
-	std::unique_ptr<FSocket> ListenSocket;
+public:
 
-	/** Connection sockets that have not yet been dispatched. Currently, there are no cleanup mechanisms for stalled connections. */
-	TArray< std::unique_ptr<XmlFSocket> > PendingSockets;
-	
+	ARemoteControlHub();
 
+	/** Initialize the remote control hub and start listening for incoming connections. */
+	virtual void PostInitializeComponents() override;
+
+	/** Check and dispatch new incoming connections. */
+	virtual void Tick( float deltaSeconds ) override;
+
+
+
+
+private:
+	
 	/** Create the main listen socket. */
 	void CreateListenSocket();
 
@@ -64,20 +70,16 @@ protected:
 	void DispatchSocket( std::string command, std::unique_ptr<XmlFSocket> socket );
 
 
+	/** Main listen socket */
+	std::unique_ptr<FSocket> ListenSocket;
+
+	/** Connection sockets that have not yet been dispatched. Currently, there are no cleanup mechanisms for stalled connections. */
+	TArray< std::unique_ptr<XmlFSocket> > PendingSockets;
+
+
 	/* commands */
 
 	/** Connect directly to an object that implements the RemoteControllable interface */
 	void CmdConnect( std::string args, std::unique_ptr<XmlFSocket> socket );
 
-
-public:
-
-	ARemoteControlHub();
-
-	/** Initialize the remote control hub and start listening for incoming connections. */
-	virtual void PostInitializeComponents() override;
-
-	/** Check and dispatch new incoming connections. */
-	virtual void Tick( float deltaSeconds ) override;
-	
 };
