@@ -145,7 +145,8 @@ public:
 	pugi::xml_document InXml;
 
 	/** Parse status of InXMl, set by GetXml(). If GetXml() has not been called yet or if InXMl has been reset due to a subsequent (attempted) read operation,
-	 ** then InXmlStatus.status is set to pugi::status_no_document_element. */
+	 ** then InXmlStatus.status is set to pugi::status_no_document_element. This field can be also queried as a bool, in which case it evaluates to true
+	 ** if and only if InXmlStatus.status == pugi::status_ok. */
 	pugi::xml_parse_result InXmlStatus;
 
 	/** A pre-allocated, re-usable xml document that can be sent with SendXml(). If one is sending repeatedly an xml document with the same structure

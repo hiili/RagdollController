@@ -128,7 +128,7 @@ bool XmlFSocket::PutXml( pugi::xml_document * xmlDoc /*= 0 */ )
 
 		Writer( XmlFSocket & socket ) : Socket( socket ), IsGood( Socket.IsGood() ) {}
 
-		virtual void write( const void* data, size_t size )
+		virtual void write( const void* data, std::size_t size )
 		{
 			if( !IsGood || !Socket.Socket ) return;
 			IsGood &= Socket.PutRaw( data, size );
@@ -251,7 +251,7 @@ bool XmlFSocket::GetRaw()
 		return false;
 	}
 
-	// success: correct the size of Buffer in case that bytesRead < bytesPending, then return true
+	// success: correct the size of Buffer in case that bytesRead < bytesPending
 	this->Buffer.resize( this->Buffer.size() - bytesPending + bytesRead );
 
 	// dump to log?
