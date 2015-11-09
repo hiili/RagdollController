@@ -116,7 +116,7 @@ void ADeepSnapshotManager::RegisterSnapshotComponent( UDeepSnapshotBase * compon
 	}
 
 	// register for all specified snapshot groups
-	for( auto & groupName : snapshotGroups )
+	for( auto groupName : snapshotGroups )
 	{
 		// does this group already exist?
 		if( !registeredSnapshotComponentsByGroup.Contains( groupName ) )
@@ -125,7 +125,7 @@ void ADeepSnapshotManager::RegisterSnapshotComponent( UDeepSnapshotBase * compon
 			registeredSnapshotComponentsByGroup.Emplace( groupName );
 		}
 
-		// add to the group list
+		// add the component to the current group
 		bool isAlreadyInSet;
 		registeredSnapshotComponentsByGroup[groupName].Emplace( component, &isAlreadyInSet );
 
