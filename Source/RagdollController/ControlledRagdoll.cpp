@@ -37,28 +37,11 @@ void AControlledRagdoll::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-
-	/* init the SkeletalMeshComponent pointer: scan all components and choose the first USkeletalMeshComponent */
-
-	// get all components of the right type
-	TArray<USkeletalMeshComponent*> comps;
-	GetComponents( comps );
-
-	// if at least one found, choose the first one
-	if( comps.Num() >= 1 )
+	// init the SkeletalMeshComponent pointer
+	SkeletalMeshComponent = Utility::FindUniqueComponentByClass<USkeletalMeshComponent>( *this );
+	if( !SkeletalMeshComponent )
 	{
-		this->SkeletalMeshComponent = comps[0];
-
-		// warn about multiple SkeletalMeshComponents
-		if( comps.Num() > 1 )
-		{
-			UE_LOG( LogRcCr, Warning, TEXT( "(%s) Multiple USkeletalMeshComponents found! Using the first one." ), TEXT( __FUNCTION__ ) );
-		}
-	}
-	else
-	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) No USkeletalMeshComponent found!" ), TEXT( __FUNCTION__ ) );
-		return;
+		UE_LOG( LogRcCr, Warning, TEXT( "(%s) No USkeletalMeshComponent component found or there were multiple candidates! Cannot bind." ), TEXT( __FUNCTION__ ) );
 	}
 
 

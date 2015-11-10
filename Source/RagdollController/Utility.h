@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "GameFramework/Actor.h"
+
 
 
 
@@ -18,4 +20,35 @@ public:
 
 	static void AddDefaultRootComponent( AActor * actor, FString spriteName );
 
+	/** Search through the components owned by the provided actor and return a component with a type that matches the return type.
+	 *  @return If there is exactly one component with a matching type, then return a pointer to it. Otherwise return a nullptr. */
+	template<typename T>
+	static T * FindUniqueComponentByClass( const AActor & actor );
+
 };
+
+
+
+
+template<typename ComponentType>
+ComponentType * Utility::FindUniqueComponentByClass( const AActor & actor )
+{
+	static_assert(TPointerIsConvertibleFromTo<ComponentType, const UActorComponent>::Value,
+		"'ComponentType' template parameter to Utility::FindUniqueComponentByClass must be derived from UActorComponent");
+
+	ComponentType * selected = 0;
+	for( UActorComponent * const candidate : actor.GetComponents() )
+	{
+		ComponentType * castCandidate = dynamic_cast<ComponentType *>(candidate);
+		if( castCandidate )
+		{
+			// multiple matches? return failure
+			if( selected ) return nullptr;
+
+			// first hit -> store
+			selected = castCandidate;
+		}
+	}
+
+	return selected;
+}
