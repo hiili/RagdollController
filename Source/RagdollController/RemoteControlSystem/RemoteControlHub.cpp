@@ -16,10 +16,6 @@
 #include <algorithm>
 
 
-// remote control interface address (format: n, n, n, n) and port
-#define RCH_ADDRESS 0, 0, 0, 0
-#define RCH_PORT 7770
-
 // TCP send and receive buffer size
 #define RCH_TCP_BUFFERS_SIZE (64 * 1024)
 
@@ -76,8 +72,8 @@ void ARemoteControlHub::CreateListenSocket()
 	} );
 
 	// create a listen socket
-	FIPv4Endpoint endpoint( FIPv4Address(RCH_ADDRESS), RCH_PORT );
-	this->ListenSocket = std::unique_ptr<FSocket>( FTcpSocketBuilder( "Remote control interface main listener" )
+	FIPv4Endpoint endpoint( ListenOnlyOnLocalhost ? FIPv4Address( 127, 0, 0, 1 ) : FIPv4Address( 0, 0, 0, 0 ), ListenPort );
+	this->ListenSocket = std::unique_ptr<FSocket>( FTcpSocketBuilder( "RemoteControlHub main listener" )
 		//.AsReusable()
 		.AsNonBlocking()
 		.BoundToEndpoint( endpoint )

@@ -13,6 +13,9 @@
 #include "RemoteControlHub.generated.h"
 
 
+#define DEFAULT_LISTENPORT 7770
+
+
 
 
 /**
@@ -57,6 +60,16 @@ public:
 
 private:
 	
+	/** TCP listen port. */
+	UPROPERTY( EditAnywhere, Category = "Remote Control System" )
+	int32 ListenPort = DEFAULT_LISTENPORT;
+
+	/** If true, then binds to 127.0.0.1, effectively making the hub reachable only on localhost.
+	 *  Otherwise bind to 0.0.0.0, effectively granting world access. */
+	UPROPERTY( EditAnywhere, Category = "Remote Control System" )
+	bool ListenOnlyOnLocalhost = true;
+
+
 	/** Create the main listen socket. */
 	void CreateListenSocket();
 
