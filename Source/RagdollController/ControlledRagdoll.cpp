@@ -68,8 +68,11 @@ void AControlledRagdoll::PostInitializeComponents()
 		/* We are standalone or a server */
 		
 		// make sure that physics simulation is enabled also on a dedicated server
-		this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
-		this->SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are already enabled via editor!
+		if( SkeletalMeshComponent )
+		{
+			SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
+			SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are already enabled via editor!
+		}
 
 	}
 	else
@@ -114,7 +117,7 @@ void AControlledRagdoll::BeginPlay()
 void AControlledRagdoll::Tick( float deltaSeconds )
 {
 	// sanity check
-	if( !this->SkeletalMeshComponent )
+	if( !SkeletalMeshComponent )
 	{
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error: invalid state! Skipping tick." ), TEXT(__FUNCTION__) );
 	}
@@ -182,44 +185,44 @@ void AControlledRagdoll::InitState()
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error! (scope guard 'sgError' was triggered)" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data if any errors
-		this->JointStates.Empty();
+		JointStates.Empty();
 	} );
 
 
 	// check that we have everything we need, otherwise bail out
-	if( !this->SkeletalMeshComponent ) return;
+	if( !SkeletalMeshComponent ) return;
 
 	// check the number of joints and preallocate the top level array
-	int32 numJoints = this->SkeletalMeshComponent->Constraints.Num();
-	this->JointNames.SetNum( numJoints );
-	this->JointStates.SetNum( numJoints );
+	int32 numJoints = SkeletalMeshComponent->Constraints.Num();
+	JointNames.SetNum( numJoints );
+	JointStates.SetNum( numJoints );
 
 	// fill the array with joint data
 	for( int joint = 0; joint < numJoints; ++joint )
 	{
 		// fetch the FConstraintInstance of this joint
-		FConstraintInstance * constraint = this->SkeletalMeshComponent->Constraints[joint];
+		FConstraintInstance * constraint = SkeletalMeshComponent->Constraints[joint];
 
 		// if null then bail out
 		if( !constraint ) return;
 
 		// store data
-		this->JointStates[joint].Constraint = constraint;
-		this->JointNames[joint] = constraint->JointName;
-		this->JointStates[joint].Bodies[0] = this->SkeletalMeshComponent->GetBodyInstance( constraint->ConstraintBone1 );
-		this->JointStates[joint].Bodies[1] = this->SkeletalMeshComponent->GetBodyInstance( constraint->ConstraintBone2 );
-		this->JointStates[joint].BoneInds[0] = this->SkeletalMeshComponent->GetBoneIndex( constraint->ConstraintBone1 );
-		this->JointStates[joint].BoneInds[1] = this->SkeletalMeshComponent->GetBoneIndex( constraint->ConstraintBone2 );
-		this->JointStates[joint].RefFrameRotations[0] = constraint->GetRefFrame( EConstraintFrame::Frame1 ).GetRotation();
-		this->JointStates[joint].RefFrameRotations[1] = constraint->GetRefFrame( EConstraintFrame::Frame2 ).GetRotation();
+		JointStates[joint].Constraint = constraint;
+		JointNames[joint] = constraint->JointName;
+		JointStates[joint].Bodies[0] = SkeletalMeshComponent->GetBodyInstance( constraint->ConstraintBone1 );
+		JointStates[joint].Bodies[1] = SkeletalMeshComponent->GetBodyInstance( constraint->ConstraintBone2 );
+		JointStates[joint].BoneInds[0] = SkeletalMeshComponent->GetBoneIndex( constraint->ConstraintBone1 );
+		JointStates[joint].BoneInds[1] = SkeletalMeshComponent->GetBoneIndex( constraint->ConstraintBone2 );
+		JointStates[joint].RefFrameRotations[0] = constraint->GetRefFrame( EConstraintFrame::Frame1 ).GetRotation();
+		JointStates[joint].RefFrameRotations[1] = constraint->GetRefFrame( EConstraintFrame::Frame2 ).GetRotation();
 
 		// clear the angle readouts and the motor command
-		this->JointStates[joint].JointAngles = FVector::ZeroVector;
-		this->JointStates[joint].MotorCommand = FVector::ZeroVector;
+		JointStates[joint].JointAngles = FVector::ZeroVector;
+		JointStates[joint].MotorCommand = FVector::ZeroVector;
 
 		// bail out if something was not available
-		if( !this->JointStates[joint].Bodies[0] || !this->JointStates[joint].Bodies[1]
-			|| this->JointStates[joint].BoneInds[0] == INDEX_NONE || this->JointStates[joint].BoneInds[1] == INDEX_NONE ) return;
+		if( !JointStates[joint].Bodies[0] || !JointStates[joint].Bodies[1]
+			|| JointStates[joint].BoneInds[0] == INDEX_NONE || JointStates[joint].BoneInds[1] == INDEX_NONE ) return;
 	}
 
 	// all good, release the error cleanup scope guard and return
@@ -233,7 +236,7 @@ void AControlledRagdoll::InitState()
 void AControlledRagdoll::ValidateBlueprintWritables()
 {
 	// check if non-Blueprint JointState fields have been accidentally zeroed in Blueprint
-	for( auto & jointState : this->JointStates )
+	for( auto & jointState : JointStates )
 	{
 		// check only the first field..
 		if( !jointState.Constraint ) {
@@ -254,15 +257,18 @@ void AControlledRagdoll::ReadFromSimulation()
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error! (scope guard 'sgError' was triggered)" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data (including static joint data!) if any errors
-		this->JointStates.Empty();
+		JointStates.Empty();
 	} );
 
 
+	// check that we have everything we need, otherwise bail out
+	if( !SkeletalMeshComponent ) return;
+
 	// check that the array size matches the skeleton's joint count
-	if( this->JointStates.Num() != this->SkeletalMeshComponent->Constraints.Num() ) return;
+	if( JointStates.Num() != SkeletalMeshComponent->Constraints.Num() ) return;
 
 	// loop through joints
-	for( auto & jointState : this->JointStates )
+	for( auto & jointState : JointStates )
 	{
 		// check availability of PhysX data
 		if( !jointState.Constraint || !jointState.Constraint->ConstraintData ) return;
@@ -270,7 +276,7 @@ void AControlledRagdoll::ReadFromSimulation()
 		// store the global rotations of the connected bones
 		for( int i = 0; i < 2; ++i )
 		{
-			jointState.BoneGlobalRotations[i] = this->SkeletalMeshComponent->GetBoneTransform( jointState.BoneInds[i] ).GetRotation();
+			jointState.BoneGlobalRotations[i] = SkeletalMeshComponent->GetBoneTransform( jointState.BoneInds[i] ).GetRotation();
 		}
 
 		// store the joint rotation angles (we could use the UE wrappers, however they reverse Y and Z for some reason. do not get involved with that:
@@ -306,15 +312,18 @@ void AControlledRagdoll::WriteToSimulation()
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error! (scope guard 'sgError' was triggered)" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data (including static joint data!) if any errors
-		this->JointStates.Empty();
+		JointStates.Empty();
 	} );
 
 
+	// check that we have everything we need, otherwise bail out
+	if( !SkeletalMeshComponent ) return;
+
 	// check that the array size matches the skeleton's joint count
-	if( this->JointStates.Num() != this->SkeletalMeshComponent->Constraints.Num() ) return;
+	if( JointStates.Num() != SkeletalMeshComponent->Constraints.Num() ) return;
 
 	// loop through joints
-	for( auto & jointState : this->JointStates )
+	for( auto & jointState : JointStates )
 	{
 		// check availability of PhysX data
 		if( !jointState.Constraint || !jointState.Constraint->ConstraintData ) return;
