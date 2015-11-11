@@ -35,7 +35,7 @@ XmlFSocket::XmlFSocket( std::unique_ptr<FSocket> socket ) :
 
 
 
-bool XmlFSocket::IsGood()
+bool XmlFSocket::IsGood() const
 {
 	return this->Socket && this->Socket->GetConnectionState() == ESocketConnectionState::SCS_Connected;
 }
@@ -60,7 +60,7 @@ bool XmlFSocket::GetLine()
 		// see if Buffer has a complete line, in which case extract it and return
 		if( ExtractLineFromBuffer() ) return true;
 
-	} while( GetFromSocketToBuffer() );
+	} while( GetRaw() );
 
 	// no more data available and did not get a complete line
 	return false;
@@ -71,18 +71,12 @@ bool XmlFSocket::GetLine()
 
 bool XmlFSocket::PutLine( std::string line )
 {
-	// check that we have a valid and connected socket
-	if( !IsGood() ) return false;
-
 	// append LF (prefer a possible string copy in place of two Send() calls and risking network fragmentation)
+	// (could avoid the copy/copies by temporarily abusing the null terminator..)
 	line.append( "\n" );
 
-	// write data
-	int32 bytesSent;
-	this->Socket->Send( (const uint8 *)line.data(), line.size(), bytesSent );
-
-	// return the success status
-	return bytesSent == line.size();
+	// write data and return
+	return PutRaw( (const void *)line.c_str(), line.size() );
 }
 
 
@@ -96,7 +90,7 @@ bool XmlFSocket::GetXml()
 		// see if Buffer has a complete document, in which case extract it and return
 		if( ExtractXmlFromBuffer() ) return true;
 
-	} while( GetFromSocketToBuffer() );
+	} while( GetRaw() );
 
 	// no more data available and did not get a complete document
 	return false;
@@ -129,10 +123,7 @@ bool XmlFSocket::PutXml( pugi::xml_document * xmlDoc /*= 0 */ )
 		virtual void write( const void* data, size_t size )
 		{
 			if( !IsGood || !Socket.Socket ) return;
-
-			int32 bytesSent;
-			Socket.Socket->Send( (const uint8 *)data, size, bytesSent );
-			IsGood &= bytesSent == size;
+			IsGood &= Socket.PutRaw( data, size );
 		}
 	} writer( *this );
 
@@ -223,7 +214,7 @@ bool XmlFSocket::ExtractXmlFromBuffer()
 
 
 
-bool XmlFSocket::GetFromSocketToBuffer()
+bool XmlFSocket::GetRaw()
 {
 	bool success;
 	uint32 bytesPending;
@@ -255,4 +246,20 @@ bool XmlFSocket::GetFromSocketToBuffer()
 	// success: correct the size of Buffer in case that bytesRead < bytesPending, then return true
 	this->Buffer.resize( this->Buffer.size() - bytesPending + bytesRead );
 	return true;
+}
+
+
+
+
+bool XmlFSocket::PutRaw( const void * buffer, std::size_t length )
+{
+	// check that we have a valid and connected socket
+	if( !IsGood() ) return false;
+
+	// write data
+	int32 bytesSent;
+	this->Socket->Send( (const uint8 *)buffer, length, bytesSent );
+
+	// return the success status
+	return bytesSent == length;
 }

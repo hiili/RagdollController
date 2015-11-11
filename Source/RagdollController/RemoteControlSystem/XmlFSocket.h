@@ -46,12 +46,28 @@ public:
 
 
 	/** Check whether we have a socket and that it is connected and all-ok. */
-	bool IsGood();
+	bool IsGood() const;
 
 	/** Set whether the read methods should block until success. Timeout is specified in milliseconds. Note that a timeout value of 0 does _not_ mean
 	 *  "no timeout" but "don't block"! Write methods will never retry upon failure. */
 	void SetBlocking( bool shouldBlock, int timeoutMs = std::numeric_limits<int>::max() );
 
+
+	/** Prepares Buffer for further processing. Checks for the presence of an in-situ xml parse and, if one is present, drops it and resets InXml.
+	 *  Then drops all leading whitespace from the buffer (whitespace as in std::isspace, in practice: spaces, tabs, LFs and CRs). */
+	void CleanupBuffer();
+
+	/** Tries to read more data from the socket into Buffer. Note that a GetLine() call will leave the line terminator (LF or CRLF) of the read line to the
+	 *  buffer. Also, the beginning of the buffer might contain an in-situ parse of an xml document, in case that GetXml() has been just called. You can precede
+	 *  your call(s) to GetRaw() with a CleanupBuffer() call: this will drop a possibly existing in-situ xml parse and any leading whitespace from Buffer.
+	 *  
+	 *  If ShouldBlock == true, then the call blocks until either more data has been received or BlockingTimeoutMs is exceeded.
+	 *  
+	 *  @return True if any new data was read, false otherwise. */
+	bool GetRaw();
+
+	/** Writes raw data to the socket. Return true on success, false on full or partial failure. */
+	bool PutRaw( const void * buffer, std::size_t length );
 
 	/** Tries to read the next non-empty, complete (LF or CRLF terminated) line from the socket. On success, the new line is placed into Line.
 	 *  The Line field is not touched upon failure.
@@ -66,27 +82,19 @@ public:
 	/** The UE FSocket. */
 	std::unique_ptr<FSocket> Socket;
 
+	/** Inbound data buffer. Might contain an in-situ parse of an xml document. */
+	std::string Buffer;
+
 	/** A copy of the last full line read with GetLine(), without the terminating LF or CRLF. This buffer can be modified directly. */
 	std::string Line;
 
 
 private:
 
-	/** Tries to read some more data from the socket into Buffer. Returns true if any new data was read. If ShouldBlock == true, then BlockingTimeoutMs
-	 *  is adhered. */
-	bool GetFromSocketToBuffer();
-
-	/** Prepares Buffer for further processing. Drops leading whitespace (whitespace as in std::isspace, in practice: spaces, tabs, LFs and CRs).
-	 *  Checks for the presence of an in-situ xml parse and, if one is present, drops it and resets InXml. */
-	void CleanupBuffer();
-
 	/** Tries to extract a complete, non-empty line from Buffer. On success, the line is placed in Line and true is returned.
 	 *   The Line field is not touched on failure. */
 	bool ExtractLineFromBuffer();
 
-
-	/** Temporary buffer. Might contain an in-situ parse of an xml document; see BufferInSituXmlLength! */
-	std::string Buffer;
 
 	/** If this is non-zero, then the Buffer contains an in-situ parse of an xml document. Further read operations should first remove this much data
 	 ** from the beginning of the buffer and make sure that the related xml document (InXml) is not used afterwards.
