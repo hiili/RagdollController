@@ -41,4 +41,11 @@ public:
 	virtual void Tick( float deltaSeconds ) override;
 
 
+
+
+private:
+
+	/** Try to connect with physics debugger. */
+	void ConnectToPVD();
+
 };
