@@ -348,21 +348,14 @@ void UDeepSnapshotBase::OnReplicationSnapshotUpdate()
 
 void UDeepSnapshotBase::LogFailedDowncast( const char * functionName ) const
 {
-	UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) Downcast failed: target component is of wrong type!" ),
-		*FString(functionName) );
+	UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "(%s) Downcast failed: target component is of wrong type!" ), *FString(functionName) );
 	UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
 }
 
 
 FString UDeepSnapshotBase::LogCreateDiagnosticLine() const
 {
-#if NO_LOGGING
-	return FString();
-#else
-	return FString::Printf( TEXT("snapshot component: name=%s, owner=%s; target component: name=%s, owner=%s"),
-		*GetName(),
-		GetOwner() ? *GetOwner()->GetName() : *FString( "(no owner)" ),
-		TargetComponent ? *TargetComponent->GetName() : *FString( "(no target)" ),
-		TargetComponent && TargetComponent->GetOwner() ? *TargetComponent->GetOwner()->GetName() : *FString( "(target has no owner)" ) );
-#endif
+	return FString::Printf( TEXT( "snapshot component: %s; target component: %s" ),
+		*GetPathName( GetWorld() ),
+		TargetComponent ? *TargetComponent->GetPathName( TargetComponent->GetWorld() ) : *FString( "(no target)" ) );
 }

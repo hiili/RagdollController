@@ -22,7 +22,8 @@ class RAGDOLLCONTROLLER_API ADeepSnapshotManager : public AActor
 {
 	GENERATED_BODY()
 
-	/** Permit deep snapshot components to have private access during initialization, so that they can register themselves with us. */
+	/** Permit deep snapshot components to have private access during initialization, so that they can register themselves with us.
+	 *  Intended method to be called: RegisterSnapshotComponent() */
 	friend void UDeepSnapshotBase::InitializeComponent();
 
 

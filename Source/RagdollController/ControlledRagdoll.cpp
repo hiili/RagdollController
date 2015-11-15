@@ -3,6 +3,7 @@
 #include "RagdollController.h"
 #include "ControlledRagdoll.h"
 
+#include "RemoteControllable.h"
 #include "RCLevelScriptActor.h"
 #include "XmlFSocket.h"
 #include "ScopeGuard.h"
@@ -37,28 +38,24 @@ void AControlledRagdoll::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-
-	/* init the SkeletalMeshComponent pointer: scan all components and choose the first USkeletalMeshComponent */
-
-	// get all components of the right type
-	TArray<USkeletalMeshComponent*> comps;
-	GetComponents( comps );
-
-	// if at least one found, choose the first one
-	if( comps.Num() >= 1 )
+	// init the SkeletalMeshComponent pointer
+	SkeletalMeshComponent = Utility::FindUniqueComponentByClass<USkeletalMeshComponent>( *this );
+	if( !SkeletalMeshComponent )
 	{
-		this->SkeletalMeshComponent = comps[0];
-
-		// warn about multiple SkeletalMeshComponents
-		if( comps.Num() > 1 )
-		{
-			UE_LOG( LogRcCr, Warning, TEXT( "(%s) Multiple USkeletalMeshComponents found! Using the first one." ), TEXT( __FUNCTION__ ) );
-		}
+		UE_LOG( LogRcCr, Warning, TEXT( "(%s) No USkeletalMeshComponent component found or there were multiple candidates! Cannot bind." ), TEXT( __FUNCTION__ ) );
 	}
-	else
+
+	// init the RemoteController pointer
+	RemoteControllable = Utility::FindUniqueComponentByClass<URemoteControllable>( *this );
+	if( !RemoteControllable )
 	{
-		UE_LOG( LogRcCr, Error, TEXT( "(%s) No USkeletalMeshComponent found!" ), TEXT( __FUNCTION__ ) );
-		return;
+		UE_LOG( LogRcCr, Warning, TEXT( "(%s) No URemoteControllable component found or there were multiple candidates! Cannot bind." ), TEXT( __FUNCTION__ ) );
+	}
+
+	// register with the RemoteController, if we have one
+	if( RemoteControllable )
+	{
+		RemoteControllable->RegisterUser( *this, "ControlledRagdoll" );   // ignore errors here; OpenFrame() will fail and we can branch on that then
 	}
 
 
@@ -68,8 +65,11 @@ void AControlledRagdoll::PostInitializeComponents()
 		/* We are standalone or a server */
 		
 		// make sure that physics simulation is enabled also on a dedicated server
-		this->SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
-		this->SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are already enabled via editor!
+		if( SkeletalMeshComponent )
+		{
+			SkeletalMeshComponent->bEnablePhysicsOnDedicatedServer = true;
+			SkeletalMeshComponent->SetSimulatePhysics( true ); // this must be called after bEnablePhysicsOnDedicatedServer = true even if physics are already enabled via editor!
+		}
 
 	}
 	else
@@ -114,7 +114,7 @@ void AControlledRagdoll::BeginPlay()
 void AControlledRagdoll::Tick( float deltaSeconds )
 {
 	// sanity check
-	if( !this->SkeletalMeshComponent )
+	if( !SkeletalMeshComponent )
 	{
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error: invalid state! Skipping tick." ), TEXT(__FUNCTION__) );
 	}
@@ -136,8 +136,7 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	/* Relay data between the game engine and the remote controller, while calling additional tick functionality in between. */
 
 	// Read inbound data
-	PrepareRemoteControllerCommunication();
-	ReadFromRemoteController();
+	auto frame = ReadFromRemoteController();
 	ReadFromSimulation();
 
 	// Call the tick hook (available for inherited C++ classes), then Super::Tick(), which runs this actor's Blueprint
@@ -147,8 +146,7 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 	// Write outbound data
 	WriteToSimulation();
-	WriteToRemoteController();
-	FinalizeRemoteControllerCommunication();
+	WriteToRemoteController( frame );
 
 
 
@@ -182,44 +180,44 @@ void AControlledRagdoll::InitState()
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error! (scope guard 'sgError' was triggered)" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data if any errors
-		this->JointStates.Empty();
+		JointStates.Empty();
 	} );
 
 
 	// check that we have everything we need, otherwise bail out
-	if( !this->SkeletalMeshComponent ) return;
+	if( !SkeletalMeshComponent ) return;
 
 	// check the number of joints and preallocate the top level array
-	int32 numJoints = this->SkeletalMeshComponent->Constraints.Num();
-	this->JointNames.SetNum( numJoints );
-	this->JointStates.SetNum( numJoints );
+	int32 numJoints = SkeletalMeshComponent->Constraints.Num();
+	JointNames.SetNum( numJoints );
+	JointStates.SetNum( numJoints );
 
 	// fill the array with joint data
 	for( int joint = 0; joint < numJoints; ++joint )
 	{
 		// fetch the FConstraintInstance of this joint
-		FConstraintInstance * constraint = this->SkeletalMeshComponent->Constraints[joint];
+		FConstraintInstance * constraint = SkeletalMeshComponent->Constraints[joint];
 
 		// if null then bail out
 		if( !constraint ) return;
 
 		// store data
-		this->JointStates[joint].Constraint = constraint;
-		this->JointNames[joint] = constraint->JointName;
-		this->JointStates[joint].Bodies[0] = this->SkeletalMeshComponent->GetBodyInstance( constraint->ConstraintBone1 );
-		this->JointStates[joint].Bodies[1] = this->SkeletalMeshComponent->GetBodyInstance( constraint->ConstraintBone2 );
-		this->JointStates[joint].BoneInds[0] = this->SkeletalMeshComponent->GetBoneIndex( constraint->ConstraintBone1 );
-		this->JointStates[joint].BoneInds[1] = this->SkeletalMeshComponent->GetBoneIndex( constraint->ConstraintBone2 );
-		this->JointStates[joint].RefFrameRotations[0] = constraint->GetRefFrame( EConstraintFrame::Frame1 ).GetRotation();
-		this->JointStates[joint].RefFrameRotations[1] = constraint->GetRefFrame( EConstraintFrame::Frame2 ).GetRotation();
+		JointStates[joint].Constraint = constraint;
+		JointNames[joint] = constraint->JointName;
+		JointStates[joint].Bodies[0] = SkeletalMeshComponent->GetBodyInstance( constraint->ConstraintBone1 );
+		JointStates[joint].Bodies[1] = SkeletalMeshComponent->GetBodyInstance( constraint->ConstraintBone2 );
+		JointStates[joint].BoneInds[0] = SkeletalMeshComponent->GetBoneIndex( constraint->ConstraintBone1 );
+		JointStates[joint].BoneInds[1] = SkeletalMeshComponent->GetBoneIndex( constraint->ConstraintBone2 );
+		JointStates[joint].RefFrameRotations[0] = constraint->GetRefFrame( EConstraintFrame::Frame1 ).GetRotation();
+		JointStates[joint].RefFrameRotations[1] = constraint->GetRefFrame( EConstraintFrame::Frame2 ).GetRotation();
 
 		// clear the angle readouts and the motor command
-		this->JointStates[joint].JointAngles = FVector::ZeroVector;
-		this->JointStates[joint].MotorCommand = FVector::ZeroVector;
+		JointStates[joint].JointAngles = FVector::ZeroVector;
+		JointStates[joint].MotorCommand = FVector::ZeroVector;
 
 		// bail out if something was not available
-		if( !this->JointStates[joint].Bodies[0] || !this->JointStates[joint].Bodies[1]
-			|| this->JointStates[joint].BoneInds[0] == INDEX_NONE || this->JointStates[joint].BoneInds[1] == INDEX_NONE ) return;
+		if( !JointStates[joint].Bodies[0] || !JointStates[joint].Bodies[1]
+			|| JointStates[joint].BoneInds[0] == INDEX_NONE || JointStates[joint].BoneInds[1] == INDEX_NONE ) return;
 	}
 
 	// all good, release the error cleanup scope guard and return
@@ -233,7 +231,7 @@ void AControlledRagdoll::InitState()
 void AControlledRagdoll::ValidateBlueprintWritables()
 {
 	// check if non-Blueprint JointState fields have been accidentally zeroed in Blueprint
-	for( auto & jointState : this->JointStates )
+	for( auto & jointState : JointStates )
 	{
 		// check only the first field..
 		if( !jointState.Constraint ) {
@@ -254,15 +252,18 @@ void AControlledRagdoll::ReadFromSimulation()
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error! (scope guard 'sgError' was triggered)" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data (including static joint data!) if any errors
-		this->JointStates.Empty();
+		JointStates.Empty();
 	} );
 
 
+	// check that we have everything we need, otherwise bail out
+	if( !SkeletalMeshComponent ) return;
+
 	// check that the array size matches the skeleton's joint count
-	if( this->JointStates.Num() != this->SkeletalMeshComponent->Constraints.Num() ) return;
+	if( JointStates.Num() != SkeletalMeshComponent->Constraints.Num() ) return;
 
 	// loop through joints
-	for( auto & jointState : this->JointStates )
+	for( auto & jointState : JointStates )
 	{
 		// check availability of PhysX data
 		if( !jointState.Constraint || !jointState.Constraint->ConstraintData ) return;
@@ -270,7 +271,7 @@ void AControlledRagdoll::ReadFromSimulation()
 		// store the global rotations of the connected bones
 		for( int i = 0; i < 2; ++i )
 		{
-			jointState.BoneGlobalRotations[i] = this->SkeletalMeshComponent->GetBoneTransform( jointState.BoneInds[i] ).GetRotation();
+			jointState.BoneGlobalRotations[i] = SkeletalMeshComponent->GetBoneTransform( jointState.BoneInds[i] ).GetRotation();
 		}
 
 		// store the joint rotation angles (we could use the UE wrappers, however they reverse Y and Z for some reason. do not get involved with that:
@@ -306,15 +307,18 @@ void AControlledRagdoll::WriteToSimulation()
 		UE_LOG( LogRcCr, Error, TEXT( "(%s) Internal error! (scope guard 'sgError' was triggered)" ), TEXT( __FUNCTION__ ) );
 
 		// erase all data (including static joint data!) if any errors
-		this->JointStates.Empty();
+		JointStates.Empty();
 	} );
 
 
+	// check that we have everything we need, otherwise bail out
+	if( !SkeletalMeshComponent ) return;
+
 	// check that the array size matches the skeleton's joint count
-	if( this->JointStates.Num() != this->SkeletalMeshComponent->Constraints.Num() ) return;
+	if( JointStates.Num() != SkeletalMeshComponent->Constraints.Num() ) return;
 
 	// loop through joints
-	for( auto & jointState : this->JointStates )
+	for( auto & jointState : JointStates )
 	{
 		// check availability of PhysX data
 		if( !jointState.Constraint || !jointState.Constraint->ConstraintData ) return;
@@ -338,96 +342,59 @@ void AControlledRagdoll::WriteToSimulation()
 
 
 
-void AControlledRagdoll::HandleNetworkError( const std::string & description )
+
+
+
+
+URemoteControllable::UserFrame AControlledRagdoll::ReadFromRemoteController()
 {
-	// drop the connection
-	RemoteControlSocket.reset();
+	// return if no operational connection
+	if( !RemoteControllable || !RemoteControllable->HasConnectionAndValidData() ) return URemoteControllable::UserFrame{};
 
-	// set InXmlStatus.status to pugi::status_no_document_element
-	RemoteControlSocket->InXmlStatus.status = pugi::status_no_document_element;
-
-	// log
-	UE_LOG( LogRcCr, Error, TEXT( "(%s, %s) Remote controller connection failed: %s! Dropping the connection." ),
-		TEXT( __FUNCTION__ ), *GetHumanReadableName(), *FString( description.c_str() ) );
-}
+	// open the frame, bail out if it contains null handles
+	URemoteControllable::UserFrame frame = RemoteControllable->OpenFrame( *this );
+	if( !frame ) return URemoteControllable::UserFrame{};
 
 
-
-
-void AControlledRagdoll::PrepareRemoteControllerCommunication()
-{
-	// no-op if no remote controller
-	if( !this->RemoteControlSocket ) return;
-
-	// check that the connection is good
-	if( !RemoteControlSocket->IsGood() )
-	{
-		// connection failed
-		HandleNetworkError( "network level failure" );
-		return;
-	}
-
-	// read data from socket
-	RemoteControlSocket->SetBlocking( true );   // synchronous mode so block with no timeout; we really want that data on each tick
-	if( !RemoteControlSocket->GetXml() )
-	{
-		// read failed
-		HandleNetworkError( "failed to read xml data from the socket (" + std::string( RemoteControlSocket->InXmlStatus.description() ) + ")" );
-		return;
-	}
-
-	check( RemoteControlSocket->InXmlStatus.status == pugi::status_ok );
-}
-
-
-
-
-void AControlledRagdoll::FinalizeRemoteControllerCommunication()
-{
-	// no-op if no remote controller or no inbound data is available (latter test is redundant, because PrepareRemoteControllerCommunication() drops the
-	// connection in such cases)
-	if( !RemoteControlSocket || RemoteControlSocket->InXmlStatus.status != pugi::status_ok ) return;
-
-	// send OutXml
-	if( !RemoteControlSocket->PutXml() )
-	{
-		// send failed
-		HandleNetworkError( "failed to send the xml response document" );
-	}
-}
-
-
-
-
-void AControlledRagdoll::ReadFromRemoteController()
-{
-	// no-op if we have no valid data from remote
-	if( !RemoteControlSocket || RemoteControlSocket->InXmlStatus.status != pugi::status_ok ) return;
-	
 	UE_LOG( LogTemp, Log, TEXT( "GOT XML DATA" ) );
 
 	// handle all setter commands here and postpone getter handling to WriteToRemoteController()
-	if( pugi::xml_node node = RemoteControlSocket->InXml.child( "setActuators" ) )
+	if( pugi::xml_node node = frame.command.child( "setActuators" ) )
 	{
 		//...
 	}
+
+
+	return frame;
 }
 
 
 
 
-void AControlledRagdoll::WriteToRemoteController()
+void AControlledRagdoll::WriteToRemoteController( URemoteControllable::UserFrame frame )
 {
-	// no-op if we have no valid data from remote
-	if( !RemoteControlSocket || RemoteControlSocket->InXmlStatus.status != pugi::status_ok ) return;
+	// return if no operational connection
+	if( !RemoteControllable || !RemoteControllable->HasConnectionAndValidData() ) return;
+
+	// close the frame and return if it contains null handles
+	if( !frame )
+	{
+		RemoteControllable->CloseFrame( *this );
+		return;
+	}
+
 
 	// handle all getter commands here; setters were handled in ReadFromRemoteController()
-	if( RemoteControlSocket->InXml.child( "getSensors" ) )
+	if( frame.response.child( "getSensors" ) )
 	{
 		//...
 	}
-	if( RemoteControlSocket->InXml.child( "getActuators" ) )
+	if( frame.response.child( "getActuators" ) )
 	{
 		//...
 	}
+
+
+	// close the frame
+	RemoteControllable->CloseFrame( *this );
 }
