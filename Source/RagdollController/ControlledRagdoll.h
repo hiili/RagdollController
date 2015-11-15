@@ -49,14 +49,14 @@ struct FJointState
 	std::array<FQuat, 2> BoneGlobalRotations;
 
 	/** PhysX joint angles. The X, Y and Z dimensions correspond to twist, swing1 and swing2 fields of the PhysX joint, respectively. */
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
+	UPROPERTY( VisibleInstanceOnly, Category = RagdollController )
 	FVector JointAngles;
 
 
 	/* Dynamic controller data (updated during the 1st half of Tick, before the actor's Blueprint is run) */
 
 	/** Joint motor command for the current tick. The X, Y and Z dimensions correspond to twist, swing1 and swing2 in the PhysX joint, respectively. */
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
+	UPROPERTY( VisibleInstanceOnly, Category = RagdollController )
 	FVector MotorCommand;
 
 };
@@ -101,24 +101,58 @@ public:
 
 
 
-	/* ragdoll interface */
+	/* ragdoll Blueprint interface */
 
 
 public:
 
+	/** Get the number of joints. */
+	UFUNCTION( BlueprintCallable, Category = RagdollController )
+	int32 GetNumJoints() const;
+
+	/** Get an array containing the names of all joints.
+	 *  @return		Returns a reference to the internal joint name array. Treat this as const (UE reflection does not permit const return types). */
+	UFUNCTION( BlueprintCallable, BlueprintPure, Category = RagdollController )
+	TArray<FName> & GetJointNames();
+
+	/** Find the index of a joint by name.
+	 *  @param JointName		Name of the joint to look up.
+	 *  @return Index of the named joint. Will return INDEX_NONE if joint not found. */
+	UFUNCTION( BlueprintCallable, Category = RagdollController )
+	int32 GetJointIndex( FName JointName ) const;
+
+
+	/** Get the current rotation angles of a given joint.
+	 *  The X, Y and Z dimensions correspond to twist, swing1 and swing2 fields of the PhysX joint, respectively. */
+	UFUNCTION( BlueprintCallable, Category = RagdollController )
+	FVector GetJointAngles( int32 JointIndex ) const;
+
+	/** Get the current motor command of a given joint.
+	 *  The X, Y and Z dimensions correspond to twist, swing1 and swing2 fields of the PhysX joint, respectively. */
+	UFUNCTION( BlueprintCallable, Category = RagdollController )
+	FVector GetJointMotorCommand( int32 JointIndex ) const;
+
+	/** Set the motor command of a given joint.
+	 *  The X, Y and Z dimensions correspond to twist, swing1 and swing2 fields of the PhysX joint, respectively. */
+	UFUNCTION( BlueprintCallable, Category = RagdollController )
+	void SetJointMotorCommand( int32 JointIndex, const FVector & MotorCommand );
 
 
 
-protected:
 
-	/** Cached joint names of the actor's SkeletalMeshComponent. When initialized, then JointNames.Num() == JointStates.Num(). */
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
-	TArray<FName> JointNames;
+	/* ragdoll C++ interface */
+	
 
-	/** Data for all joints and associated bodies of the actor's SkeletalMeshComponent. Refresh errors are signaled by emptying the array: test validity with
-	 ** JointStates.Num() != 0. */
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
-	TArray<FJointState> JointStates;
+public:
+
+	/** Get a const reference to the internal joint name array. */
+	const TArray<FName> & getJointNames() const { return JointNames; }
+
+	/** Get a const reference to the interla joint state array. */
+	const TArray<FJointState> & getJointStates() const { return JointStates; }
+
+	/** Get a non-const reference to the interla joint state array. */
+	TArray<FJointState> & getJointStates() { return JointStates; }
 
 
 
@@ -171,6 +205,18 @@ private:
 
 	/** The RemoteControllable component. This can be null so check before use! */
 	URemoteControllable * RemoteControllable{};
+
+
+	/* ragdoll state */
+
+	/** Cached joint names of the actor's SkeletalMeshComponent. When initialized, then JointNames.Num() == JointStates.Num(). */
+	UPROPERTY( VisibleInstanceOnly, Category = RagdollController )
+	TArray<FName> JointNames;
+
+	/** Data for all joints and associated bodies of the actor's SkeletalMeshComponent. Refresh errors are signaled by emptying the array: test validity with
+	 ** JointStates.Num() != 0. */
+	UPROPERTY( VisibleInstanceOnly, Category = RagdollController )
+	TArray<FJointState> JointStates;
 
 
 	// Temporary, remove when done testing

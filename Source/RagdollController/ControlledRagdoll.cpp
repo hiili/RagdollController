@@ -253,6 +253,44 @@ void AControlledRagdoll::ValidateBlueprintWritables()
 
 
 
+int32 AControlledRagdoll::GetNumJoints() const
+{
+	return JointNames.Num();
+}
+
+TArray<FName> & AControlledRagdoll::GetJointNames()
+{
+	return JointNames;
+}
+
+int32 AControlledRagdoll::GetJointIndex( FName JointName ) const
+{
+	int32 ind;
+	return JointNames.Find( JointName, ind ) ? ind : INDEX_NONE;
+}
+
+FVector AControlledRagdoll::GetJointAngles( int32 JointIndex ) const
+{
+	return JointStates[JointIndex].JointAngles;
+}
+
+FVector AControlledRagdoll::GetJointMotorCommand( int32 JointIndex ) const
+{
+	return JointStates[JointIndex].MotorCommand;
+}
+
+void AControlledRagdoll::SetJointMotorCommand( int32 JointIndex, const FVector & MotorCommand )
+{
+	JointStates[JointIndex].MotorCommand = MotorCommand;
+}
+
+
+
+
+
+
+
+
 void AControlledRagdoll::ReadFromSimulation()
 {
 	// init the error cleanup scope guard
