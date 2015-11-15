@@ -31,6 +31,10 @@
 #define LINE_BUFFER_SIZE 1024
 
 
+DECLARE_LOG_CATEGORY_EXTERN( LogRemoteControlSystem, Log, All );
+DEFINE_LOG_CATEGORY( LogRemoteControlSystem );
+
+
 
 
 ARemoteControlHub::ARemoteControlHub()
@@ -54,7 +58,7 @@ void ARemoteControlHub::PostInitializeComponents()
 	{
 		CreateListenSocket();
 	} else {
-		UE_LOG( LogRcRch, Warning, TEXT( "(%s) Not authority: listen socket not created." ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRemoteControlSystem, Warning, TEXT( "(%s) Not authority: listen socket not created." ), TEXT( __FUNCTION__ ) );
 	}
 }
 
@@ -65,7 +69,7 @@ void ARemoteControlHub::CreateListenSocket()
 {
 	// init the error cleanup scope guard
 	auto sgError = MakeScopeGuard( [this](){
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Failed to create the listen socket!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Failed to create the listen socket!" ), TEXT( __FUNCTION__ ) );
 
 		// reset everything on errors
 		this->ListenSocket = nullptr;
@@ -84,7 +88,7 @@ void ARemoteControlHub::CreateListenSocket()
 	if( !this->ListenSocket ) return;
 	
 	// all ok, release the error cleanup scope guard
-	UE_LOG( LogRcRch, Log, TEXT( "(%s) Listen socket created successfully." ), TEXT( __FUNCTION__ ) );
+	UE_LOG( LogRemoteControlSystem, Log, TEXT( "(%s) Listen socket created successfully." ), TEXT( __FUNCTION__ ) );
 	sgError.release();
 }
 
@@ -118,7 +122,7 @@ void ARemoteControlHub::CheckForNewConnections()
 		if( !connectionSocket )
 		{
 			// failed, log and keep looping
-			UE_LOG( LogRcRch, Error, TEXT( "(%s) Incoming connection attempt, accept failed!" ), TEXT( __FUNCTION__ ) );
+			UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Incoming connection attempt, accept failed!" ), TEXT( __FUNCTION__ ) );
 			continue;
 		}
 
@@ -127,11 +131,11 @@ void ARemoteControlHub::CheckForNewConnections()
 		if( !connectionSocket->SetReceiveBufferSize( RCH_TCP_BUFFERS_SIZE, finalReceiveBufferSize ) |   // do not short-circuit
 			!connectionSocket->SetSendBufferSize( RCH_TCP_BUFFERS_SIZE, finalSendBufferSize ) )
 		{
-			UE_LOG( LogRcRch, Warning, TEXT( "(%s) Failed to set buffer sizes for a new connection!" ), TEXT( __FUNCTION__ ) );
+			UE_LOG( LogRemoteControlSystem, Warning, TEXT( "(%s) Failed to set buffer sizes for a new connection!" ), TEXT( __FUNCTION__ ) );
 		}
 
 		// log
-		UE_LOG( LogRcRch, Log, TEXT( "(%s) Incoming connection accepted. Effective buffer sizes: %d (in), %d (out)" ), TEXT( __FUNCTION__ ),
+		UE_LOG( LogRemoteControlSystem, Log, TEXT( "(%s) Incoming connection accepted. Effective buffer sizes: %d (in), %d (out)" ), TEXT( __FUNCTION__ ),
 			finalReceiveBufferSize, finalSendBufferSize );
 
 		// wrap the socket into an XmlFSocket and store it to PendingSockets (check goodness later)
@@ -154,7 +158,7 @@ void ARemoteControlHub::ManagePendingConnections()
 			// bad connection? drop it
 			if( !(*iterPendingSocket)->IsGood() )
 			{
-				UE_LOG( LogRcRch, Error, TEXT( "(%s) Pending connection read error! Closing the socket." ), TEXT( __FUNCTION__ ) );
+				UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Pending connection read error! Closing the socket." ), TEXT( __FUNCTION__ ) );
 
 				this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
 				break;   // play safe and don't touch the iterator anymore
@@ -181,7 +185,7 @@ void ARemoteControlHub::DispatchSocket( std::string command, std::unique_ptr<Xml
 	// verify and remove handshake
 	if( command.compare( 0, std::strlen( RCH_HANDSHAKE_STRING ), RCH_HANDSHAKE_STRING ) != 0 )
 	{
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Invalid handshake string: %s" ), TEXT( __FUNCTION__ ), *FString( command.c_str() ) );
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Invalid handshake string: %s" ), TEXT( __FUNCTION__ ), *FString( command.c_str() ) );
 		socket->PutLine( RCH_ERROR_STRING );   // don't care about errors
 		return;
 	}
@@ -194,7 +198,7 @@ void ARemoteControlHub::DispatchSocket( std::string command, std::unique_ptr<Xml
 	}
 	else
 	{
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Invalid command: %s" ), TEXT( __FUNCTION__ ), *FString( command.c_str() ) );
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Invalid command: %s" ), TEXT( __FUNCTION__ ), *FString( command.c_str() ) );
 		socket->PutLine( RCH_ERROR_STRING );
 	}
 }
@@ -204,7 +208,7 @@ void ARemoteControlHub::DispatchSocket( std::string command, std::unique_ptr<Xml
 
 void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket> socket )
 {
-	UE_LOG( LogRcRch, Log, TEXT( "(%s) Processing CONNECT command. NetworkName pattern: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+	UE_LOG( LogRemoteControlSystem, Log, TEXT( "(%s) Processing CONNECT command. NetworkName pattern: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 
 	// find the target RemoteControllable component based on its NetworkName
 	FWildcardString pattern( args.c_str() );
@@ -223,14 +227,14 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 			if( selected )
 			{
 				// target has been already found; we have multiple matches -> log and ignore
-				UE_LOG( LogRcRch, Warning, TEXT( "(ARemoteControlHub::CmdConnect) Multiple matching components found for network name pattern '%s'! Ignoring: %s, NetworkName=%s" ),
+				UE_LOG( LogRemoteControlSystem, Warning, TEXT( "(ARemoteControlHub::CmdConnect) Multiple matching components found for network name pattern '%s'! Ignoring: %s, NetworkName=%s" ),
 					*pattern, *candidate->GetPathName( candidate->GetWorld() ), *candidate->NetworkName );
 			}
 			else
 			{
 				// first hit: store and log
 				selected = candidate;
-				UE_LOG( LogRcRch, Log, TEXT( "(ARemoteControlHub::CmdConnect) Target component found: %s, NetworkName=%s" ),
+				UE_LOG( LogRemoteControlSystem, Log, TEXT( "(ARemoteControlHub::CmdConnect) Target component found: %s, NetworkName=%s" ),
 					*selected->GetPathName( selected->GetWorld() ), *selected->NetworkName );
 			}
 		}
@@ -244,7 +248,7 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 		if( !socket->PutLine( RCH_ACK_STRING ) )
 		{
 			// failed: log and let the connection drop (no point in sending an error string to the already failed TCP stream)
-			UE_LOG( LogRcRch, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ) );
+			UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Failed to send ACK string to remote!" ), TEXT( __FUNCTION__ ) );
 			return;
 		}
 
@@ -260,7 +264,7 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 		check( socket );
 
 		// log, send error to socket, and let the connection drop
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Target component not found: %s" ), TEXT( __FUNCTION__ ), *pattern );
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Target component not found: %s" ), TEXT( __FUNCTION__ ), *pattern );
 		socket->PutLine( RCH_ERROR_STRING );
 		return;
 	}

@@ -31,7 +31,7 @@
  * 
  * The connection has now been forwarded to the RemoteControllable component that has a matching NetworkName set for it (@see RemoteControllable::NetworkName).
  * In this case, a RemoteControllable with the network name Owen will be selected. The target name can be also a ?*-pattern. In case of an error, the hub
- * responds with the line ERROR. The actual reason for the error is logged in the engine logs. All log output is placed in the LogRcRch log.
+ * responds with the line ERROR. The actual reason for the error is logged in the engine logs. All log output is placed in the LogRemoteControlSystem log.
  * 
  * From this point on, the communication link is handled by the RemoteControllable component; the hub does not intervene in the connection in any further way.
  * 

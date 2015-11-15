@@ -4,6 +4,9 @@
 #include "RemoteControllable.h"
 
 
+DECLARE_LOG_CATEGORY_EXTERN( LogRemoteControlSystem, Log, All );
+
+
 
 
 // Sets default values for this component's properties
@@ -53,11 +56,11 @@ void URemoteControllable::prepareFrame()
 		// no: someone forgot to do open-close or just close
 
 		// log a warning 
-		UE_LOG( LogRcRch, Warning, TEXT( "(%s) Some users did not perform a full OpenFrame()-CloseFrame() cycle during the previous tick! Culprit(s):" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRemoteControlSystem, Warning, TEXT( "(%s) Some users did not perform a full OpenFrame()-CloseFrame() cycle during the previous tick! Culprit(s):" ), TEXT( __FUNCTION__ ) );
 		for( const UObject * user : nonfinishedUsers )
 		{
 			check( user );
-			UE_LOG( LogRcRch, Warning, TEXT( "(%s)     %s (xmlTreeName=%s)" ), TEXT( __FUNCTION__ ), *user->GetPathName( user->GetWorld() ), *FString( registeredUsers[user].c_str() ) );
+			UE_LOG( LogRemoteControlSystem, Warning, TEXT( "(%s)     %s (xmlTreeName=%s)" ), TEXT( __FUNCTION__ ), *user->GetPathName( user->GetWorld() ), *FString( registeredUsers[user].c_str() ) );
 		}
 
 		// finalize the communications for the previous tick
@@ -120,7 +123,7 @@ void URemoteControllable::handleNetworkError( const std::string & description )
 	remoteControlSocket->InXmlStatus.status = pugi::status_no_document_element;
 
 	// log
-	UE_LOG( LogRcRch, Error, TEXT( "(%s, %s) Remote controller connection failed: %s! Dropping the connection." ), TEXT( __FUNCTION__ ), *GetPathName( GetWorld() ), *FString( description.c_str() ) );
+	UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s, %s) Remote controller connection failed: %s! Dropping the connection." ), TEXT( __FUNCTION__ ), *GetPathName( GetWorld() ), *FString( description.c_str() ) );
 }
 
 
@@ -140,7 +143,7 @@ URemoteControllable::UserFrame URemoteControllable::OpenFrame( const UObject & u
 	if( !nonfinishedUsers.Contains( &user ) )
 	{
 		// the user has already opened and closed the frame -> log and return failure
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) A repeated call was made! Each user must call OpenFrame exactly once per tick. User: %s" ), TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld() ) );
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) A repeated call was made! Each user must call OpenFrame exactly once per tick. User: %s" ), TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld() ) );
 		return UserFrame{};
 	}
 
@@ -162,7 +165,7 @@ URemoteControllable::UserFrame URemoteControllable::OpenFrame( const UObject & u
 	else
 	{
 		// no, there is no command tree for the user -> log and return null handles
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) The received command XML document does not contain an element for the user %s! Expected element name: %s" ),
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) The received command XML document does not contain an element for the user %s! Expected element name: %s" ),
 			TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld() ), *FString( treeName.c_str() ) );
 		return UserFrame{};
 	}
@@ -178,7 +181,7 @@ void URemoteControllable::CloseFrame( const UObject & user )
 	if( !nonfinishedUsers.Contains( &user ) )
 	{
 		// the user has already opened and closed the frame -> log and return failure
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Called although there is no frame open! User: %s" ), TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld() ) );
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Called although there is no frame open! User: %s" ), TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld() ) );
 		return;
 	}
 
@@ -199,14 +202,14 @@ bool URemoteControllable::ValidateUserAccess( const UObject & user )
 	// do we have valid data?
 	if( !HasConnectionAndValidData() )
 	{
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Data access attempted while we do not have a connection or valid data! User: %s" ), TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld() ) );
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Data access attempted while we do not have a connection or valid data! User: %s" ), TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld() ) );
 		return false;
 	}
 
 	// is the user registered?
 	if( !registeredUsers.Contains( &user ) )
 	{
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Data access attempted by a non-registered user! User: %s" ), TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld() ) );
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Data access attempted by a non-registered user! User: %s" ), TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld() ) );
 		return false;
 	}
 
@@ -225,7 +228,7 @@ void URemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 	// nullptr? -> error
 	if( !socket )
 	{
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) The socket pointer is null!" ), TEXT( __FUNCTION__ ) );
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) The socket pointer is null!" ), TEXT( __FUNCTION__ ) );
 		return;
 	}
 
@@ -244,7 +247,7 @@ void URemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 	}
 
 	// log
-	UE_LOG( LogRcRch, Log, TEXT( "(%s) New remote controller connected. Target component: %s" ), TEXT( __FUNCTION__ ), *GetPathName( GetWorld() ) );
+	UE_LOG( LogRemoteControlSystem, Log, TEXT( "(%s) New remote controller connected. Target component: %s" ), TEXT( __FUNCTION__ ), *GetPathName( GetWorld() ) );
 }
 
 
@@ -281,7 +284,7 @@ bool URemoteControllable::RegisterUser( UObject & user, const std::string & xmlT
 	// check that we do not have a socket yet
 	if( remoteControlSocket )
 	{
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) We already have a connection established! Registration is not possible anymore. Ignoring: %s, xmlTreeName=%s" ),
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) We already have a connection established! Registration is not possible anymore. Ignoring: %s, xmlTreeName=%s" ),
 			TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld()), *FString( xmlTreeName.c_str() ) );
 		return false;
 	}
@@ -291,7 +294,7 @@ bool URemoteControllable::RegisterUser( UObject & user, const std::string & xmlT
 	{
 		if( elem.Key == &user || elem.Value == xmlTreeName )
 		{
-			UE_LOG( LogRcRch, Error, TEXT( "(%s) Registration with an already existing user pointer or xmlTreeName attempted! Ignoring: %s, xmlTreeName=%s" ),
+			UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Registration with an already existing user pointer or xmlTreeName attempted! Ignoring: %s, xmlTreeName=%s" ),
 				TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld()), *FString( xmlTreeName.c_str() ) );
 			return false;
 		}
@@ -305,7 +308,7 @@ bool URemoteControllable::RegisterUser( UObject & user, const std::string & xmlT
 	static_cast<UserType &>(user).AddTickPrerequisiteComponent( this );
 
 	// log and return success
-	UE_LOG( LogRcRch, Log, TEXT( "(%s) New user successfully registered: %s, xmlTreeName=%s" ),
+	UE_LOG( LogRemoteControlSystem, Log, TEXT( "(%s) New user successfully registered: %s, xmlTreeName=%s" ),
 		TEXT( __FUNCTION__ ), *user.GetPathName( user.GetWorld()), *FString( xmlTreeName.c_str() ) );
 	return true;
 }
