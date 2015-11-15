@@ -24,6 +24,14 @@
 #define XML_BLOCK_FOOTER "XML_DOCUMENT_END"
 
 
+/** Log category for full debug dump */
+#define RAW_DUMP_BLOCK_SIZE 500   // UE_LOG has an upper limit on the length of the string, so we need to chop up the string into small enough blocks
+DECLARE_LOG_CATEGORY_EXTERN( LogXmlFSocketDumpInbound, Log, All );
+DECLARE_LOG_CATEGORY_EXTERN( LogXmlFSocketDumpOutbound, Log, All );
+DEFINE_LOG_CATEGORY( LogXmlFSocketDumpInbound );
+DEFINE_LOG_CATEGORY( LogXmlFSocketDumpOutbound );
+
+
 
 
 XmlFSocket::XmlFSocket( std::unique_ptr<FSocket> socket ) :
@@ -245,6 +253,17 @@ bool XmlFSocket::GetRaw()
 
 	// success: correct the size of Buffer in case that bytesRead < bytesPending, then return true
 	this->Buffer.resize( this->Buffer.size() - bytesPending + bytesRead );
+
+	// dump to log?
+	if( LogAllCommunications )
+	{
+		std::string s( Buffer.substr( Buffer.length() - bytesRead, bytesRead ) );
+		for( std::size_t pos = 0; pos < s.length(); pos += RAW_DUMP_BLOCK_SIZE )
+		{
+			UE_LOG( LogXmlFSocketDumpInbound, Log, TEXT( "\n%s" ), *FString( s.substr( pos, RAW_DUMP_BLOCK_SIZE ).c_str() ) );
+		}
+	}
+
 	return true;
 }
 
@@ -259,6 +278,16 @@ bool XmlFSocket::PutRaw( const void * buffer, std::size_t length )
 	// write data
 	int32 bytesSent;
 	this->Socket->Send( (const uint8 *)buffer, length, bytesSent );
+
+	// dump to log?
+	if( LogAllCommunications )
+	{
+		std::string s( (const char *)buffer, length );
+		for( std::size_t pos = 0; pos < s.length(); pos += RAW_DUMP_BLOCK_SIZE )
+		{
+			UE_LOG( LogXmlFSocketDumpOutbound, Log, TEXT( "\n%s" ), *FString( s.substr( pos, RAW_DUMP_BLOCK_SIZE ).c_str() ) );
+		}
+	}
 
 	// return the success status
 	return bytesSent == length;

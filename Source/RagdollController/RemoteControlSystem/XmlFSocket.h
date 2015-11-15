@@ -88,6 +88,9 @@ public:
 	/** A copy of the last full line read with GetLine(), without the terminating LF or CRLF. This buffer can be modified directly. */
 	std::string Line;
 
+	/** If true, then all communications will be dumped to the log. */
+	bool LogAllCommunications = false;
+
 
 private:
 
