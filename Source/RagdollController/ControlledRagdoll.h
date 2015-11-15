@@ -3,9 +3,9 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "RCLevelScriptActor.h"
 #include "GameFramework/GameMode.h"
 
+#include "RCLevelScriptActor.h"
 #include "RemoteControllable.h"
 
 #include <PxTransform.h>
@@ -14,6 +14,9 @@
 #include <array>
 
 #include "ControlledRagdoll.generated.h"
+
+
+class URemoteControllable;
 
 
 
@@ -65,9 +68,7 @@ struct FJointState
  * Main class for a controlled ragdoll.
  */
 UCLASS()
-class RAGDOLLCONTROLLER_API AControlledRagdoll :
-	public AActor,
-	public IRemoteControllable
+class RAGDOLLCONTROLLER_API AControlledRagdoll : public AActor
 {
 	GENERATED_BODY()
 
@@ -87,6 +88,9 @@ protected:
 
 	/** The GameMode. Note that this is always null on non-authority, and probably also during an editor session! */
 	AGameMode * GameMode{};
+
+	/** The RemoteControllable component. This can be null so check before use! */
+	URemoteControllable * RemoteControllable{};
 
 
 	/* Ragdoll state data */
@@ -116,16 +120,8 @@ protected:
 
 	/* Inbound data flow, 1st half of Tick() */
 	
-	/** Handle network errors with remote controllers. Currently drops the connection, logs, and sets InXmlStatus.status to pugi::status_no_document_element. */
-	void HandleNetworkError( const std::string & description );
-
-	/** If a remote controller is connected, then read in one xml document and prepare the response document. If success, then RemoteControlSocket->InXml
-	 ** contains the received xml document, RemoteControlSocket->InXmlStatus.status is set to pugi::status_ok, and RemoteControlSocket->OutXml is cleared.
-	 ** On failure, RemoteControlSocket->InXmlStatus.status is set to pugi::status_no_document_element. */
-	void PrepareRemoteControllerCommunication();
-
 	/** If xml data was received from a remote controller, then handle all commands with inbound data (setters). */
-	void ReadFromRemoteController();
+	URemoteControllable::UserFrame ReadFromRemoteController();
 
 	/** Read data from the game engine (PhysX etc). Called during the first half of each tick. */
 	void ReadFromSimulation();
@@ -137,10 +133,7 @@ protected:
 	void WriteToSimulation();
 
 	/** If xml data was received from a remote controller, then handle all commands that request outbound data (getters). */
-	void WriteToRemoteController();
-
-	/** If xml data was received from a remote controller, then send out the response document. */
-	void FinalizeRemoteControllerCommunication();
+	void WriteToRemoteController( URemoteControllable::UserFrame frame );
 
 
 

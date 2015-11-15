@@ -204,42 +204,42 @@ void ARemoteControlHub::DispatchSocket( std::string command, std::unique_ptr<Xml
 
 void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket> socket )
 {
-	UE_LOG( LogRcRch, Log, TEXT( "(%s) Processing CONNECT command. Target pattern: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
+	UE_LOG( LogRcRch, Log, TEXT( "(%s) Processing CONNECT command. NetworkName pattern: %s" ), TEXT( __FUNCTION__ ), *FString( args.c_str() ) );
 
-	// find the target object based on its name. unfortunately it seems that we cannot narrow this to our interface, or even to interfaces in general.
+	// find the target RemoteControllable component based on its NetworkName
 	FWildcardString pattern( args.c_str() );
-	IRemoteControllable * selected = nullptr;
-	ForEachObjectOfClass( UObject::StaticClass(), [this, &pattern, &selected]( UObject * candidate ) -> void {
+	URemoteControllable * selected = nullptr;
+	ForEachObjectOfClass( URemoteControllable::StaticClass(), [this, &pattern, &selected]( UObject * candidateObject ) -> void {
 
-		// match names; also make sure that the object is from our world
-		if( candidate->GetWorld() == GetWorld() && pattern.IsMatch( candidate->GetName() ) )
+		// downcast: should be always possible because we are looping only through objects of this type
+		URemoteControllable * candidate = static_cast<URemoteControllable *>(candidateObject);
+
+		// match names; also make sure that the component is from our world
+		if( candidate->GetWorld() == GetWorld() && pattern.IsMatch( candidate->NetworkName ) )
 		{
-			/* object with a matching name found */
+			/* component with a matching name found */
 
-			// make sure to log a warning if multiple matches are found
+			// have already found one?
 			if( selected )
 			{
-				// target has been already found; we have multiple matches
-				UE_LOG( LogRcRch, Warning, TEXT( "(ARemoteControlHub::CmdConnect) Multiple matching objects found for pattern '%s'! Ignoring: %s" ),
-					*pattern, *candidate->GetName() );
-				return;
+				// target has been already found; we have multiple matches -> log and ignore
+				UE_LOG( LogRcRch, Warning,
+					TEXT( "(ARemoteControlHub::CmdConnect) Multiple matching components found for network name pattern '%s'!" ),
+					*pattern );
+				UE_LOG( LogRcRch, Warning, TEXT( "(ARemoteControlHub::CmdConnect)     Ignoring component: NetworkName=%s, name=%s, owner=%s" ),
+					*candidate->NetworkName,
+					*candidate->GetName(),
+					candidate->GetOwner() ? *candidate->GetOwner()->GetName() : TEXT( "(no owner)" ) );
 			}
-
-			// check that the object is RemoteControllable
-			selected = dynamic_cast<IRemoteControllable *>(candidate);
-			if( !selected )
+			else
 			{
-				// no: log and keep searching
-				UE_LOG( LogRcRch, Warning, TEXT( "(ARemoteControlHub::CmdConnect) Matching object found but it is not IRemoteControllable! Ignoring: %s" ),
-					*candidate->GetName() );
-				return;
+				// first hit: store and log
+				selected = candidate;
+				UE_LOG( LogRcRch, Log, TEXT( "(ARemoteControlHub::CmdConnect) Target component found: NetworkName=%s, name=%s, owner=%s" ),
+					*selected->NetworkName,
+					*selected->GetName(),
+					selected->GetOwner() ? *selected->GetOwner()->GetName() : TEXT( "(no owner)" ) );
 			}
-
-			// invariant: we have a target selected && it must be an UObject, because we just found it by iterating all UObjects
-			check( selected && dynamic_cast<UObject *>(selected) );
-
-			UE_LOG( LogRcRch, Log, TEXT( "(ARemoteControlHub::CmdConnect) Target object found. Target: %s" ),
-				*dynamic_cast<UObject *>(selected)->GetName() );
 		}
 
 	} );
@@ -267,7 +267,7 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 		check( socket );
 
 		// log, send error to socket, and let the connection drop
-		UE_LOG( LogRcRch, Error, TEXT( "(%s) Target object not found: %s" ), TEXT( __FUNCTION__ ), *pattern );
+		UE_LOG( LogRcRch, Error, TEXT( "(%s) Target component not found: %s" ), TEXT( __FUNCTION__ ), *pattern );
 		socket->PutLine( RCH_ERROR_STRING );
 		return;
 	}
