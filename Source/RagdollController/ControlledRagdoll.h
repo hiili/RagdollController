@@ -75,25 +75,41 @@ class RAGDOLLCONTROLLER_API AControlledRagdoll : public AActor
 
 
 
+	/* constructors/destructor */
+
+
+public:
+
+	AControlledRagdoll();
+
+
+
+
+	/* UE interface overrides */
+
+
+public:
+
+	virtual void PostInitializeComponents() override;
+	virtual void BeginPlay() override;
+
+	/** Ticking is performed in two stages. During the first stage, inbound data from the game engine and the remote controller is read and stored to internal
+	 ** data structs. During the second stage, outbound data is sent back to the game engine and to the remote controller. TickHook() and the actor's Blueprint
+	 ** are called between these stages. TickHook() is called just before the Blueprint. */
+	virtual void Tick( float deltaSeconds ) override;
+
+
+
+
+	/* ragdoll interface */
+
+
+public:
+
+
+
+
 protected:
-
-
-	/* Class data */
-
-	/** The SkeletalMeshComponent of the actor to be controlled. This is guaranteed to be always valid. */
-	USkeletalMeshComponent * SkeletalMeshComponent{};
-
-	/** Our custom LevelScriptActor. Note that this is always null during an editor session! */
-	ARCLevelScriptActor * RCLevelScriptActor{};
-
-	/** The GameMode. Note that this is always null on non-authority, and probably also during an editor session! */
-	AGameMode * GameMode{};
-
-	/** The RemoteControllable component. This can be null so check before use! */
-	URemoteControllable * RemoteControllable{};
-
-
-	/* Ragdoll state data */
 
 	/** Cached joint names of the actor's SkeletalMeshComponent. When initialized, then JointNames.Num() == JointStates.Num(). */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = RagdollController )
@@ -105,14 +121,22 @@ protected:
 	TArray<FJointState> JointStates;
 
 
-	/* Miscellaneous methods */
 
-	/** Initialize the state data structs (read static data from the game engine, etc.) */
-	void InitState();
+
+	/* internal */
+
+
+protected:
 
 	/** Tick hook that is called from Tick() after internal data structs have been updated but before sending anything out to PhysX and the remote controller.
 	 ** This is called between the 1st and the 2nd half of Tick() (see below), and just before running the actor's Blueprint. */
 	virtual void TickHook( float deltaSeconds ) {};
+
+
+private:
+
+	/** Initialize the state data structs (read static data from the game engine, etc.) */
+	void InitState();
 
 	/** Run a sanity check on all Blueprint-writable data. */
 	void ValidateBlueprintWritables();
@@ -136,19 +160,18 @@ protected:
 	void WriteToRemoteController( URemoteControllable::UserFrame frame );
 
 
+	/** The SkeletalMeshComponent of the actor to be controlled. This is guaranteed to be always valid. */
+	USkeletalMeshComponent * SkeletalMeshComponent{};
 
+	/** Our custom LevelScriptActor. Note that this is always null during an editor session! */
+	ARCLevelScriptActor * RCLevelScriptActor{};
 
-public:
+	/** The GameMode. Note that this is always null on non-authority, and probably also during an editor session! */
+	AGameMode * GameMode{};
 
-	AControlledRagdoll();
+	/** The RemoteControllable component. This can be null so check before use! */
+	URemoteControllable * RemoteControllable{};
 
-	virtual void PostInitializeComponents() override;
-	virtual void BeginPlay() override;
-
-	/** Ticking is performed in two stages. During the first stage, inbound data from the game engine and the remote controller is read and stored to internal
-	 ** data structs. During the second stage, outbound data is sent back to the game engine and to the remote controller. TickHook() and the actor's Blueprint
-	 ** are called between these stages. TickHook() is called just before the Blueprint. */
-	virtual void Tick( float deltaSeconds ) override;
 
 	// Temporary, remove when done testing
 	int tickCounter = -1;
