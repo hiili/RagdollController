@@ -58,7 +58,8 @@ struct FAutomaticReplication
 
 	/** If enabled, then the network authority will automatically take a private, replicated snapshot on a certain schedule.
 	 *  All network clients will apply this snapshot automatically as soon as it has been transmitted over the network.
-	 *  Note that the effective replication frequency depends also on the current NetUpdateFrequency value of the owning actor. */
+	 *  Note that the effective replication frequency depends also on the current NetUpdateFrequency value of the owning actor. 
+	 *  WARNING: Replication does not currently work between little- and big-endian systems! This is due to an UE bug. (a workaround would be possible) */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite )
 	EAutomaticReplicationMode ReplicationMode = EAutomaticReplicationMode::Disabled;
 

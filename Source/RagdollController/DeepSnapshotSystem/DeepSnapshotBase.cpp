@@ -325,6 +325,8 @@ void UDeepSnapshotBase::Replicate()
 
 	// create an archive writer and perform a snapshot to it
 	FMemoryWriter writer( ReplicationSnapshot.Data );
+	//writer.ArIsPersistent = true;   // permit replication between systems with different endianness, as long as the derived class supports it
+	// ^ cannot enable until this UE bug is fixed: https://answers.unrealengine.com/questions/333914/serialization-to-archive-can-corrupt-source-data.html
 	SerializeTargetIfNotNull( writer );
 }
 
@@ -333,6 +335,8 @@ void UDeepSnapshotBase::ApplyReplicatedSnapshot()
 {
 	// create an archive reader for the incoming data and perform a recall from it
 	FMemoryReader reader( ReplicationSnapshot.Data );
+	//reader.ArIsPersistent = true;   // permit replication between systems with different endianness, as long as the derived class supports it
+	// ^ cannot enable until this UE bug is fixed: https://answers.unrealengine.com/questions/333914/serialization-to-archive-can-corrupt-source-data.html
 	SerializeTargetIfNotNull( reader );
 }
 
