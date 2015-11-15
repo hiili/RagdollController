@@ -134,10 +134,8 @@ void ADeepSnapshotManager::RegisterSnapshotComponent( UDeepSnapshotBase * compon
 		{
 			// log
 			UE_LOG( LogDeepSnapshotSystem, Error,
-				TEXT( "(%s) A deep snapshot component is trying to register multiple times! Component: name=%s, owner=%s. Snapshot group name: %s" ),
-				TEXT( __FUNCTION__ ),
-				*component->GetName(), component->GetOwner() ? *component->GetOwner()->GetName() : TEXT("(no owner)"),
-				*groupName.ToString() );
+				TEXT( "(%s) A deep snapshot component is trying to register multiple times! Component: %s, Snapshot group name: %s" ),
+				TEXT( __FUNCTION__ ), *component->GetPathName( component->GetWorld() ), *groupName.ToString() );
 		}
 	}
 }

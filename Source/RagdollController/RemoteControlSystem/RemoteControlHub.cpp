@@ -223,22 +223,15 @@ void ARemoteControlHub::CmdConnect( std::string args, std::unique_ptr<XmlFSocket
 			if( selected )
 			{
 				// target has been already found; we have multiple matches -> log and ignore
-				UE_LOG( LogRcRch, Warning,
-					TEXT( "(ARemoteControlHub::CmdConnect) Multiple matching components found for network name pattern '%s'!" ),
-					*pattern );
-				UE_LOG( LogRcRch, Warning, TEXT( "(ARemoteControlHub::CmdConnect)     Ignoring component: NetworkName=%s, name=%s, owner=%s" ),
-					*candidate->NetworkName,
-					*candidate->GetName(),
-					candidate->GetOwner() ? *candidate->GetOwner()->GetName() : TEXT( "(no owner)" ) );
+				UE_LOG( LogRcRch, Warning, TEXT( "(ARemoteControlHub::CmdConnect) Multiple matching components found for network name pattern '%s'! Ignoring: %s, NetworkName=%s" ),
+					*pattern, *candidate->GetPathName( candidate->GetWorld() ), *candidate->NetworkName );
 			}
 			else
 			{
 				// first hit: store and log
 				selected = candidate;
-				UE_LOG( LogRcRch, Log, TEXT( "(ARemoteControlHub::CmdConnect) Target component found: NetworkName=%s, name=%s, owner=%s" ),
-					*selected->NetworkName,
-					*selected->GetName(),
-					selected->GetOwner() ? *selected->GetOwner()->GetName() : TEXT( "(no owner)" ) );
+				UE_LOG( LogRcRch, Log, TEXT( "(ARemoteControlHub::CmdConnect) Target component found: %s, NetworkName=%s" ),
+					*selected->GetPathName( selected->GetWorld() ), *selected->NetworkName );
 			}
 		}
 
