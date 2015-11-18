@@ -394,23 +394,25 @@ void AControlledRagdoll::WriteToSimulation()
 
 URemoteControllable::UserFrame AControlledRagdoll::ReadFromRemoteController()
 {
-	// return if no operational connection
-	if( !RemoteControllable || !RemoteControllable->HasConnectionAndValidData() ) return URemoteControllable::UserFrame{};
+	// if we do not have a RemoteControllable, then return with null handles 
+	if( !RemoteControllable ) return{};
 
-	// open the frame, bail out if it contains null handles
+	// open the frame
 	URemoteControllable::UserFrame frame = RemoteControllable->OpenFrame( *this );
-	if( !frame ) return URemoteControllable::UserFrame{};
 
-
-	UE_LOG( LogTemp, Log, TEXT( "GOT XML DATA" ) );
-
-	// handle all setter commands here and postpone getter handling to WriteToRemoteController()
-	if( pugi::xml_node node = frame.command.child( "setActuators" ) )
+	// if frame contains a valid command tree handle, then perform all setter commands here
+	if( frame.command )
 	{
-		//...
+		UE_LOG( LogTemp, Log, TEXT( "GOT XML DATA" ) );
+
+		// handle all setter commands here and postpone getter handling to WriteToRemoteController()
+		if( pugi::xml_node node = frame.command.child( "setActuators" ) )
+		{
+			//...
+		}
 	}
 
-
+	// return the frame, no matter what it contains
 	return frame;
 }
 
@@ -419,28 +421,23 @@ URemoteControllable::UserFrame AControlledRagdoll::ReadFromRemoteController()
 
 void AControlledRagdoll::WriteToRemoteController( URemoteControllable::UserFrame frame )
 {
-	// return if no operational connection
-	if( !RemoteControllable || !RemoteControllable->HasConnectionAndValidData() ) return;
+	// if we do not have a RemoteControllable, then return
+	if( !RemoteControllable ) return;
 
-	// close the frame and return if it contains null handles
-	if( !frame )
+	// if frame contains valid command and response tree handles, then perform all getter commands here
+	if( frame.command && frame.response )
 	{
-		RemoteControllable->CloseFrame( *this );
-		return;
+		// handle all getter commands here; setters were handled in ReadFromRemoteController()
+		if( frame.response.child( "getSensors" ) )
+		{
+			//...
+		}
+		if( frame.response.child( "getActuators" ) )
+		{
+			//...
+		}
 	}
 
-
-	// handle all getter commands here; setters were handled in ReadFromRemoteController()
-	if( frame.response.child( "getSensors" ) )
-	{
-		//...
-	}
-	if( frame.response.child( "getActuators" ) )
-	{
-		//...
-	}
-
-
-	// close the frame
+	// close the frame, no matter what it contains
 	RemoteControllable->CloseFrame( *this );
 }
