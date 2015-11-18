@@ -16,27 +16,40 @@
 /**
  * An actor component for communicating with a remote controller over a TCP socket using XML. The connection is initiated by the remote controller by
  * contacting the RemoteControlHub actor. The remote can then request a connection dispatch to a RemoteControllable component based on the component's
- * NetworkName (the NetworkName can be set via the editor). The connection will be rejected if the component has no registered users (see below).
+ * NetworkName (the NetworkName can be set via the editor).
  * 
- * On the UE side, all users of the control link (components and actors) must initially register with the RemoteControllable using the RegisterUser() method.
+ * On the UE side, all users of the control link (components, actors, ...) must initially register with the RemoteControllable using the RegisterUser() method.
  * This must happen before the remote opens the connection; trying to register once a connection is already open is an error (will be rejected and logged).
  * 
- * All communication takes place synchronously. All registered users should perform the following steps during every tick:
- *   1. Call OpenFrame(), which returns a UserFrame with two handles: one to a command XML tree and one to a response XML tree.
- *   2. If the UserFrame contains non-null handles, then read data from the command tree and write data to the response tree.
- *   3. Call CloseFrame(), even if OpenFrame() returned null handles.
+ * Users can probe whether we have an operational connection and new data by calling HasConnectionAndValidData(). Once connected and as long as the connection
+ * is operational (HasConnectionAndValidData() returns true), all communication will take place synchronously.
  * 
- * Once a connection is established, the RemoteControllable will read exactly one XML document from the remote controller per tick. This happens when the first
- * user calls OpenFrame(). The response XML document is sent to the remote immediately after the last registered user has called CloseFrame().
+ * All registered users should perform the following steps during each tick:
+ *   1. Call HasConnectionAndValidData(). Continue if it returns true, otherwise stop.
+ *   2. Call OpenFrame(), which returns a UserFrame with two handles: one to a command XML tree and one to a response XML tree.
+ *   3. If the UserFrame contains non-null handles, then read data from the command tree and write data to the response tree.
+ *   4. Call CloseFrame(), even if OpenFrame() returned null handles.
  * 
- * The response document is not cleared between ticks: each user continues with their response tree from the previous tick. This way the user does not need to
- * re-create the tree layout on each tick and typically needs to only overwrite node data.
+ * Once a connection is established, the RemoteControllable will read exactly one XML document from the remote controller per tick. This happens before any of
+ * the registered users' tick methods get called.
+ * 
+ * The response XML document is sent to the remote immediately after the last registered user has called CloseFrame(). The response document is not cleared
+ * between ticks: each user continues with their response tree from the previous tick. This way the user does not need to re-create the tree layout on each tick
+ * and typically needs to only overwrite node data.
  * 
  * @see RemoteControlHub, XmlFSocket, Mbml
  */
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RAGDOLLCONTROLLER_API URemoteControllable : public UActorComponent
 {
+	/* Implementation details:
+	 * 
+	 * Upon a connection request, the hub actor calls the ConnectWith() method, which in turn stores the connection socket in the RemoteControlSocket field.
+	 * 
+	 * We could well send the response document during the next TickComponent() call. However, we try to send it as soon as possible, so as to leave more time
+	 * for the network and the remote before we try to read in the next inbound command document (we do a blocking read at that point).
+	 **/
+
 	GENERATED_BODY()
 
 	/** Permit the remote control hub to have private access, so that it can connect us with the remote controller.
@@ -63,7 +76,7 @@ public:
 public:
 
 	// Called when the game starts
-	//virtual void BeginPlay() override;
+	virtual void BeginPlay() override;
 
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
@@ -77,12 +90,13 @@ public:
 public:
 
 	/** Register a new user of the control link. This must be called before the remote controller opens the connection; trying to register after that will fail.
-	 *  Once registered, the user is responsible to call OpenFrame() followed by a call to CloseFrame() exactly once per each tick. There is no unregister
-	 *  method at the moment; registration is for lifetime. Registration will create a tick prerequisite between the RemoteControllable component and the user.
+	 *  Once registered, the user is responsible to probe HasConnectionAndValidData() on each tick, and if it return true, then call OpenFrame() followed by a
+	 *  call to CloseFrame() exactly once per each tick. There is no unregister method at the moment; registration is for lifetime. Registration will mark the
+	 *  RemoteControllable component as a tick prerequisite for the user.
 	 *  
 	 *  @param	user			A pointer to the user, which must be an AActor (an overload exists for UActorComponent users).
-	 *  @param	xmlTreeName		The name of the subtree in the command and response XML documents that the user wishes to use. This must be unique among all
-	 *							users of this RemoteControllable component. @see OpenFrame()
+	 *  @param	xmlTreeName		The name of the subtree in the command and response documents that the user wishes to use. This must be unique among all users
+	 *							of this RemoteControllable component. @see OpenFrame()
 	 *  @return					True on success, false otherwise. The call can fail for various reasons, including: the user is trying to register multiple
 	 *							times, the xmlTreeName is already taken, or the control link is already open. */
 	bool RegisterUser( AActor & user, const std::string & xmlTreeName );
@@ -91,8 +105,7 @@ public:
 	bool RegisterUser( UActorComponent & user, const std::string & xmlTreeName );
 
 
-	/** Data struct that represents a specific user's portion of the current tick's network communication frame. Note that you can test the validity of the
-	 *  handles as if they were booleans, just like with regular pointers. */
+	/** Data struct that represents a specific user's portion of the current tick's network communication frame. */
 	struct UserFrame
 	{
 		/** A handle to the command element. Modifications to this element are allowed but will be discarded when the frame is closed. Can be a null handle. */
@@ -100,7 +113,13 @@ public:
 
 		/** A handle to the response element. This element will be sent back to the remote once the frame is closed. Can be a null handle. */
 		pugi::xml_node response;
+
+		/** Conversion to boolean for easy validity testing. */
+		explicit operator bool() const { return command && response; }
 	};
+
+	/** Test whether we have an operational connection with a remote controller, so that it is now safe to call OpenFrame(). */
+	bool HasConnectionAndValidData() const;
 
 	/** Opens the command and response XML trees corresponding to the current tick. Each user has provided a tree name during registration (xmlTreeName).
 	 *  The root element of the command XML document should contain a child element with a matching name. If found, then a handle to this element will be
@@ -108,10 +127,11 @@ public:
 	 *  for every registered user. The names of these child elements equal the xmlTreeNames of the users. A handle to the calling user's response
 	 *  element will be returned. Note that the response elements are not cleared between ticks.
 	 *  
+	 *  You should use HasConnectionAndValidData() to probe whether a connection has been established, as probing with OpenFrame() would flood the error log.
+	 *  
 	 *  @param	user			A pointer to the user.
-	 *  @return					A UserFrame struct containing the command and response element handles. Both handles will be null handles in case of an error.
-	 *							This can happen for various reasons, including: no connection has been established yet, the connection has failed, or the user's
-	 *							element is missing from the command XML document. */
+	 *  @return					A UserFrame struct containing the command and response element handles. If the user's element is missing from the command XML
+	 *							document, then both handles will be null handles. */
 	UserFrame OpenFrame( const UObject & user );
 
 	/** Closes the frame opened via OpenFrame(). This should be called even if OpenFrame() returned a UserFrame with null handles.
@@ -132,7 +152,7 @@ private:
 	/** The set of registered users and their associated xml tree names, with a mapping to the associated xml tree names. */
 	TMap<const UObject *, std::string> registeredUsers;
 
-	/** The set of users that have not yet opened and closed their frames during this tick. This is filled with all registered users during openNetworkFrame()
+	/** The set of users that have not yet opened and closed their frames during this tick. This is filled with all registered users during prepareFrame()
 	 *  once a new xml document has been successfully read, and gradually cleared by CloseFrame(). */
 	TSet<const UObject *> nonfinishedUsers;
 
@@ -148,90 +168,31 @@ private:
 	/** Connect with a remote controller by accepting a remote control socket. Also creates the necessary response trees for each user. */
 	void ConnectWith( std::unique_ptr<XmlFSocket> socket );
 
+
 	/** The name by which remote controllers can contact this component via a RemoteControlHub. */
 	UPROPERTY( EditAnywhere, Category = "RemoteControlSystem" )
 	FString NetworkName;
 
+	/** Remote control socket */
+	std::unique_ptr<XmlFSocket> remoteControlSocket;
 
 
 
-	/* internal */
+
+	/* internal operations */
 
 
 private:
 
-	/** State machine representation of the state of our internal network communications frame for the ongoing tick. */
-	class enum NetworkFrameState
-	{
-		/**
-		 * We do not have an operational connection. Either the remote has not connected yet, or an established connection has been lost.
-		 * While in this state, all calls to OpenFrame will keep returning null handles until the next tick, even if we get a new connection socket.
-		 * 
-		 * A new connection can arrive via ConnectWith() at any moment. However, we transition out from this state only in TickComponent (which runs before our
-		 * users' tick methods, due to the prerequisites set during registration). This way we force all users to step in to the synchronized communication
-		 * loop during the same tick.
-		 * 
-		 * Also, we transition into this state only as a result of a network error, and because there is network activity only during the first OpenFrame()
-		 * call and the last CloseFrame() call for a given tick, we cannot transition into this state between these calls.
-		 *
-		 *   Invariant: We cannot transition into or out from the NoConnection state in the middle of user activity for a tick
-		 *              (ie, between the first call to OpenFrame() and the last call to CloseFrame() for a tick)
-		 * 
-		 * Events and transitions:
-		 *		TickComponent(): If we have a connection (IsGood() state is irrelevant), then transition to Closed
-		 */
-		NoConnection,
-
-		/**
-		 * We have a connection. The network frame for the previous tick has been already closed (or did not exist if we are in the first tick), but the network
-		 * frame for the ongoing tick has not yet been opened.
-		 *
-		 * Invariant: There are no non-finished users
-		 *            nonfinishedUsers.Num() == 0
-		 * 
-		 * Events and transitions:
-		 *		TickComponent(): no transition
-		 *		A user calls OpenFrame(): call openNetworkFrame()
-		 *			On success, transition to Open
-		 *			On failure, transition to NoConnection
-		 *		A user calls CloseFrame(): no transition (log an error)
-		 */
-		Closed,
-
-		/**
-		 * The network frame for the ongoing tick has been successfully opened, but not yet closed. InXml and OutXml are in valid and initialized state.
-		 * 
-		 * Invariant: remoteControlSocket.InXml contains a successfully received XML document (it might or might not contain entries for all users).
-		 *            remoteControlSocket.InXmlStatus == true.
-		 *            remoteControlSocket.OutXml contains an initialized XML document (it might contain writes from users)
-		 *            
-		 * Invariant: There are non-finished users
-		 *            nonfinishedUsers.Num() > 0
-		 * 
-		 * Events and transitions:
-		 *		TickComponent(): clear nonfinishedUsers and log an error, call closeNetworkFrame(), then transition to Closed
-		 *		A user calls OpenFrame(): no transition
-		 *		A user calls CloseFrame(): remove the user from nonfinishedUsers
-		 *			If not last user: no transition
-		 *			If last user (nonfinishedUsers.Num() becomes 0): call closeNetworkFrame()
-		 *				On success, transition to Closed
-		 *				On failure, transition to NoConnection
-		 */
-		Open,
-	} networkFrameState;
-
-
-	/** Read in a new command xml document and mark all users as non-finished. Checks that the previous tick was finalized and finalizes it if necessary. */
-	void openNetworkFrame();
+	/** Read in a new command xml document and marks all users as nonfinished. Called before any users get a chance to access our data during this tick;
+	 ** this is ensured by the tick prerequisites that are added during each user registration. Checks that the previous tick was finalized and finalizes
+	 ** it if necessary. */
+	void prepareFrame();
 
 	/** Send back the response xml document. */
-	void closeNetworkFrame();
+	void finalizeFrame();
 
 	/** Handle a network error: drop the connection and log the event. */
 	void handleNetworkError( const std::string & description );
-
-
-	/** The remote control socket */
-	std::unique_ptr<XmlFSocket> remoteControlSocket;
 
 };

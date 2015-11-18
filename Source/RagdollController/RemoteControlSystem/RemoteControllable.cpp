@@ -1,18 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-/**
- * Implementation details
- * 
- * Upon a connection request, the hub actor calls the ConnectWith() method, which in turn stores the connection socket in the RemoteControlSocket field.
- * We do not accept connections if we do not have registered users.
- * 
- *   Invariant: If a connection exists, then we have at least one registered user.
- *              remoteControlSocket != nullptr -> registeredUsers.Num() > 0
- * 
- * We could well receive and send data during our TickComponent() call. However, we try to read data as late as possible and send data as soon as possible, so
- * as to leave more time for the network and the remote between receiving our data and having to send new data to us (we do a blocking read).
- */
-
 #include "RagdollController.h"
 #include "RemoteControllable.h"
 
@@ -32,30 +19,41 @@ URemoteControllable::URemoteControllable()
 }
 
 
-// BeginPlay() is disabled in constructor!
-//// Called when the game starts
-//void URemoteControllable::BeginPlay()
-//{
-//	Super::BeginPlay();
-//
-//}
+// Called when the game starts
+void URemoteControllable::BeginPlay()
+{
+	Super::BeginPlay();
 
+	// BeginPlay() is disabled in constructor!
+}
 
 
 // Called every frame
 void URemoteControllable::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
 {
-	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+	// initialize the communications frame for this tick
+	prepareFrame();
 
-	// check for a new connection. transition from NoConnection to Closed if have one.
-	if( networkFrameState == NetworkFrameState::NoConnection && remoteControlSocket ) networkFrameState = NetworkFrameState::Closed;
+	// run the component's blueprint at the end, so that we already have the xml data for this tick
+	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+}
+
+
+
+
+
+
+
+
+void URemoteControllable::prepareFrame()
+{
+	// no-op if no remote controller
+	if( !remoteControlSocket ) return;
 
 	// did all users properly complete their open-close cycle during the previous tick? force-complete if not.
-	if( networkFrameState == NetworkFrameState::Open )
+	if( nonfinishedUsers.Num() > 0 )
 	{
 		// no: someone forgot to do open-close or just close
-
-		check( nonfinishedUsers.Num() > 0 );   // closing the frame for the last user should cause a transition out from Open
 
 		// log a warning 
 		UE_LOG( LogRemoteControlSystem, Warning, TEXT( "(%s) Some users did not perform a full OpenFrame()-CloseFrame() cycle during the previous tick! Culprit(s):" ), TEXT( __FUNCTION__ ) );
@@ -67,19 +65,12 @@ void URemoteControllable::TickComponent( float DeltaTime, ELevelTick TickType, F
 
 		// finalize the communications for the previous tick
 		nonfinishedUsers.Reset();
-		closeNetworkFrame();
+		finalizeFrame();
 	}
-}
 
-
-
-
-
-
-void URemoteControllable::openNetworkFrame()
-{
-	// no-op if no remote controller
-	if( !remoteControlSocket ) return;
+	// we need to force-complete also if there are no users, because finalizeFrame() is called from CloseFrame(), which in turn is called by users.
+	// just make sure that we have valid data (ie, this is not the first call to prepareFrame() after a remote has connected)
+	if( HasConnectionAndValidData() && registeredUsers.Num() == 0 ) finalizeFrame();
 
 
 	// read data from socket (leave the response document intact)
@@ -104,12 +95,12 @@ void URemoteControllable::openNetworkFrame()
 
 
 
-void URemoteControllable::closeNetworkFrame()
+void URemoteControllable::finalizeFrame()
 {
 	// invariant: we have a connection and valid inbound data available for this tick, otherwise we should not get here. We are called from CloseFrame():
 	//   - no remote: CloseFrame() should be no-op
-	//   - network error: openNetworkFrame() should have dropped the connection
-	//   - a new connection established during this tick but openNetworkFrame() has not been called yet: CloseFrame should be no-op due to no valid data available
+	//   - network error: prepareFrame() should have dropped the connection
+	//   - a new connection established during this tick but prepareFrame() has not been called yet: CloseFrame should be no-op due to no valid data available
 	check( HasConnectionAndValidData() );
 
 	// invariant: all users should have finished by now (this is enforced internally)
@@ -201,7 +192,7 @@ void URemoteControllable::CloseFrame( const UObject & user )
 	// was this the last user? send the document if yes
 	if( nonfinishedUsers.Num() == 0 )
 	{
-		closeNetworkFrame();
+		finalizeFrame();
 	}
 }
 
@@ -238,13 +229,6 @@ void URemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 	if( !socket )
 	{
 		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) The socket pointer is null!" ), TEXT( __FUNCTION__ ) );
-		return;
-	}
-
-	// no registered users? -> log and drop the connection
-	if( registeredUsers.Num() == 0 )
-	{
-		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) No registered users! Rejecting the connection attempt." ), TEXT( __FUNCTION__ ) );
 		return;
 	}
 
