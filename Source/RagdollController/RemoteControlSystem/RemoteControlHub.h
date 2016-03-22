@@ -22,12 +22,12 @@
  * A hub entity for parsing and forwarding incoming connection requests from remote controllers to components of type RemoteControllable.
  * 
  * The hub is activated by simply dropping one into the Unreal world. It listens on a TCP port (7770 by default, which can be changed via the editor).
- * Once a TCP connection is received, the remote controller can send command lines to the hub. All incoming lines must be terminated with LF or CRLF; all
+ * Once a TCP connection is received, the remote controller can send command lines to the hub. Incoming lines can be terminated with LF or CRLF; all
  * outgoing lines are terminated with LF. Currently, only the CONNECT command is supported, and it must be preceded with a proper handshake string.
  * The usage is as follows:
  *
  *   <remote> RagdollController RCH: CONNECT Owen
- *   <hub> OK
+ *      <hub> OK
  * 
  * The connection has now been forwarded to the RemoteControllable component that has a matching NetworkName set for it (@see RemoteControllable::NetworkName).
  * In this case, a RemoteControllable with the network name Owen will be selected. The target name can be also a ?*-pattern. In case of an error, the hub

@@ -76,7 +76,7 @@ struct FAutomaticReplication
 	/** If enabled, then network clients will apply the last received snapshot on each tick, effectively locking the state of the target component to that
 	 *  snapshot. If disabled, then the replication snapshot is applied to the target component only whenever a new snapshot has been received. This can permit
 	 *  client-side prediction and related approaches in case that the replication frequency is lower than the frame rate.
-	 *  Note that client-side prediction with a non-realtime server might require adjustments of the max physics (sub)step size! */
+	 *  Note that client-side prediction with a non-realtime server might require adjustments to the max physics (sub)step size! */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite )
 	bool HardSync = false;
 
@@ -115,7 +115,7 @@ class RAGDOLLCONTROLLER_API UDeepSnapshotBase : public UActorComponent
 	 * 
 	 * We permit automatic matching between snapshot components and target components. This is done by calling the IsAcceptableTargetType() pure virtual
 	 * method, which the derived snapshot components then implement. There is a pitfall: a more general snapshot component might match and accept a more derived
-	 * target component, for which the user did add a separate snapshot component. For example, consider that you have an Actor with a StaticMeshComponent and a
+	 * target component for which the user did add a separate snapshot component. For example, consider that you have an Actor with a StaticMeshComponent and a
 	 * SkeletalMeshComponent. Then you drop in a PrimitiveComponentSnapshot and a SkeletalMeshComponentSnapshot component, with auto matching enabled in both.
 	 * It could happen that both snapshot components pick the SkeletalMeshComponent as their target, which is not what the user probably wanted.
 	 * 
@@ -310,7 +310,7 @@ private:
 	FSnapshotData * FindSnapshotByName( FName name );
 
 	/** Look for a component in the owning actor that matches the predicate 'pred'. If found, then assign it to TargetComponent and return true.
-	 * Otherwise return false. */
+	 *  Otherwise return false. */
 	bool SelectTargetComponentByPredicate( std::function<bool( UActorComponent * )> pred );
 
 };

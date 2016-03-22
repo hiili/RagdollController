@@ -17,20 +17,22 @@
 
 
 /**
-* Xml wrapper for FSockets that supports both xml-based and line-based communications.
-* 
-* Xml documents received from the socket must be preceded by a block header and followed by a block footer as follows:
-*   XML_DOCUMENT_BEGIN
-*   <the xml document>
-*   XML_DOCUMENT_END
-* All outgoing xml documents are preceded by a similar block headers and footers.
-* 
-* If you are going to communicate with Matlab, then you might want to take a look at the Mbml helper class.
-* 
-* Warning: No flood protection! The line buffer size is unlimited.
-* 
-* @see Mbml
-*/
+ * Xml wrapper for FSockets that supports both xml-based and line-based communications. Incoming lines can be terminated with LF or CRLF; outgoing lines are
+ * terminated with LF.
+ * 
+ * Xml documents received from the socket must be preceded by a block header and followed by a block footer as follows:
+ *   XML_DOCUMENT_BEGIN
+ *   <the xml document>
+ *   XML_DOCUMENT_END
+ * All outgoing xml documents are preceded by similar block headers and footers.
+ * 
+ * 
+ * If you are going to communicate with Matlab, then you might want to take a look at the Mbml helper class.
+ *
+ * Warning: No flood protection! The line buffer size is unlimited.
+ * 
+ * @see Mbml
+ */
 class XmlFSocket
 {
 
@@ -40,8 +42,8 @@ class XmlFSocket
 
 public:
 
-	/** Constructs a new XmlFSocket wrapper around the provided FSocket and shares its ownership via the provided shared pointer.
-	 *  The socket argument can be null, in which case the resulting object will be in an invalid state (IsGood() == false). */
+	/** Constructs a new XmlFSocket wrapper around the provided FSocket. The socket argument can be null, in which case the resulting object will be in an
+	 *  invalid state (IsGood() == false). */
 	XmlFSocket( std::unique_ptr<FSocket> socket );
 
 
@@ -53,13 +55,15 @@ public:
 	void SetBlocking( bool shouldBlock, int timeoutMs = std::numeric_limits<int>::max() );
 
 
-	/** Prepares Buffer for further processing. Checks for the presence of an in-situ xml parse and, if one is present, drops it and resets InXml.
-	 *  Then drops all leading whitespace from the buffer (whitespace as in std::isspace, in practice: spaces, tabs, LFs and CRs). */
+	/** Prepares Buffer for further processing by removing all leading "garbage". More specifically, checks for the presence of an in-situ xml parse and, if one
+	 *  is present, drops it and resets InXml. Then drops all leading whitespace from the buffer (whitespace as in std::isspace, in practice: spaces, tabs, LFs
+	 *  and CRs). */
 	void CleanupBuffer();
 
-	/** Tries to read more data from the socket into Buffer. Note that a GetLine() call will leave the line terminator (LF or CRLF) of the read line to the
-	 *  buffer. Also, the beginning of the buffer might contain an in-situ parse of an xml document, in case that GetXml() has been just called. You can precede
-	 *  your call(s) to GetRaw() with a CleanupBuffer() call: this will drop a possibly existing in-situ xml parse and any leading whitespace from Buffer.
+	/** Tries to read more data from the socket into Buffer. Note that GetLine() calls will leave the line terminator (LF or CRLF) of the read line into Buffer.
+	 *  In addition to such line terminators, the beginning of the buffer might contain also an in-situ parse of an xml document, in case that GetXml() has been
+	 *  just called. You can precede your calls to GetRaw() with a CleanupBuffer() call: this will drop a possibly existing in-situ xml parse and any leading
+	 *  whitespace from Buffer.
 	 *  
 	 *  If ShouldBlock == true, then the call blocks until either more data has been received or BlockingTimeoutMs is exceeded.
 	 *  
@@ -69,12 +73,15 @@ public:
 	/** Writes raw data to the socket. Return true on success, false on full or partial failure. */
 	bool PutRaw( const void * buffer, std::size_t length );
 
-	/** Tries to read the next non-empty, complete (LF or CRLF terminated) line from the socket. On success, the new line is placed into Line.
-	 *  The Line field is not touched upon failure.
+	/** Tries to read the next non-empty, complete (LF or CRLF terminated) line from Buffer, which in turn is re-filled from the socket if necessary. On
+	 *  success, the new line is placed into Line and removed from Buffer. The Line field is not touched upon failure. Buffer might have been cleaned up with
+	 *  CleanupBuffer() in both cases.
+	 *  
 	 *  @return True if a new line was read, false otherwise. */
 	bool GetLine();
 
 	/** Writes the contents of 'line' to the socket after appending an LF to it.
+	 *
 	 *  @return True on success, false on full or partial failure. */
 	bool PutLine( std::string line );
 
@@ -100,15 +107,15 @@ private:
 
 
 	/** If this is non-zero, then the Buffer contains an in-situ parse of an xml document. Further read operations should first remove this much data
-	 ** from the beginning of the buffer and make sure that the related xml document (InXml) is not used afterwards.
-	 ** Note that the Buffer data to be removed can contain nulls! */
+	 *  from the beginning of the buffer and make sure that the related xml document (InXml) is not used afterwards.
+	 *  Note that the Buffer data to be removed can contain nulls! */
 	std::size_t BufferInSituXmlLength = 0;
 
 	/** Whether read operations should block. */
 	bool ShouldBlock = false;
 
 	/** Network read timeout value for blocking read operations, in milliseconds. Note that a single read operation might perform several network reads, and
-	 ** this value controls the timeout of such single _network_ read operations. */
+	 *  this value controls the timeout of such single _network_ read operations. */
 	int32 BlockingTimeoutMs = 0;
 
 
@@ -140,18 +147,18 @@ public:
 	bool PutXml( pugi::xml_document * xmlDoc = 0 );
 
 
-	/** The last XML document received with GetXml(). The document is reset on the next read operation (GetLine or GetXml); the document is an in-situ
-	 ** parse of the XmlFSocket's internal buffer, with the implication that any subsequent read operation on this XmlFSocket needs to reset this document. */
+	/** The last XML document received with GetXml(). After a successful GetXml() call, the document is an in-situ parse of the XmlFSocket's Buffer field, with
+	 *  the implication that any subsequent GetLine() or GetXml() read operation on this XmlFSocket needs to reset this document. */
 	pugi::xml_document InXml;
 
 	/** Parse status of InXMl, set by GetXml(). If GetXml() has not been called yet or if InXMl has been reset due to a subsequent (attempted) read operation,
-	 ** then InXmlStatus.status is set to pugi::status_no_document_element. This field can be also queried as a bool, in which case it evaluates to true
-	 ** if and only if InXmlStatus.status == pugi::status_ok. */
+	 *  then InXmlStatus.status is set to pugi::status_no_document_element. This field can be also queried as a bool, in which case it evaluates to true
+	 *  if and only if InXmlStatus.status == pugi::status_ok. */
 	pugi::xml_parse_result InXmlStatus;
 
 	/** A pre-allocated, re-usable xml document that can be sent with SendXml(). If one is sending repeatedly an xml document with the same structure
-	 ** with only the contained data changing, then it can be handy to initialize this document once and then just update the contained data
-	 ** before each send operation. OutXml is never written to or reset by XmlFSocket itself; it is up to client code to use it in whatever way seems best. */
+	 *  with only the contained data changing, then it can be handy to initialize this document once and then just update the contained data
+	 *  before each send operation. OutXml is never written to or reset by XmlFSocket itself; it is up to client code to use it in whatever way seems best. */
 	pugi::xml_document OutXml;
 
 

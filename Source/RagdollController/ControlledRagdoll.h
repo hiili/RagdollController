@@ -148,10 +148,10 @@ public:
 	/** Get a const reference to the internal joint name array. */
 	const TArray<FName> & getJointNames() const { return JointNames; }
 
-	/** Get a const reference to the interla joint state array. */
+	/** Get a const reference to the internal joint state array. */
 	const TArray<FJointState> & getJointStates() const { return JointStates; }
 
-	/** Get a non-const reference to the interla joint state array. */
+	/** Get a non-const reference to the internal joint state array. */
 	TArray<FJointState> & getJointStates() { return JointStates; }
 
 

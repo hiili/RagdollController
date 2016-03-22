@@ -63,7 +63,7 @@ public:
 	float GetFixedFps() const { return FixedFps; }
 
 	/** Set a new constant virtual (game-time) tick rate to be used. The real (wall-clock) tick rate of clients and standalone instances is always capped to not
-	 ** exceed this. @see GetFixedFps() */
+	 *  exceed this. @see GetFixedFps() */
 	UFUNCTION( BlueprintCallable, Category = "Frame rate management" )
 	void SetFixedFps( float newFixedFps );
 
@@ -90,7 +90,7 @@ private:
 
 
 	/** The constant virtual (game-time) tick rate to be used. The real (wall-clock) tick rate of clients and standalone instances is always capped to not
-	 ** exceed this. */
+	 *  exceed this. */
 	UPROPERTY( EditAnywhere, Category = "Frame rate management" )
 	float FixedFps = 60.f;
 
@@ -115,13 +115,13 @@ private:
 public:
 
 	/** Register an actor so as to have its NetUpdateFrequency automatically corrected on each tick, so as to take into account the simulation time vs. wall
-	 ** clock time difference; UE does not take care of this in our case of using fixed time steps. No-op with a logged warning if the actor is already
-	 ** registered. @see UnregisterManagedNetUpdateFrequency */
+	 *  clock time difference; UE does not take care of this in our case of using fixed time steps. No-op with a logged warning if the actor is already
+	 *  registered. @see UnregisterManagedNetUpdateFrequency */
 	UFUNCTION( BlueprintCallable, Category = "NetUpdateFrequency management" )
 	void RegisterManagedNetUpdateFrequency( AActor * actor );
 
 	/** Unregister an actor from receiving automatic NetUpdateFrequency updates. No-op with a logged warning if the actor has not been registered.
-	 ** @see RegisterManagedNetUpdateFrequency */
+	 *  @see RegisterManagedNetUpdateFrequency */
 	UFUNCTION( BlueprintCallable, Category = "NetUpdateFrequency management" )
 	void UnregisterManagedNetUpdateFrequency( AActor * actor );
 

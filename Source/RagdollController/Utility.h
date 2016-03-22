@@ -21,7 +21,8 @@ public:
 	static void AddDefaultRootComponent( AActor * actor, FString spriteName );
 
 	/** Search through the components owned by the provided actor and return a component with a type that matches the return type.
-	 *  @return If there is exactly one component with a matching type, then return a pointer to it. Otherwise return a nullptr. */
+	 *
+	 *  @return		If there is exactly one component with a matching type, then return a pointer to it. Otherwise return a nullptr. */
 	template<typename T>
 	static T * FindUniqueComponentByClass( const AActor & actor );
 
