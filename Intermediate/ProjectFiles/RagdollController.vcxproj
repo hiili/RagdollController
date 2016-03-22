@@ -289,7 +289,9 @@
     <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControlHub.h" />
     <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllable.cpp" />
     <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllable.h" />
+    <ClInclude Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllableHelper.h" />
     <ClInclude Include="..\..\Source\RagdollController\ScopeGuard.h" />
+    <ClCompile Include="..\..\Source\RagdollController\RemoteControlSystem\RemoteControllableHelper.cpp" />
     <ClCompile Include="..\..\Source\RagdollController\Utility.cpp" />
     <ClInclude Include="..\..\Source\RagdollController\Utility.h" />
     <ClCompile Include="..\..\Source\RagdollController\FramerateManager.cpp" />

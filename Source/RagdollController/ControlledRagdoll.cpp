@@ -55,7 +55,7 @@ void AControlledRagdoll::PostInitializeComponents()
 	// register with the RemoteController, if we have one
 	if( RemoteControllable )
 	{
-		RemoteControllable->RegisterUser( *this, "ControlledRagdoll" );   // ignore errors here; OpenFrame() will fail and we can branch on that then
+		RemoteControllable->RegisterUser( *this, "ControlledRagdoll", URemoteControllable::CommunicationCallback_t(), URemoteControllable::CommunicationCallback_t() );
 	}
 
 
@@ -136,7 +136,7 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 	/* Relay data between the game engine and the remote controller, while calling additional tick functionality in between. */
 
 	// Read inbound data
-	auto frame = ReadFromRemoteController();
+	//auto frame = ReadFromRemoteController();
 	ReadFromSimulation();
 
 	// Call the tick hook (available for inherited C++ classes), then Super::Tick(), which runs this actor's Blueprint
@@ -146,7 +146,7 @@ void AControlledRagdoll::Tick( float deltaSeconds )
 
 	// Write outbound data
 	WriteToSimulation();
-	WriteToRemoteController( frame );
+	//WriteToRemoteController( frame );
 
 
 
@@ -392,55 +392,55 @@ void AControlledRagdoll::WriteToSimulation()
 
 
 
-URemoteControllable::UserFrame AControlledRagdoll::ReadFromRemoteController()
-{
-	// return if no operational connection
-	if( !RemoteControllable || !RemoteControllable->HasConnectionAndValidData() ) return URemoteControllable::UserFrame{};
-
-	// open the frame, bail out if it contains null handles
-	URemoteControllable::UserFrame frame = RemoteControllable->OpenFrame( *this );
-	if( !frame ) return URemoteControllable::UserFrame{};
-
-
-	UE_LOG( LogTemp, Log, TEXT( "GOT XML DATA" ) );
-
-	// handle all setter commands here and postpone getter handling to WriteToRemoteController()
-	if( pugi::xml_node node = frame.command.child( "setActuators" ) )
-	{
-		//...
-	}
-
-
-	return frame;
-}
-
-
-
-
-void AControlledRagdoll::WriteToRemoteController( URemoteControllable::UserFrame frame )
-{
-	// return if no operational connection
-	if( !RemoteControllable || !RemoteControllable->HasConnectionAndValidData() ) return;
-
-	// close the frame and return if it contains null handles
-	if( !frame )
-	{
-		RemoteControllable->CloseFrame( *this );
-		return;
-	}
-
-
-	// handle all getter commands here; setters were handled in ReadFromRemoteController()
-	if( frame.response.child( "getSensors" ) )
-	{
-		//...
-	}
-	if( frame.response.child( "getActuators" ) )
-	{
-		//...
-	}
-
-
-	// close the frame
-	RemoteControllable->CloseFrame( *this );
-}
+//URemoteControllable::UserFrame AControlledRagdoll::ReadFromRemoteController()
+//{
+//	// return if no operational connection
+//	if( !RemoteControllable || !RemoteControllable->HasConnectionAndValidData() ) return URemoteControllable::UserFrame{};
+//
+//	// open the frame, bail out if it contains null handles
+//	URemoteControllable::UserFrame frame = RemoteControllable->OpenFrame( *this );
+//	if( !frame ) return URemoteControllable::UserFrame{};
+//
+//
+//	UE_LOG( LogTemp, Log, TEXT( "GOT XML DATA" ) );
+//
+//	// handle all setter commands here and postpone getter handling to WriteToRemoteController()
+//	if( pugi::xml_node node = frame.command.child( "setActuators" ) )
+//	{
+//		//...
+//	}
+//
+//
+//	return frame;
+//}
+//
+//
+//
+//
+//void AControlledRagdoll::WriteToRemoteController( URemoteControllable::UserFrame frame )
+//{
+//	// return if no operational connection
+//	if( !RemoteControllable || !RemoteControllable->HasConnectionAndValidData() ) return;
+//
+//	// close the frame and return if it contains null handles
+//	if( !frame )
+//	{
+//		RemoteControllable->CloseFrame( *this );
+//		return;
+//	}
+//
+//
+//	// handle all getter commands here; setters were handled in ReadFromRemoteController()
+//	if( frame.response.child( "getSensors" ) )
+//	{
+//		//...
+//	}
+//	if( frame.response.child( "getActuators" ) )
+//	{
+//		//...
+//	}
+//
+//
+//	// close the frame
+//	RemoteControllable->CloseFrame( *this );
+//}

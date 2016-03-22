@@ -35,6 +35,9 @@
  * 
  * From this point on, the communication link is handled by the RemoteControllable component; the hub does not intervene in the connection in any further way.
  * 
+ * On timing: The RemoteControlHub always ticks before any RemoteControllable components. Consequently, a target RemoteControllable will start to run its
+ * schedule already during the same tick on which the corresponding CONNECT command is received and processed by the hub.
+ * 
  * @see RemoteControllable
  */
 UCLASS(Blueprintable)

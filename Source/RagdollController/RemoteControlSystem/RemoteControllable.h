@@ -2,58 +2,153 @@
 
 #pragma once
 
-#include "Components/ActorComponent.h"
+#include "Components/SceneComponent.h"
 
+#include "RemoteControllableHelper.h"
 #include "RemoteControlHub.h"
 
 #include <string>
+#include <functional>
 
 #include "RemoteControllable.generated.h"
 
 
 
 
+/** Operations of a communication schedule of a RemoteControllable. Conceptually nested within FRemoteControllableSchedule (UHT disallows nested classes).
+ *  @see URemoteControllable, FRemoteControllableSchedule */
+UENUM()
+enum class ERemoteControllableScheduleOperations : uint8
+{
+	/** Receive an inbound XML document (block until received), then call all receive callbacks. */
+	Receive,
+
+	/** Call all send callbacks, then send the constructed XML document. */
+	Send,
+
+	/** Let the tick methods of the users run at this point. There must be at most one YieldToUsers operation in the schedule for each engine tick. */
+	YieldToUsers,
+
+	/** Yield control until next engine tick. This operation contains an implicit YieldToUsers operation, in case that there has not been an explicit one for
+	 *  the ongoing engine tick. */
+	Yield,
+};
+
+
+/** A communication schedule for a RemoteControllable. Conceptually nested within RemoteControllable (UHT disallows nested classes).
+ *  @see URemoteControllable, ERemoteControllableScheduleOperations */
+USTRUCT()
+struct FRemoteControllableSchedule
+{
+	GENERATED_BODY()
+
+	/** The schedule by which communication operations take place. Various combinations can be used to achieve different useful communication patterns.
+	 *  Usage examples:
+	 *  
+	 *  Schedule = { Send, Receive }, YieldsBeforeScheduleRestart = 1:
+	 *		On each tick, send a state report, which the remote can then use to produce a command document. Block until the command document has
+	 *		been received. Perform both operations before the users' tick method runs.
+	 *		Note that the UE game thread will block for the whole time that it takes to complete the send-receive loop.
+	 *	
+	 *  Schedule = { Receive, YieldToUsers, Send }, YieldsBeforeScheduleRestart = 1:
+	 *		On each tick, block until a command document has been received. Let the user's tick method run. Then send back a state report, which the remote can
+	 *		then use to produce a command document for the next tick. This gives one tick's worth of time for the remote and the network to complete the loop
+	 *		before starting to stall the game thread, with the price of introducing a delay of one tick to the control signal.
+	 *
+	 *  Schedule = { YieldToUsers, Send, Yield, Receive }, YieldsBeforeScheduleRestart = 5:
+	 *		On engine tick n, let the users' tick methods run, then send a state report. The remote can use this report to produce a command document for the
+	 *		next engine tick. Proceed to the next engine tick (n+1) and block until the command document has been received. The users' tick methods will run
+	 *		after this receive operation. Then skip 5 engine ticks and restart the schedule (restart on n+6). The control loop will have one tick's worth of
+	 *		time to complete before stalling the game thread, there will be a delay of one tick in the control signal, and the control frequency is 1/6 * fps
+	 *		(10Hz, assuming a 60Hz tick rate). */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "RemoteControlSystem" )
+	TArray<ERemoteControllableScheduleOperations> Schedule;
+
+	/** How many times to repeatedly yield control between finishing the communication schedule and restarting it. After a yield, control is re-gained via the
+	 *  next TickComponent() invocation. Consequently, the total number of ticks a full communication cycle takes is the number of explicit Yield operations in
+	 *  the schedule + YieldsBeforeScheduleRestart. This field is simply for convenience; the same effect could be achieved by adding Yield commands to the end
+	 *  of the schedule.
+	 *  
+	 *  There has to be at least one yield invocation during a cycle, either in the schedule or set here. Otherwise the game thread will block permanently. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "RemoteControlSystem", meta = (ClampMin = "0", UIMin = "0", UIMax = "60") )
+	int32 YieldsBeforeScheduleRestart = 1;
+
+
+	/** Index to the effective schedule that combines both the explicit schedule and the implicit Yield commands at its end. */
+	struct Index {
+		explicit Index( const FRemoteControllableSchedule & schedule_ );
+
+		/** Restart the schedule from the beginning. */
+		void restart();
+
+		/** Get the current index position. */
+		operator int() const;
+
+		/** Get the operation at the current index. */
+		ERemoteControllableScheduleOperations operator*() const;
+
+		/** Advance the schedule, restart if at end. */
+		Index operator++(int);
+
+		/** Back step the schedule, go to end if at beginning. */
+		Index operator--(int);
+
+	private:
+		const FRemoteControllableSchedule * schedule = nullptr;
+		int32 index = 0;
+
+	public:
+		/** Don't use! Needed for UE CDOs. */
+		Index();
+	};
+
+};
+
+
+
+
+
 /**
- * An actor component for communicating with a remote controller over a TCP socket using XML. The connection is initiated by the remote controller by
- * contacting the RemoteControlHub actor. The remote can then request a connection dispatch to a RemoteControllable component based on the component's
- * NetworkName (the NetworkName can be set via the editor).
+ * An actor component for communicating with a remote controller over a TCP socket using XML. The connection is initiated by the remote controller by contacting
+ * the RemoteControlHub actor. The remote can then request a connection dispatch to a RemoteControllable component based on the component's NetworkName (the
+ * NetworkName can be set via the editor).
  * 
  * On the UE side, all users of the control link (components, actors, ...) must initially register with the RemoteControllable using the RegisterUser() method.
- * This must happen before the remote opens the connection; trying to register once a connection is already open is an error (will be rejected and logged).
+ * Users provide two callbacks during this registration: one for receiving a network communication frame and one for filling out and sending a network
+ * communication frame. The order and frequency by which the callbacks will be called (send-receive-tick, receive-tick-send, receive-tick-send-tick*n, ...)
+ * depends on the CommunicationSchedule field of the RemoteControllable object.
  * 
- * Users can probe whether we have an operational connection and new data by calling HasConnectionAndValidData(). Once connected and as long as the connection
- * is operational (HasConnectionAndValidData() returns true), all communication will take place synchronously.
+ * The schedule starts to run from the beginning once a connection has been established. Exactly one XML document will be read from the remote controller for
+ * each Receive operation. The game thread blocks with no timeout until the document has been received. Exactly one XML document will be sent back for each Send
+ * operation. No data is read or sent and no callbacks are called during consecutive Yield operations.
  * 
- * All registered users should perform the following steps during each tick:
- *   1. Call HasConnectionAndValidData(). Continue if it returns true, otherwise stop.
- *   2. Call OpenFrame(), which returns a UserFrame with two handles: one to a command XML tree and one to a response XML tree.
- *   3. If the UserFrame contains non-null handles, then read data from the command tree and write data to the response tree.
- *   4. Call CloseFrame(), even if OpenFrame() returned null handles.
- * 
- * Once a connection is established, the RemoteControllable will read exactly one XML document from the remote controller per tick. This happens before any of
- * the registered users' tick methods get called.
- * 
- * The response XML document is sent to the remote immediately after the last registered user has called CloseFrame(). The response document is not cleared
- * between ticks: each user continues with their response tree from the previous tick. This way the user does not need to re-create the tree layout on each tick
- * and typically needs to only overwrite node data.
+ * The remote controller can close the connection by simply closing the TCP socket; EOF (socket shutdown) or any network error will cause potential blocking
+ * reads to cancel and the schedule to stop running. A dropped and re-established connection will cause the schedule to restart from the beginning. Opening a
+ * new connection to a RemoteControllable while a connection already exists will cause the old connection to be dropped and replaced with the new one (the
+ * schedule restarts also in this case).
  * 
  * @see RemoteControlHub, XmlFSocket, Mbml
  */
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class RAGDOLLCONTROLLER_API URemoteControllable : public UActorComponent
+class RAGDOLLCONTROLLER_API URemoteControllable : public USceneComponent
 {
-	/* Implementation details:
-	 * 
-	 * Upon a connection request, the hub actor calls the ConnectWith() method, which in turn stores the connection socket in the RemoteControlSocket field.
-	 * 
-	 * We could well send the response document during the next TickComponent() call. However, we try to send it as soon as possible, so as to leave more time
-	 * for the network and the remote before we try to read in the next inbound command document (we do a blocking read at that point).
-	 **/
-
+	/*
+	 * Why don't we inherit from an UActorComponent? We create the post-user-tick helper component as our default subcomponent, so as to not pollute the
+	 * component space of the owning actor.
+	 *
+	 *
+	 * Inversion of control:
+	 *
+	 * The RemoteControllable class uses callbacks to communicate with users, which results in inversion of control. Reasons for this design choice:
+	 *   - We might want special communication schedules, so as to minimize stalls of the game thread and to limit the communication rate.
+	 *   - We might have several users that all communicate through the same socket and XML documents.
+	 *   - This requires coordination: all users must adhere to the same communication schedule. Leaving control to the users would also leave them the burden
+	 *     of keeping track of the communication schedule.
+	 */
 	GENERATED_BODY()
 
-	/** Permit the remote control hub to have private access, so that it can connect us with the remote controller.
-	 *  Members intended to be accessed: ConnectWith(), NetworkName */
+	/** Permit the remote control hub to have private access, so that it can connect the remote controller to us.
+	 *  Members intended to be accessed: ConnectWith() */
 	friend class ARemoteControlHub;
 
 
@@ -70,7 +165,7 @@ public:
 
 
 
-	/* UE interface overrides */
+	/* UE interface overrides and ticking */
 
 
 public:
@@ -78,121 +173,167 @@ public:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	// Called every frame
+	/** Called every frame. Advances the schedule until the next YieldToUsers or Yield operation. The component's blueprint is run first. Post-user-tick
+	 *  operations are run via the postUserTick() method, which is triggered by our RemoteControllableHelper subcomponent. */
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
+	/** Called every frame by our RemoteControllableHelper subcomponent after our users have ticked. Advances the schedule until the next Yield operation. */
+	void postUserTick();
 
 
 
-	/* The remote control interface */
+
+	/* communication schedule */
 
 
 public:
 
-	/** Register a new user of the control link. This must be called before the remote controller opens the connection; trying to register after that will fail.
-	 *  Once registered, the user is responsible to probe HasConnectionAndValidData() on each tick, and if it return true, then call OpenFrame() followed by a
-	 *  call to CloseFrame() exactly once per each tick. There is no unregister method at the moment; registration is for lifetime. Registration will mark the
-	 *  RemoteControllable component as a tick prerequisite for the user.
+	/** The schedule by which communication operations take place. */
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "RemoteControlSystem" )
+	FRemoteControllableSchedule CommunicationSchedule;
+
+	/** Return the index of the position in the schedule that will be executed next. Yields originating from YieldsBeforeScheduleRestart are treated implicitly
+	 *  as residing at the end of the explicit schedule. Consequently, the returned index has the range [0,n), where n = CommunicationSchedule.Schedule.Num() +
+	 *  CommunicationSchedule.YieldsBeforeScheduleRestart. */
+	UFUNCTION( BlueprintCallable, Category = "RemoteControlSystem" )
+	int32 GetNextOperationIndex() const;
+
+
+private:
+
+	/** Current index position in the effective schedule that combines both the explicit schedule and the implicit Yield commands at its end. */
+	FRemoteControllableSchedule::Index scheduleIndex;
+
+
+
+
+	/* user registration */
+
+
+public:
+
+	/** Type of the communication callback functions. */
+	typedef std::function<void( pugi::xml_node )> CommunicationCallback_t;
+
+	/** Register a new user of the control link.
 	 *  
-	 *  @param	user			A pointer to the user, which must be an AActor (an overload exists for UActorComponent users).
-	 *  @param	xmlTreeName		The name of the subtree in the command and response documents that the user wishes to use. This must be unique among all users
-	 *							of this RemoteControllable component. @see OpenFrame()
-	 *  @return					True on success, false otherwise. The call can fail for various reasons, including: the user is trying to register multiple
-	 *							times, the xmlTreeName is already taken, or the control link is already open. */
-	bool RegisterUser( AActor & user, const std::string & xmlTreeName );
+	 *  The root element of each inbound XML document should contain a child element for each registered user, and the name of the element should match the
+	 *  user's xmlTreeName. Each outbound XML document will contain a single root element, under which a child element is placed for every registered user,
+	 *  again with names matching the xmlTreeName strings of each user.
+	 *  
+	 *  @param user					A reference to the user, which must be either an Actor or ActorComponent object (see overloads). This reference is used to
+	 *								enforce the timing of pre-user-tick and post-user-tick operations in the schedule. It is also used for detecting if the user
+	 *								has been destroyed, in which case the associated user entry is removed from the user list and the associated callbacks will
+	 *								not be called anymore.
+	 *  @param	xmlTreeName			The name of the subtree in the command and response documents that the user wishes to use. This must be unique among all
+	 *								users of this RemoteControllable component.
+	 *  @param receiveCallback		Called when it is time to process the next inbound XML document. The argument of the callback is a handle to the XML tree
+	 *								in the inbound XML document whose name matches the user's xmlTreeName, or a null handle if no such tree was found. The
+	 *								callback function can be an empty std::function.
+	 *  @param sendCallback			Called when it is time to generate the next outbound XML document. The argument of the callback is a handle to an XML tree
+	 *								in the outbound XML document whose name has been set to the user's xmlTreeName. This tree is not cleared between ticks,
+	 *								which permits users to create their response structure only once and then just overwrite values on each subsequent tick. The
+	 *								sendCallback function is never called with a null handle. The callback function can be an empty std::function.
+	 *  @return						True on success, false otherwise. The call can fail for various reasons, including: the user is trying to register multiple
+	 *								times, the user is of wrong type, or the xmlTreeName is already taken. */
+	bool RegisterUser( AActor & user, const std::string & xmlTreeName,
+		const CommunicationCallback_t & receiveCallback, const CommunicationCallback_t & sendCallback );
+	bool RegisterUser( UActorComponent & user, const std::string & xmlTreeName,
+		const CommunicationCallback_t & receiveCallback, const CommunicationCallback_t & sendCallback );
 
-	/** Registration method for UActorComponent users. See the AActor overload for documentation. */
-	bool RegisterUser( UActorComponent & user, const std::string & xmlTreeName );
+	/** Unregister a user of the control link. Callbacks associated with this user will not be called anymore.
+	 *
+	 *	@param user		A reference to the user that was passed earlier to RegisterUser().
+	 *	@return			True on success, false if the provided user is not a registered user of this RemoreControllable. */
+	bool UnregisterUser( AActor & user );
+	bool UnregisterUser( UActorComponent & user );
 
 
-	/** Data struct that represents a specific user's portion of the current tick's network communication frame. */
-	struct UserFrame
+private:
+
+	/** Add tick prerequisites, so that we tick before the user and our post-user-tick helper subcomponent ticks after it. Return true on success. */
+	template< typename ObjectType, typename void (UActorComponent::*AddTickPrerequisiteMethod)(ObjectType *) >
+	bool enforceTimings( ObjectType & user );
+
+	/** Store a new user to the registeredUsers array while enforcing uniqueness constraints. Return true on success. */
+	bool storeNewUser( UObject & user, const std::string & xmlTreeName,
+		const std::function<void( pugi::xml_node )> & receiveCallback, const std::function<void( pugi::xml_node )> & sendCallback );
+
+
+	/** Remove tick prerequisites. Return true on success. */
+	template< typename ObjectType, typename void (UActorComponent::*RemoveTickPrerequisiteMethod)(ObjectType *) >
+	bool removeTimings( ObjectType & user );
+
+	/** Remove a user from the registeredUsers array. Return true on success. */
+	bool removeUser( UObject & user );
+
+
+	/** Find our RemoteControllableHelper component. Log and return nullptr on failure. */
+	URemoteControllableHelper * findRemoteControllableHelper();
+
+
+	/** A registered user entry. */
+	struct RegisteredUser
 	{
-		/** A handle to the command element. Modifications to this element are allowed but will be discarded when the frame is closed. Can be a null handle. */
-		pugi::xml_node command;
+		/** A pointer to the user object. Must be unique within this component. Will become null if the object is destroyed (set by UE). */
+		TWeakObjectPtr<UObject> user;
 
-		/** A handle to the response element. This element will be sent back to the remote once the frame is closed. Can be a null handle. */
-		pugi::xml_node response;
+		/** The xmlTreeName of this user. Must be unique within this component. */
+		std::string xmlTreeName;
 
-		/** Conversion to boolean for easy validity testing. */
-		explicit operator bool() const { return command && response; }
+		/** Callback function for receiving data. Can be an empty function. */
+		CommunicationCallback_t receiveCallback;
+
+		/** Callback function for sending data. Can be an empty function. */
+		CommunicationCallback_t sendCallback;
 	};
 
-	/** Test whether we have an operational connection with a remote controller, so that it is now safe to call OpenFrame(). */
-	bool HasConnectionAndValidData() const;
-
-	/** Opens the command and response XML trees corresponding to the current tick. Each user has provided a tree name during registration (xmlTreeName).
-	 *  The root element of the command XML document should contain a child element with a matching name. If found, then a handle to this element will be
-	 *  returned. The name of the root element is ignored. The response XML document will contain a single root element, under which a child element is placed
-	 *  for every registered user. The names of these child elements equal the xmlTreeNames of the users. A handle to the calling user's response
-	 *  element will be returned. Note that the response elements are not cleared between ticks.
-	 *  
-	 *  You should use HasConnectionAndValidData() to probe whether a connection has been established, as probing with OpenFrame() would flood the error log.
-	 *  
-	 *  @param	user			A pointer to the user.
-	 *  @return					A UserFrame struct containing the command and response element handles. If the user's element is missing from the command XML
-	 *							document, then both handles will be null handles. */
-	UserFrame OpenFrame( const UObject & user );
-
-	/** Closes the frame opened via OpenFrame(). This should be called even if OpenFrame() returned a UserFrame with null handles.
-	 *  @param	user			A pointer to the user. */
-	void CloseFrame( const UObject & user );
-
-
-private:
-
-	/** Actual local registration for both AActor and UActorComponent users. */
-	template<typename UserType>
-	bool RegisterUser( UObject & user, const std::string & xmlTreeName );
-
-	/** Check that the user is registered and we are in a valid state for user access. */
-	bool ValidateUserAccess( const UObject & user );
-
-
-	/** The set of registered users and their associated xml tree names, with a mapping to the associated xml tree names. */
-	TMap<const UObject *, std::string> registeredUsers;
-
-	/** The set of users that have not yet opened and closed their frames during this tick. This is filled with all registered users during prepareFrame()
-	 *  once a new xml document has been successfully read, and gradually cleared by CloseFrame(). */
-	TSet<const UObject *> nonfinishedUsers;
+	/** The set of registered users. Uniqueness is enforced in storeNewUser(). */
+	TArray<RegisteredUser> registeredUsers;
 
 
 
 
-
-	/* RemoteControlHub integration */
+	/* network functionality */
 	
 
-private:
-
-	/** Connect with a remote controller by accepting a remote control socket. Also creates the necessary response trees for each user. */
-	void ConnectWith( std::unique_ptr<XmlFSocket> socket );
-
+public:
 
 	/** The name by which remote controllers can contact this component via a RemoteControlHub. */
-	UPROPERTY( EditAnywhere, Category = "RemoteControlSystem" )
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "RemoteControlSystem" )
 	FString NetworkName;
 
-	/** Remote control socket */
+
+private:
+
+	/** Connect with a remote controller by accepting a remote control socket. The current connection is dropped, if one exists. The schedule is restarted. */
+	void ConnectWith( std::unique_ptr<XmlFSocket> socket );
+
+	/** Test whether we have an operational connection with a remote controller. If true, then all registered callbacks are being called according to the
+	 *  selected schedule and timings. */
+	bool IsConnected() const;
+
+	/** Handle a network error: drop the connection and log the event. */
+	void handleNetworkError( const std::string & description );
+
+	/** The remote control socket */
 	std::unique_ptr<XmlFSocket> remoteControlSocket;
 
 
 
 
-	/* internal operations */
+	/* schedule operations and helpers */
 
 
 private:
 
-	/** Read in a new command xml document and marks all users as nonfinished. Called before any users get a chance to access our data during this tick;
-	 ** this is ensured by the tick prerequisites that are added during each user registration. Checks that the previous tick was finalized and finalizes
-	 ** it if necessary. */
-	void prepareFrame();
+	/** If and only if IsConnected(), then advance the schedule up to the next YieldToUsers or Yield operation. */
+	void advanceSchedule( bool usersHaveTicked );
 
-	/** Send back the response xml document. */
-	void finalizeFrame();
+	/** Perform a receive operation with all registered users. */
+	void receive();
 
-	/** Handle a network error: drop the connection and log the event. */
-	void handleNetworkError( const std::string & description );
+	/** Perform a send operation with all registered users. */
+	void send();
 
 };

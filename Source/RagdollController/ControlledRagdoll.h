@@ -179,7 +179,7 @@ private:
 	/* Inbound data flow, 1st half of Tick() */
 	
 	/** If xml data was received from a remote controller, then handle all commands with inbound data (setters). */
-	URemoteControllable::UserFrame ReadFromRemoteController();
+	//URemoteControllable::UserFrame ReadFromRemoteController();
 
 	/** Read data from the game engine (PhysX etc). Called during the first half of each tick. */
 	void ReadFromSimulation();
@@ -191,7 +191,7 @@ private:
 	void WriteToSimulation();
 
 	/** If xml data was received from a remote controller, then handle all commands that request outbound data (getters). */
-	void WriteToRemoteController( URemoteControllable::UserFrame frame );
+	//void WriteToRemoteController( URemoteControllable::UserFrame frame );
 
 
 	/** The SkeletalMeshComponent of the actor to be controlled. This is guaranteed to be always valid. */
