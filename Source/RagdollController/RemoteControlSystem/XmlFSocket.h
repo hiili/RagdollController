@@ -65,7 +65,7 @@ public:
 	 *  just called. You can precede your calls to GetRaw() with a CleanupBuffer() call: this will drop a possibly existing in-situ xml parse and any leading
 	 *  whitespace from Buffer.
 	 *  
-	 *  If ShouldBlock == true, then the call blocks until either more data has been received or BlockingTimeoutMs is exceeded.
+	 *  If ShouldBlock == true, then the call blocks until either more data or EOF has been received, BlockingTimeoutMs is exceeded, or a network error occurs.
 	 *  
 	 *  @return True if any new data was read, false otherwise. */
 	bool GetRaw();
@@ -76,6 +76,9 @@ public:
 	/** Tries to read the next non-empty, complete (LF or CRLF terminated) line from Buffer, which in turn is re-filled from the socket if necessary. On
 	 *  success, the new line is placed into Line and removed from Buffer. The Line field is not touched upon failure. Buffer might have been cleaned up with
 	 *  CleanupBuffer() in both cases.
+	 *  
+	 *  If ShouldBlock == true, then the call blocks until either success, there is no incoming activity for BlockingTimeoutMs, EOF is received, or a network
+	 *  error occurs.
 	 *  
 	 *  @return True if a new line was read, false otherwise. */
 	bool GetLine();
@@ -131,6 +134,9 @@ public:
 	* Preceding garbage data is _not_ skipped, except for whitespace (spaces, tabs, LFs and CRs). 
 	* Note that the current InXml document is reset no matter whether a new xml document was found for parsing!
 	* 
+	* If ShouldBlock == true, then the call blocks until either success, there is no incoming activity for BlockingTimeoutMs, EOF is received, or a network
+	* error occurs.
+	*
 	* On success, the parsed document becomes available in InXml and InXmlStatus is set to pugi::status_ok. See the documentation of InXml for details.
 	* On failure, InXmlStatus can be used to determine the state of InXml.
 	* 
@@ -164,11 +170,19 @@ public:
 
 private:
 
-	/** Tries to extract a complete xml document from Buffer. On success, the document is parsed to xmlDoc and true is returned.
-	 *  Parsing is done in-situ, and the BufferInSituXmlLength variable is set to indicate the length of the xml-reserved block sitting at the beginning of
-	 *  Buffer.
+	/** Return codes for ExtractXmlFromBuffer(). */
+	enum class ExtractXmlStatus { Ok, NoXmlBlockFound, ParseError };
+
+	/** Tries to extract a complete xml document from Buffer. On success, the parsed document will reside in InXml and true is returned. Parsing is done
+	 *  in-situ, and the BufferInSituXmlLength variable is set to indicate the length of the xml-reserved block sitting at the beginning of Buffer.
 	 * 
-	 *  xmlDoc is not touched on failure, except for parse errors; see GetXml(). */
-	bool ExtractXmlFromBuffer();
+	 *  InXml is not touched if the method fails due to not being able to locate an xml block in the buffer (ExtractXmlStatus::NoXmlBlockFound). However, in
+	 *  case of a parse error (ExtractXmlStatus::ParseError), InXml should be considered invalid; InXmlStatus will indicate its exact state in this case.
+	 *  
+	 *  Also, in the case of a parse error of a complete xml block (ExtractXmlStatus::ParseError), the BufferInSituXmlLength field will be set in such a way
+	 *  that a following CleanupBuffer() call will drop the corrupt xml document from Buffer.
+	 *  
+	 *  @see ExtractXmlStatus */
+	ExtractXmlStatus ExtractXmlFromBuffer();
 
 };

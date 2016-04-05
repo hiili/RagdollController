@@ -92,12 +92,25 @@ bool XmlFSocket::PutLine( std::string line )
 
 bool XmlFSocket::GetXml()
 {
-	// read more data until either we have a full document or no more new data
+	// read more data until either we have a full document, an error state, or no more new data
 	do
 	{
-		// see if Buffer has a complete document, in which case extract it and return
-		if( ExtractXmlFromBuffer() ) return true;
-
+		switch( ExtractXmlFromBuffer() )
+		{
+		case ExtractXmlStatus::Ok:
+			// all ok -> stop and return success
+			return true;
+			break;
+		case ExtractXmlStatus::NoXmlBlockFound:
+			// no xml block found yet -> keep reading more data in
+			break;
+		case ExtractXmlStatus::ParseError:
+			// xml block found but it is invalid -> return error
+			return false;
+			break;
+		default:
+			check( false );   // should not be reached
+		}
 	} while( GetRaw() );
 
 	// no more data available and did not get a complete document
@@ -195,28 +208,28 @@ bool XmlFSocket::ExtractLineFromBuffer()
 
 
 
-bool XmlFSocket::ExtractXmlFromBuffer()
+XmlFSocket::ExtractXmlStatus XmlFSocket::ExtractXmlFromBuffer()
 {
 	// skip leading whitespace, drop previous in-situ InXml
 	CleanupBuffer();
 
 	// check if we have an xml block header at the beginning of the buffer. return false if not.
-	if( 0 != Buffer.compare( 0, std::strlen( XML_BLOCK_HEADER ), XML_BLOCK_HEADER ) ) return false;
+	if( 0 != Buffer.compare( 0, std::strlen( XML_BLOCK_HEADER ), XML_BLOCK_HEADER ) ) return ExtractXmlStatus::NoXmlBlockFound;
 
 	// check if we have an xml block footer somewhere in the buffer (keep it simple and don't care about the line terminator). return false if not.
 	std::size_t footerPos = Buffer.find( XML_BLOCK_FOOTER );
-	if( footerPos == std::string::npos ) return false;
+	if( footerPos == std::string::npos ) return ExtractXmlStatus::NoXmlBlockFound;
 
-	// we have a valid xml document in the buffer, now try to parse it into InXml (let pugixml eat the block header).
+	// we have a complete xml block in the buffer, now try to parse it into InXml (let pugixml eat the block header).
 	// Set BufferInSituXmlLength so that the footer is discarded too when the in-situ parse is cleared (let the line terminator stay).
 	BufferInSituXmlLength = footerPos + std::strlen( XML_BLOCK_FOOTER );
 	InXmlStatus = InXml.load_buffer_inplace( &Buffer[0], footerPos );
 
-	// check for parse errors
-	if( !InXmlStatus ) return false;
+	// if xml parse errors, the return false
+	if( !InXmlStatus ) return ExtractXmlStatus::ParseError;
 
 	// all ok, return true
-	return true;
+	return ExtractXmlStatus::Ok;
 }
 
 
@@ -231,9 +244,11 @@ bool XmlFSocket::GetRaw()
 	// check that we have a valid and connected socket
 	if( !IsGood() ) return false;
 
-	// if in blocking mode, wait until we have new data
+	// if in blocking mode, wait until we have new data or EOF, or a network error occurs
 	if( this->ShouldBlock )
 	{
+		// UE's Wait() is not well documented, but at least most platform implementations seem to use select() in a way that returns immediately on network
+		// errors or EOF (as of UE 4.9)
 		this->Socket->Wait( ESocketWaitConditions::WaitForRead, FTimespan( 0, 0, 0, 0, this->BlockingTimeoutMs ) );
 	}
 
