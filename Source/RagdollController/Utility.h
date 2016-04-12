@@ -21,6 +21,12 @@ public:
 
 	static void AddDefaultRootComponent( AActor * actor, FString spriteName );
 
+	/** Get a pretty-printed name of the given object, or "(null)" if a nullptr was provided. */
+	static FString GetName( const UObject * object )
+	{
+		return object ? *object->GetPathName( object->GetWorld() ) : FString( "(null)" );
+	}
+
 	/** Find a unique actor from the world by type.
 	 *
 	 * @param ActorType				The type of the target actor
