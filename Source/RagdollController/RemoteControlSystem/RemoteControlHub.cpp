@@ -161,7 +161,10 @@ void ARemoteControlHub::ManagePendingConnections()
 				UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s) Pending connection read error! Closing the socket." ), TEXT( __FUNCTION__ ) );
 
 				this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
-				break;   // play safe and don't touch the iterator anymore
+
+				// play safe and don't touch the iterator anymore; instead start over
+				ManagePendingConnections();
+				return;
 			}
 
 			continue;
@@ -172,8 +175,9 @@ void ARemoteControlHub::ManagePendingConnections()
 		DispatchSocket( command, std::move( *iterPendingSocket ) );
 		this->PendingSockets.RemoveAt( iterPendingSocket.GetIndex() );
 
-		// play safe and don't touch the iterator anymore
-		break;
+		// play safe and don't touch the iterator anymore; instead start over
+		ManagePendingConnections();
+		return;
 	}
 }
 
