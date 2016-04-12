@@ -27,6 +27,14 @@ public:
 		return object ? *object->GetPathName( object->GetWorld() ) : FString( "(null)" );
 	}
 
+	/** Find all actors that are of the specified type. This is a convenience wrapper around UGameplayStatics::GetAllActorsOfClass().
+	 *
+	 * @param ActorType				The type of the target actor
+	 * @param worldContextObject	An object that defines the world from which to look for the target actor
+	 * @return						An array of pointers to the found actors */
+	template<typename ActorType>
+	static TArray<ActorType *> FindActorsByClass( const UObject & worldContextObject );
+
 	/** Find a unique actor from the world by type.
 	 *
 	 * @param ActorType				The type of the target actor
@@ -45,6 +53,24 @@ public:
 };
 
 
+
+
+template<typename ActorType>
+TArray<ActorType *> Utility::FindActorsByClass( const UObject & worldContextObject )
+{
+	static_assert(TPointerIsConvertibleFromTo<ActorType, const AActor>::Value,
+		"'ActorType' template parameter to Utility::FindUniqueActorByClass must be derived from AActor");
+
+	TArray<AActor *> actors;
+	UGameplayStatics::GetAllActorsOfClass( const_cast<UObject *>(&worldContextObject), ActorType::StaticClass(), actors );
+		// const cast: GetAllActorsOfClass forwards the context object to GEngine->GetWorldFromContextObject, which takes it as a const (as of UE 4.9)
+
+	// cast results
+	TArray<ActorType *> castActors;
+	castActors.Reserve( actors.Num() );
+	for( auto elem : actors ) castActors.Emplace( dynamic_cast<ActorType *>(elem) );
+	return castActors;
+}
 
 
 template<typename ActorType>
