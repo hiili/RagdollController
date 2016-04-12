@@ -5,6 +5,7 @@
 
 #include "FramerateManager.h"
 #include "DeepSnapshotManager.h"
+#include "Utility.h"
 
 #include <Net/UnrealNetwork.h>
 
@@ -60,27 +61,20 @@ void UDeepSnapshotBase::InitializeComponent()
 	}
 
 	// register with a manager, if one exists
-	TArray<AActor *> managers;
-	UGameplayStatics::GetAllActorsOfClass( this, ADeepSnapshotManager::StaticClass(), managers );
-	if( managers.Num() > 0 )
+	auto result = Utility::FindUniqueActorByClass<ADeepSnapshotManager>( *this );
+	ADeepSnapshotManager * manager = result.first;
+	if( manager )
 	{
-		// manager(s) exist. make sure that there is only one.
-		if( managers.Num() >= 2 )
-		{
-			// several managers exist -> log an error
-			UE_LOG( LogDeepSnapshotSystem, Error,
-				TEXT( "(%s) There should exist at most one DeepSnapshotManager actor in the world! Number of found DeepSnapshotManager actors: %d" ),
-				TEXT( __FUNCTION__ ), managers.Num() );
-			UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
-		}
-		else
-		{
-			// exactly one exists; register with that
-			check( managers.Num() == 1 );
-			ADeepSnapshotManager * manager = dynamic_cast<ADeepSnapshotManager *>(managers[0]);
-			check( manager );   // the cast should always succeed, because we searched only actors of this class
-			manager->RegisterSnapshotComponent( this, SnapshotGroups );
-		}
+		// exactly one exists; register with that
+		manager->RegisterSnapshotComponent( this, SnapshotGroups );
+	}
+	else if( result.second >= 2 )
+	{
+		// several managers exist -> log an error
+		UE_LOG( LogDeepSnapshotSystem, Error,
+			TEXT( "(%s) There should exist at most one DeepSnapshotManager actor in the world! Number of found DeepSnapshotManager actors: %d" ),
+			TEXT( __FUNCTION__ ), result.second );
+		UE_LOG( LogDeepSnapshotSystem, Error, TEXT( "    (%s)" ), *LogCreateDiagnosticLine() );
 	}
 
 	UE_LOG( LogDeepSnapshotSystem, Log, TEXT( "(%s) Initialization finished. %s" ), TEXT( __FUNCTION__ ), *LogCreateDiagnosticLine() );
