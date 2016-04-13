@@ -26,6 +26,9 @@
  *   XML_DOCUMENT_END
  * All outgoing xml documents are preceded by similar block headers and footers.
  * 
+ * Network error and EOF handling has some limitations due to a UE issue (see the documentation of IsGood() for details). In practice, EOF (remote shutdown) and
+ * network errors can be detected only in blocking mode. Also, data cannot be sent back to the remote once an EOF is encountered; the connection will be closed
+ * immediately after arriving at EOF.
  * 
  * If you are going to communicate with Matlab, then you might want to take a look at the Mbml helper class.
  *
@@ -47,7 +50,12 @@ public:
 	XmlFSocket( std::unique_ptr<FSocket> socket );
 
 
-	/** Check whether we have a socket and that it is connected and all-ok. */
+	/** Check whether we have a socket, that it is connected, that we have not reached EOF (remote shutdown), and no network errors have occurred.
+	 *  
+	 *  Note: Due to a UE limitation, this method might return a false positive in some cases. More specifically, if the socket is set to non-blocking (via a
+	 *  SetBlocking(false) or SetBlocking(true, 0) call), then a received EOF (remote shutdown) and possibly also network errors cannot be detected at all and
+	 *  IsGood() will return a false positive. If the socket is set to block (via a SetBlocking(true, n) call with n > 0), then an EOF and network errors can be
+	 *  detected heuristically and IsGood() will work as expected. For the UE issue, see https://answers.unrealengine.com/questions/137371/ */
 	bool IsGood() const;
 
 	/** Set whether the read methods should block until success. Timeout is specified in milliseconds. Note that a timeout value of 0 does _not_ mean

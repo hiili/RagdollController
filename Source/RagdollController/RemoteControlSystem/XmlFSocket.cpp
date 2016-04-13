@@ -19,6 +19,13 @@
 #define PREALLOC_SIZE (64 * 1024)
 
 
+/** Threshold time (in seconds) for considering whether FSocket::Wait() has returned immediately. For a closed socket, Wait() returns in 1.5 to 50 microseconds
+ *  (mean = 2.5, n >= 10000). A too low threshold will result in false negatives in EOF and network error detection. On the other hand, the threshold must be
+ *  lower that the blocking timeout being used. Otherwise we would get false positives in EOF and network error detection. The smallest possible blocking
+ *  timeout is 1 ms, so setting the threshold to 500 us seems to have a good margin in both directions. */
+#define FSOCKET_WAIT_IMMEDIATE_RETURN_THRESHOLD (500.f * 1e-6)
+
+
 /** Xml block header and footer tag */
 #define XML_BLOCK_HEADER "XML_DOCUMENT_BEGIN"
 #define XML_BLOCK_FOOTER "XML_DOCUMENT_END"
@@ -235,6 +242,10 @@ XmlFSocket::ExtractXmlStatus XmlFSocket::ExtractXmlFromBuffer()
 
 
 
+/** Due to a UE limitation, we cannot explicitly detect an EOF (shutdown) and probably not even network errors (see documentation of IsGood()). However, for a
+ *  blocking socket, we can infer such cases from the time that FSocket::Wait() takes: Wait() returns immediately for EOFed or failed sockets even in blocking
+ *  mode. In blocking mode (with a long enough blocking time), we can then infer that there is an EOF or a network error if Wait() returns immediately, but
+ *  there is still no pending data in the socket. */
 bool XmlFSocket::GetRaw()
 {
 	bool success;
@@ -245,15 +256,30 @@ bool XmlFSocket::GetRaw()
 	if( !IsGood() ) return false;
 
 	// if in blocking mode, wait until we have new data or EOF, or a network error occurs
+	bool WaitReturnedImmediately = true;
 	if( this->ShouldBlock )
 	{
 		// UE's Wait() is not well documented, but at least most platform implementations seem to use select() in a way that returns immediately on network
-		// errors or EOF (as of UE 4.9)
+		// errors or EOF (as of UE 4.9). However, we need a heuristic to detect EOF and network errors; see method implementation documentation.
+		double t0 = FPlatformTime::Seconds();
 		this->Socket->Wait( ESocketWaitConditions::WaitForRead, FTimespan( 0, 0, 0, 0, this->BlockingTimeoutMs ) );
+		float WaitTime = FPlatformTime::Seconds() - t0;
+
+		WaitReturnedImmediately = WaitTime < FSOCKET_WAIT_IMMEDIATE_RETURN_THRESHOLD;
 	}
 
-	// check how much new data we have, return false if nothing new
-	if( !this->Socket->HasPendingData( bytesPending ) ) return false;
+	// check how much new data we have. also try to detect EOF and network errors.
+	success = this->Socket->HasPendingData( bytesPending );
+	if( this->ShouldBlock && this->BlockingTimeoutMs >= 1 && WaitReturnedImmediately && (!success || bytesPending == 0) )
+	{
+		// blocking Wait() returned immediately, but there is no pending data -> infer that the connection has EOFed or failed -> drop the connection and return
+		this->Socket.reset();
+		return false;
+	}
+	// return false if nothing new
+	if( !success || bytesPending == 0 ) return false;
+
+	// invariant: we have pending data
 
 	// allocate space and read the data
 	this->Buffer.resize( this->Buffer.size() + bytesPending );
@@ -304,6 +330,15 @@ bool XmlFSocket::PutRaw( const void * buffer, std::size_t length )
 		}
 	}
 
-	// return the success status
-	return bytesSent == length;
+	if( bytesSent == length )
+	{
+		// success
+		return true;
+	}
+	else
+	{
+		// failure: drop the connection and return false
+		this->Socket.reset();
+		return false;
+	}
 }
