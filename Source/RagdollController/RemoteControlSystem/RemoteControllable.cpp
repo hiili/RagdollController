@@ -274,6 +274,15 @@ bool URemoteControllable::removeUser( UObject & user )
 }
 
 
+void URemoteControllable::pruneStaleUsers()
+{
+	// do not use RemoveAllSwap(): it could introduce nasty heisenbugs if the client code unintentionally depends on the callback order
+	registeredUsers.RemoveAll( []( const RegisteredUser & registeredUser ){
+		return !registeredUser.user.IsValid();
+	} );
+}
+
+
 
 
 URemoteControllableHelper * URemoteControllable::findRemoteControllableHelper()
@@ -324,7 +333,8 @@ void URemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 	// store the new socket
 	remoteControlSocket = std::move( socket );
 
-	// enforce synchronous mode: block with no timeout. we really want that data on each tick.
+	// enforce synchronous mode: block with no timeout. we really want that data on each tick. (note that if you disable blocking, then EOF won't be detected
+	// anymore due to a UE limitation; see XmlFSocket::IsGood() for details)
 	remoteControlSocket->SetBlocking( true );
 
 	// restart the schedule
@@ -344,7 +354,7 @@ void URemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 
 
 
-bool URemoteControllable::IsConnected() const
+bool URemoteControllable::IsConnectedAndGood() const
 {
 	return remoteControlSocket && remoteControlSocket->IsGood();
 }
@@ -370,8 +380,12 @@ void URemoteControllable::handleNetworkError( const std::string & description )
 
 void URemoteControllable::advanceSchedule( bool usersHaveTicked )
 {
-	// only proceed if IsConnected()
-	if( !IsConnected() ) return;
+	// only proceed if IsConnectedAndGood()
+	if( !IsConnectedAndGood() ) return;
+
+
+	// prune stale users
+	pruneStaleUsers();
 
 
 	// store the current index for detecting invalid (non-yielding) schedules
@@ -384,10 +398,20 @@ void URemoteControllable::advanceSchedule( bool usersHaveTicked )
 		switch( *scheduleIndex++ )
 		{
 		case ERemoteControllableScheduleOperations::Receive:
-			receive();
+			// try to receive(), drop the connection on errors
+			if( !receive() )
+			{
+				remoteControlSocket.reset();
+				return;
+			}
 			break;
 		case ERemoteControllableScheduleOperations::Send:
-			send();
+			// try to send(), drop the connection on errors
+			if( !send() )
+			{
+				remoteControlSocket.reset();
+				return;
+			}
 			break;
 		case ERemoteControllableScheduleOperations::YieldToUsers:
 			if( !usersHaveTicked )
@@ -428,19 +452,95 @@ void URemoteControllable::advanceSchedule( bool usersHaveTicked )
 }
 
 
-void URemoteControllable::receive()
+
+
+TODO; // you are now accessing InXml and OutXml at their root level. xml spec requires (and your own spec, too?) that there is a single root element and the rest goes below it!
+
+
+bool URemoteControllable::receive()
 {
 	UE_LOG( LogRemoteControlSystem, Error, TEXT( "********************************** RECEIVE OP" ) );
-	if( remoteControlSocket )
+
+	// try to read a single xml document from the socket; stop if failed
+	if( !remoteControlSocket || !remoteControlSocket->GetXml() )
 	{
-		remoteControlSocket->GetLine();
+		if( remoteControlSocket )
+		{
+			TODO;
+			// 
+			// try to get something into the logs.......you need to expand GetXml() to return the ExtractXml's status enumeration. now you cannot distinguish
+			// between "no new data yet, recv was not blocking for some reason" and "got xml doc but have a parse error"
+			// 
+			// GetXml() would be now difficult to use in a non-blocking context for this reason
+		}
+		return false;
 	}
+
+	// invariant: got a complete and valid xml document, which should now reside in remoteControlSocket->InXml
+	check( remoteControlSocket->InXmlStatus );
+
+	// loop through registered users and deliver the contents of InXml to them
+	for( const RegisteredUser & registeredUser : registeredUsers )
+	{
+		// stale user? continue
+		if( !registeredUser.user.IsValid() ) continue;
+
+		// find the user's xml tree
+		pugi::xml_node node = remoteControlSocket->InXml.child( registeredUser.xmlTreeName.c_str() );
+
+		// no xml tree found? -> log and continue with a null node
+		if( !node )
+		{
+			UE_LOG( LogRemoteControlSystem, Warning,
+				TEXT( "(%s, %s) The received xml document did not contain a node for a registered user! User: %s, xmlTreeName=%s" ),
+				TEXT( __FUNCTION__ ), *Utility::GetName( this ), *Utility::GetName( registeredUser.user.Get() ), *FString( registeredUser.xmlTreeName.c_str() ) );
+		}
+
+		// call the receive callback, if not empty
+		if( registeredUser.receiveCallback ) registeredUser.receiveCallback( node );
+	}
+
+	// no fatal errors -> return success
+	return true;
 }
 
 
-void URemoteControllable::send()
+
+
+bool URemoteControllable::send()
 {
-	UE_LOG( LogRemoteControlSystem, Error, TEXT( "********************************** SEND OP" ) );
+	// stop if we do not have a socket
+	if( !remoteControlSocket ) return false;
+
+	// loop through registered users and have them fill in OutXml
+	for( const RegisteredUser & registeredUser : registeredUsers )
+	{
+		// try to find the user's xml tree (might exist from previous send ops)
+		pugi::xml_node node = remoteControlSocket->OutXml.child( registeredUser.xmlTreeName.c_str() );
+
+		// no tree? create one
+		if( !node )
+		{
+			node = remoteControlSocket->OutXml.append_child( registeredUser.xmlTreeName.c_str() );
+			if( !node )
+			{
+				// log and abort comms if unable to create new nodes (pugi rejected the name? OutXml is invalid?)
+				UE_LOG( LogRemoteControlSystem, Warning,
+					TEXT( "(%s, %s) Failed to create a new xml node! Aborting communications. User: %s, xmlTreeName=%s" ),
+					TEXT( __FUNCTION__ ), *Utility::GetName( this ), *Utility::GetName( registeredUser.user.Get() ), *FString( registeredUser.xmlTreeName.c_str() ) );
+				return false;
+			}
+		}
+
+		// invariant: we should now have a valid node
+		check( node );
+
+		// call the send callback, if not empty
+		if( registeredUser.sendCallback ) registeredUser.sendCallback( node );
+	}
+
+	// send OutXml and return its success status
+	return remoteControlSocket->PutXml();
 }
 
 

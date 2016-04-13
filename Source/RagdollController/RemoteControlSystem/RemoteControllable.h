@@ -217,7 +217,7 @@ public:
 
 	/** Register a new user of the control link.
 	 *  
-	 *  The root element of each inbound XML document should contain a child element for each registered user, and the name of the element should match the
+	 *  The root element of each inbound XML document should contain a child element for each registered user and the name of the element should match the
 	 *  user's xmlTreeName. Each outbound XML document will contain a single root element, under which a child element is placed for every registered user,
 	 *  again with names matching the xmlTreeName strings of each user.
 	 *  
@@ -255,17 +255,20 @@ private:
 	template< typename ObjectType, typename void (UActorComponent::*AddTickPrerequisiteMethod)(ObjectType *) >
 	bool enforceTimings( ObjectType & user );
 
-	/** Store a new user to the registeredUsers array while enforcing uniqueness constraints. Return true on success. */
-	bool storeNewUser( UObject & user, const std::string & xmlTreeName,
-		const std::function<void( pugi::xml_node )> & receiveCallback, const std::function<void( pugi::xml_node )> & sendCallback );
-
-
 	/** Remove tick prerequisites. Return true on success. */
 	template< typename ObjectType, typename void (UActorComponent::*RemoveTickPrerequisiteMethod)(ObjectType *) >
 	bool removeTimings( ObjectType & user );
 
+
+	/** Store a new user to the registeredUsers array while enforcing uniqueness constraints. Return true on success. */
+	bool storeNewUser( UObject & user, const std::string & xmlTreeName,
+		const std::function<void( pugi::xml_node )> & receiveCallback, const std::function<void( pugi::xml_node )> & sendCallback );
+
 	/** Remove a user from the registeredUsers array. Return true on success. */
 	bool removeUser( UObject & user );
+
+	/** Prune all stale users from the registeredUsers array. */
+	void pruneStaleUsers();
 
 
 	/** Find our RemoteControllableHelper component. Log and return nullptr on failure. */
@@ -311,7 +314,7 @@ private:
 
 	/** Test whether we have an operational connection with a remote controller. If true, then all registered callbacks are being called according to the
 	 *  selected schedule and timings. */
-	bool IsConnected() const;
+	bool IsConnectedAndGood() const;
 
 	/** Handle a network error: drop the connection and log the event. */
 	void handleNetworkError( const std::string & description );
@@ -327,13 +330,12 @@ private:
 
 private:
 
-	/** If and only if IsConnected(), then advance the schedule up to the next YieldToUsers or Yield operation. */
+	/** If and only if IsConnectedAndGood(), then advance the schedule up to the next YieldToUsers or Yield operation. */
 	void advanceSchedule( bool usersHaveTicked );
 
-	/** Perform a receive operation with all registered users. */
-	void receive();
+	/** Perform a receive operation with all registered users. Return true on success. */
+	bool receive();
 
-	/** Perform a send operation with all registered users. */
-	void send();
-
+	/** Perform a send operation with all registered users. Return true on success. */
+	bool send();
 };
