@@ -30,6 +30,8 @@
  * network errors can be detected only in blocking mode. Also, data cannot be sent back to the remote once an EOF is encountered; the connection will be closed
  * immediately after arriving at EOF.
  * 
+ * The socket can be closed by calling Close() or by destructing the XmlFSocket object. Both will perform a graceful shutdown.
+ * 
  * If you are going to communicate with Matlab, then you might want to take a look at the Mbml helper class.
  *
  * Warning: No flood protection! The line buffer size is unlimited.
@@ -49,6 +51,9 @@ public:
 	 *  invalid state (IsGood() == false). */
 	XmlFSocket( std::unique_ptr<FSocket> socket );
 
+
+	/** Performs a graceful close of the socket. Destructing an XmlFSocket object directly will also perform a graceful close. Return true on success. */
+	bool Close();
 
 	/** Check whether we have a socket, that it is connected, that we have not reached EOF (remote shutdown), and no network errors have occurred.
 	 *  

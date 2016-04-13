@@ -50,6 +50,14 @@ XmlFSocket::XmlFSocket( std::unique_ptr<FSocket> socket ) :
 
 
 
+bool XmlFSocket::Close()
+{
+	return Socket && Socket->Close();
+}
+
+
+
+
 bool XmlFSocket::IsGood() const
 {
 	return this->Socket && this->Socket->GetConnectionState() == ESocketConnectionState::SCS_Connected;
