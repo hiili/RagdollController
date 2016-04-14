@@ -461,23 +461,30 @@ bool URemoteControllable::receive()
 {
 	UE_LOG( LogRemoteControlSystem, Error, TEXT( "********************************** RECEIVE OP" ) );
 
-	// try to read a single xml document from the socket; stop if failed
-	if( !remoteControlSocket || !remoteControlSocket->GetXml() )
+	// stop if we do not have a socket
+	if( !remoteControlSocket ) return false;
+
+	// try to read a single xml document from the socket. log and stop if failed.
+	if( !remoteControlSocket->GetXml() )
 	{
-		if( remoteControlSocket )
-		{
-			TODO;
-			// 
-			// try to get something into the logs.......you need to expand GetXml() to return the ExtractXml's status enumeration. now you cannot distinguish
-			// between "no new data yet, recv was not blocking for some reason" and "got xml doc but have a parse error"
-			// 
-			// GetXml() would be now difficult to use in a non-blocking context for this reason
-		}
+		UE_LOG( LogRemoteControlSystem, Error,
+			TEXT( "(%s, %s) Failed to read an xml document from the socket! Reason: %s" ),
+			TEXT( __FUNCTION__ ), *Utility::GetName( this ), *FString( remoteControlSocket->InXmlStatus.description() ) );
 		return false;
 	}
 
 	// invariant: got a complete and valid xml document, which should now reside in remoteControlSocket->InXml
 	check( remoteControlSocket->InXmlStatus );
+
+	// find the root element of the received document (check name)
+	pugi::xml_node root = remoteControlSocket->InXml.child( TCHAR_TO_ANSI( *NetworkName ) );
+	if( !root )
+	{
+		UE_LOG( LogRemoteControlSystem, Error,
+			TEXT( "(%s, %s) The received xml document did not contain a root element that matches our NetworkName! Aborting communications. NetworkName: %s" ),
+			TEXT( __FUNCTION__ ), *Utility::GetName( this ), *NetworkName );
+		return false;
+	}
 
 	// loop through registered users and deliver the contents of InXml to them
 	for( const RegisteredUser & registeredUser : registeredUsers )
@@ -486,7 +493,7 @@ bool URemoteControllable::receive()
 		if( !registeredUser.user.IsValid() ) continue;
 
 		// find the user's xml tree
-		pugi::xml_node node = remoteControlSocket->InXml.child( registeredUser.xmlTreeName.c_str() );
+		pugi::xml_node node = root.child( registeredUser.xmlTreeName.c_str() );
 
 		// no xml tree found? -> log and continue with a null node
 		if( !node )
@@ -512,16 +519,31 @@ bool URemoteControllable::send()
 	// stop if we do not have a socket
 	if( !remoteControlSocket ) return false;
 
-	// loop through registered users and have them fill in OutXml
+	// find our root element in OutXml
+	pugi::xml_node root = remoteControlSocket->OutXml.first_child();
+	if( !root )
+	{
+		// no root yet -> create one
+		root = remoteControlSocket->OutXml.append_child( TCHAR_TO_ANSI( *NetworkName ) );
+		if( !root )
+		{
+			// log and abort comms if unable to create new nodes (pugi rejected the name? OutXml is invalid?)
+			UE_LOG( LogRemoteControlSystem, Error,
+				TEXT( "(%s, %s) Failed to create the xml root element! Aborting communications." ), TEXT( __FUNCTION__ ), *Utility::GetName( this ) );
+			return false;
+		}
+	}
+
+	// loop through registered users and have them fill in their OutXml elements
 	for( const RegisteredUser & registeredUser : registeredUsers )
 	{
 		// try to find the user's xml tree (might exist from previous send ops)
-		pugi::xml_node node = remoteControlSocket->OutXml.child( registeredUser.xmlTreeName.c_str() );
+		pugi::xml_node node = root.child( registeredUser.xmlTreeName.c_str() );
 
 		// no tree? create one
 		if( !node )
 		{
-			node = remoteControlSocket->OutXml.append_child( registeredUser.xmlTreeName.c_str() );
+			node = root.append_child( registeredUser.xmlTreeName.c_str() );
 			if( !node )
 			{
 				// log and abort comms if unable to create new nodes (pugi rejected the name? OutXml is invalid?)
