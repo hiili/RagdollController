@@ -118,6 +118,10 @@ struct FRemoteControllableSchedule
  * communication frame. The order and frequency by which the callbacks will be called (send-receive-tick, receive-tick-send, receive-tick-send-tick*n, ...)
  * depends on the CommunicationSchedule field of the RemoteControllable object.
  * 
+ * Each inbound XML document should have a single root element that contains a child element for each registered user. The name of these elements should match
+ * the xmlTreeName that each user specified during registration. Each outbound XML document will contain a single root element, under which a child element is
+ * placed for every registered user, again with names matching the xmlTreeName strings of each user.
+ *
  * The schedule starts to run from the beginning once a connection has been established. Exactly one XML document will be read from the remote controller for
  * each Receive operation. The game thread blocks with no timeout until the document has been received. Exactly one XML document will be sent back for each Send
  * operation. No data is read or sent and no callbacks are called during consecutive Yield operations.
@@ -216,10 +220,6 @@ public:
 	typedef std::function<void( pugi::xml_node )> CommunicationCallback_t;
 
 	/** Register a new user of the control link.
-	 *  
-	 *  The root element of each inbound XML document should contain a child element for each registered user and the name of the element should match the
-	 *  user's xmlTreeName. Each outbound XML document will contain a single root element, under which a child element is placed for every registered user,
-	 *  again with names matching the xmlTreeName strings of each user.
 	 *  
 	 *  @param user					A reference to the user, which must be either an Actor or ActorComponent object (see overloads). This reference is used to
 	 *								enforce the timing of pre-user-tick and post-user-tick operations in the schedule. It is also used for detecting if the user
