@@ -23,8 +23,8 @@ public:
 	/** Search through the components owned by the provided actor and return a component with a type that matches the return type.
 	 *
 	 *  @return		If there is exactly one component with a matching type, then return a pointer to it. Otherwise return a nullptr. */
-	template<typename T>
-	static T * FindUniqueComponentByClass( const AActor & actor );
+	template<typename ComponentType>
+	static ComponentType * FindUniqueComponentByClass( const AActor & actor );
 
 };
 

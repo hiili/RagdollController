@@ -1,13 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "RagdollController.h"
+#include "DeepSnapshotBase.h"
 
 #include "FramerateManager.h"
 #include "DeepSnapshotManager.h"
 
 #include <Net/UnrealNetwork.h>
-
-#include "DeepSnapshotBase.h"
 
 
 DEFINE_LOG_CATEGORY( LogDeepSnapshotSystem );
