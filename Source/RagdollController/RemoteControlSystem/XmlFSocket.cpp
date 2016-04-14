@@ -178,18 +178,14 @@ bool XmlFSocket::PutXml( pugi::xml_document * xmlDoc /*= 0 */ )
 
 void XmlFSocket::CleanupBuffer()
 {
-	// do we have an in-situ xml parse in Buffer?
-	if( BufferInSituXmlLength > 0 )
-	{
-		// yes, drop it
-		Buffer.erase( 0, BufferInSituXmlLength );
-		BufferInSituXmlLength = 0;
+	// make sure that we do not have an in-situ xml parse in Buffer
+	Buffer.erase( 0, BufferInSituXmlLength );
+	BufferInSituXmlLength = 0;
 
-		// reset InXml and its status
-		InXml.reset();
-		InXmlStatus = pugi::xml_parse_result();
-		InXmlStatus.status = pugi::status_no_document_element;
-	}
+	// reset InXml and its status
+	InXml.reset();
+	InXmlStatus = pugi::xml_parse_result();
+	InXmlStatus.status = pugi::status_no_document_element;
 
 	// drop leading whitespace
 	// copied from https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
