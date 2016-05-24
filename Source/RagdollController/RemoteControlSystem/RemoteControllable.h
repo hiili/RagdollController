@@ -71,11 +71,15 @@ struct FRemoteControllableSchedule
 	 *  
 	 *  There has to be at least one yield invocation during a cycle, either in the schedule or set here. Otherwise the game thread will block permanently. */
 	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category = "RemoteControlSystem", meta = (ClampMin = "0", UIMin = "0", UIMax = "60") )
-	int32 YieldsBeforeScheduleRestart = 1;
+	int32 YieldsBeforeScheduleRestart = 1;   // UBT has no uint32
 
+
+	/** Verify that the schedule contains at least one Yield operation and that YieldsBeforeScheduleRestart >= 0. */
+	bool verifySchedule();
 
 	/** Index to the effective schedule that combines both the explicit schedule and the implicit Yield commands at its end. */
-	struct Index {
+	class Index {
+	public:
 		explicit Index( const FRemoteControllableSchedule & schedule_ );
 
 		/** Restart the schedule from the beginning. */
@@ -101,7 +105,6 @@ struct FRemoteControllableSchedule
 		/** Don't use! Needed for UE CDOs. */
 		Index();
 	};
-
 };
 
 
@@ -330,12 +333,14 @@ private:
 
 private:
 
-	/** If and only if IsConnectedAndGood(), then advance the schedule up to the next YieldToUsers or Yield operation. */
+	/** If IsConnectedAndGood(), then advance the schedule up to the next YieldToUsers or Yield operation. */
 	void advanceSchedule( bool usersHaveTicked );
 
-	/** Perform a receive operation with all registered users. Return true on success. */
+	/** Perform a receive operation with all registered users: receive exactly one xml document from the remote, then call the receive callback of every
+	 *  registered user with the user's xml element. Return true on success. */
 	bool receive();
 
-	/** Perform a send operation with all registered users. Return true on success. */
+	/** Perform a send operation with all registered users: call the send callback of every registered user, then send the accumulated xml document to the
+	 *  remote. Return true on success. */
 	bool send();
 };

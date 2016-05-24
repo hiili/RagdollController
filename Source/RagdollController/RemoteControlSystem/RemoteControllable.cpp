@@ -41,7 +41,7 @@ URemoteControllable::URemoteControllable() :
 	else
 	{
 		UE_LOG( LogRemoteControlSystem, Error,
-			TEXT( "(%s) Failed to spawn a RemoteControllableHelper subcomponent! Post-user-tick comms operations will not run." ), TEXT( __FUNCTION__ ) );
+			TEXT( "(%s) Failed to create a RemoteControllableHelper subcomponent! Post-user-tick comms operations will not run." ), TEXT( __FUNCTION__ ) );
 	}
 }
 
@@ -119,7 +119,7 @@ ERemoteControllableScheduleOperations FRemoteControllableSchedule::Index::operat
 	}
 	else
 	{
-		// we are beyond the explicit schedule: return Yield
+		// we are beyond the explicit schedule (or the schedule is empty): return Yield
 		return ERemoteControllableScheduleOperations::Yield;
 	}
 }
@@ -140,9 +140,21 @@ FRemoteControllableSchedule::Index FRemoteControllableSchedule::Index::operator-
 	check( schedule );
 
 	Index retval( *this );
-	if( index == 0 ) index = schedule->Schedule.Num() + schedule->YieldsBeforeScheduleRestart - 1;
-	else index = (index - 1) % (schedule->Schedule.Num() + schedule->YieldsBeforeScheduleRestart);
+	if( index > 0 ) --index; else index = schedule->Schedule.Num() + schedule->YieldsBeforeScheduleRestart - 1;
 	return retval;
+}
+
+
+bool FRemoteControllableSchedule::verifySchedule()
+{
+	check(!( YieldsBeforeScheduleRestart < 0 ));   // should never be negative (UBT has no uint32)
+	if( YieldsBeforeScheduleRestart > 0 ) return true;   // have implicit Yield(s) -> satisfied
+
+	// need to find at least one explicit Yield
+	for( auto elem : Schedule ) if( elem == ERemoteControllableScheduleOperations::Yield ) return true;
+
+	// invalid schedule
+	return false;
 }
 
 
@@ -230,7 +242,7 @@ bool URemoteControllable::storeNewUser( UObject & user, const std::string & xmlT
 	const std::function<void( pugi::xml_node )> & receiveCallback, const std::function<void( pugi::xml_node )> & sendCallback )
 {
 	// check that both the user id and the tree name are unique
-	for( const auto & elem : registeredUsers )
+	for( const RegisteredUser & elem : registeredUsers )
 	{
 		if( elem.user == &user || elem.xmlTreeName == xmlTreeName )
 		{
@@ -276,7 +288,7 @@ bool URemoteControllable::removeUser( UObject & user )
 
 void URemoteControllable::pruneStaleUsers()
 {
-	// do not use RemoveAllSwap(): it could introduce nasty heisenbugs if the client code unintentionally depends on the callback order
+	// do not use RemoveAllSwap(): it could create heisenbugs if the client code unintentionally depends on the callback order
 	registeredUsers.RemoveAll( []( const RegisteredUser & registeredUser ){
 		return !registeredUser.user.IsValid();
 	} );
@@ -340,13 +352,6 @@ void URemoteControllable::ConnectWith( std::unique_ptr<XmlFSocket> socket )
 	// restart the schedule
 	scheduleIndex.restart();
 
-	//// initialize the response xml trees for each user
-	//pugi::xml_node root = remoteControlSocket->OutXml.append_child( TCHAR_TO_UTF8( *NetworkName ) );
-	//for( auto & elem : registeredUsers )
-	//{
-	//	root.append_child( elem.Value.c_str() );
-	//}
-
 	// log
 	UE_LOG( LogRemoteControlSystem, Log, TEXT( "(%s) New remote controller connected. Target component: %s" ), TEXT( __FUNCTION__ ), *GetPathName( GetWorld() ) );
 }
@@ -378,18 +383,31 @@ void URemoteControllable::handleNetworkError( const std::string & description )
 
 
 
+/** Note that this method is called twice per tick: first from our own Tick(), then from our helper's Tick(). */
 void URemoteControllable::advanceSchedule( bool usersHaveTicked )
 {
-	// only proceed if IsConnectedAndGood()
-	if( !IsConnectedAndGood() ) return;
+	auto dropConnection = [this]( const char * function, const char * reason )
+	{
+		remoteControlSocket.reset();
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s, %s) %s Aborting communications." ),
+			ANSI_TO_TCHAR( function ), *Utility::GetName( this ), ANSI_TO_TCHAR( reason ) );
+	};
 
+
+	// only proceed if IsConnectedAndGood() and the schedule is valid (check on every tick so as to permit editing the schedule programmatically)
+	if( !IsConnectedAndGood() ) return;
+	if( !CommunicationSchedule.verifySchedule() )
+	{
+		// invalid schedule -> abort comms and log
+		remoteControlSocket.reset();
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s, %s) There must be at least one Yield operation in the schedule, " )
+			TEXT( "either an implicit or an explicit one! Aborting communications." ), TEXT( __FUNCTION__ ), *Utility::GetName( this ) );
+		return;
+	}
 
 	// prune stale users
 	pruneStaleUsers();
 
-
-	// store the current index for detecting invalid (non-yielding) schedules
-	int32 initialIndex = scheduleIndex;
 
 	// advance and run operations until we get to a YieldToUsers or Yield operation
 	while( true )
@@ -401,7 +419,7 @@ void URemoteControllable::advanceSchedule( bool usersHaveTicked )
 			// try to receive(), drop the connection on errors
 			if( !receive() )
 			{
-				remoteControlSocket.reset();
+				dropConnection( __FUNCTION__, "Receive operation failed!" );
 				return;
 			}
 			break;
@@ -409,7 +427,7 @@ void URemoteControllable::advanceSchedule( bool usersHaveTicked )
 			// try to send(), drop the connection on errors
 			if( !send() )
 			{
-				remoteControlSocket.reset();
+				dropConnection( __FUNCTION__, "Send operation failed!" );
 				return;
 			}
 			break;
@@ -421,9 +439,9 @@ void URemoteControllable::advanceSchedule( bool usersHaveTicked )
 			}
 			else
 			{
-				// post-user-tick phase: illegal operation -> log and ignore (an invalid, non-yielding schedule will incorrectly trigger this error too..)
-				UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s, %s) There must be at most one YieldToUsers operation in the schedule for each engine tick! Ignoring a repeated YieldToUsers op at schedule position %d." ),
-					TEXT( __FUNCTION__ ), *GetPathName( GetWorld() ), scheduleIndex - 1 );
+				// post-user-tick phase: illegal operation -> log and ignore
+				UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s, %s) There must be at most one YieldToUsers operation in the schedule for each engine tick! " )
+					TEXT( "Ignoring a repeated YieldToUsers op at schedule position %d." ), TEXT( __FUNCTION__ ), *GetPathName( GetWorld() ), scheduleIndex - 1 );
 				break;
 			}
 		case ERemoteControllableScheduleOperations::Yield:
@@ -440,35 +458,25 @@ void URemoteControllable::advanceSchedule( bool usersHaveTicked )
 				return;
 			}
 		}
-
-		// has the schedule wrapped? (invalid schedule with no yields)
-		if( scheduleIndex == initialIndex )
-		{
-			UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s, %s) There must be at least one Yield operation in the schedule, either an implicit or an explicit one!" ),
-				TEXT( __FUNCTION__ ), *GetPathName( GetWorld() ) );
-			break;
-		}
 	}
 }
 
 
 
 
-TODO; // you are now accessing InXml and OutXml at their root level. xml spec requires (and your own spec, too?) that there is a single root element and the rest goes below it!
-
-
 bool URemoteControllable::receive()
 {
 	UE_LOG( LogRemoteControlSystem, Error, TEXT( "********************************** RECEIVE OP" ) );
 
-	// stop if we do not have a socket
+	// no-op if we do not have a socket
 	if( !remoteControlSocket ) return false;
 
-	// try to read a single xml document from the socket. log and stop if failed.
+	// read a single xml document from the socket
 	if( !remoteControlSocket->GetXml() )
 	{
+		// failed to receive a valid xml document -> log and abort comms
 		UE_LOG( LogRemoteControlSystem, Error,
-			TEXT( "(%s, %s) Failed to read an xml document from the socket! Reason: %s" ),
+			TEXT( "(%s, %s) Failed to read and parse an xml document from the socket! Reason: %s" ),
 			TEXT( __FUNCTION__ ), *Utility::GetName( this ), *FString( remoteControlSocket->InXmlStatus.description() ) );
 		return false;
 	}
@@ -476,12 +484,12 @@ bool URemoteControllable::receive()
 	// invariant: got a complete and valid xml document, which should now reside in remoteControlSocket->InXml
 	check( remoteControlSocket->InXmlStatus );
 
-	// find the root element of the received document (check name)
+	// find the root element of the received document (check name, ignore possible additional roots)
 	pugi::xml_node root = remoteControlSocket->InXml.child( TCHAR_TO_ANSI( *NetworkName ) );
 	if( !root )
 	{
 		UE_LOG( LogRemoteControlSystem, Error,
-			TEXT( "(%s, %s) The received xml document did not contain a root element that matches our NetworkName! Aborting communications. NetworkName: %s" ),
+			TEXT( "(%s, %s) The received xml document did not contain a root element that matches our NetworkName! NetworkName: %s" ),
 			TEXT( __FUNCTION__ ), *Utility::GetName( this ), *NetworkName );
 		return false;
 	}
@@ -489,25 +497,25 @@ bool URemoteControllable::receive()
 	// loop through registered users and deliver the contents of InXml to them
 	for( const RegisteredUser & registeredUser : registeredUsers )
 	{
-		// stale user? continue
+		// skip stale users (pruned elsewhere)
 		if( !registeredUser.user.IsValid() ) continue;
 
 		// find the user's xml tree
 		pugi::xml_node node = root.child( registeredUser.xmlTreeName.c_str() );
-
-		// no xml tree found? -> log and continue with a null node
 		if( !node )
 		{
+			// no xml tree found -> log and continue with a null node
 			UE_LOG( LogRemoteControlSystem, Warning,
 				TEXT( "(%s, %s) The received xml document did not contain a node for a registered user! User: %s, xmlTreeName=%s" ),
-				TEXT( __FUNCTION__ ), *Utility::GetName( this ), *Utility::GetName( registeredUser.user.Get() ), *FString( registeredUser.xmlTreeName.c_str() ) );
+				TEXT( __FUNCTION__ ), *Utility::GetName( this ),
+				*Utility::GetName( registeredUser.user.Get() ), *FString( registeredUser.xmlTreeName.c_str() ) );
 		}
 
 		// call the receive callback, if not empty
 		if( registeredUser.receiveCallback ) registeredUser.receiveCallback( node );
 	}
 
-	// no fatal errors -> return success
+	// no fatal errors (could have warnings) -> return success
 	return true;
 }
 
@@ -516,7 +524,9 @@ bool URemoteControllable::receive()
 
 bool URemoteControllable::send()
 {
-	// stop if we do not have a socket
+	UE_LOG( LogRemoteControlSystem, Error, TEXT( "********************************** SEND OP" ) );
+
+	// no-op if we do not have a socket
 	if( !remoteControlSocket ) return false;
 
 	// find our root element in OutXml
@@ -528,8 +538,7 @@ bool URemoteControllable::send()
 		if( !root )
 		{
 			// log and abort comms if unable to create new nodes (pugi rejected the name? OutXml is invalid?)
-			UE_LOG( LogRemoteControlSystem, Error,
-				TEXT( "(%s, %s) Failed to create the xml root element! Aborting communications." ), TEXT( __FUNCTION__ ), *Utility::GetName( this ) );
+			UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s, %s) Failed to create the xml root element!" ), TEXT( __FUNCTION__ ), *Utility::GetName( this ) );
 			return false;
 		}
 	}
@@ -539,17 +548,16 @@ bool URemoteControllable::send()
 	{
 		// try to find the user's xml tree (might exist from previous send ops)
 		pugi::xml_node node = root.child( registeredUser.xmlTreeName.c_str() );
-
-		// no tree? create one
 		if( !node )
 		{
+			// no tree -> create one
 			node = root.append_child( registeredUser.xmlTreeName.c_str() );
 			if( !node )
 			{
 				// log and abort comms if unable to create new nodes (pugi rejected the name? OutXml is invalid?)
-				UE_LOG( LogRemoteControlSystem, Warning,
-					TEXT( "(%s, %s) Failed to create a new xml node! Aborting communications. User: %s, xmlTreeName=%s" ),
-					TEXT( __FUNCTION__ ), *Utility::GetName( this ), *Utility::GetName( registeredUser.user.Get() ), *FString( registeredUser.xmlTreeName.c_str() ) );
+				UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s, %s) Failed to create a new xml node! User: %s, xmlTreeName=%s" ),
+					TEXT( __FUNCTION__ ), *Utility::GetName( this ),
+					*Utility::GetName( registeredUser.user.Get() ), *FString( registeredUser.xmlTreeName.c_str() ) );
 				return false;
 			}
 		}
@@ -561,8 +569,17 @@ bool URemoteControllable::send()
 		if( registeredUser.sendCallback ) registeredUser.sendCallback( node );
 	}
 
-	// send OutXml and return its success status
-	return remoteControlSocket->PutXml();
+	// send OutXml
+	if( !remoteControlSocket->PutXml() )
+	{
+		// failed to send the xml document -> log and abort comms
+		UE_LOG( LogRemoteControlSystem, Error, TEXT( "(%s, %s) Failed to send the xml document to the socket!" ),
+			TEXT( __FUNCTION__ ), *Utility::GetName( this ) );
+		return false;
+	}
+
+	// no fatal errors (could have warnings) -> return success
+	return true;
 }
 
 
