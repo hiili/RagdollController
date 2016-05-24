@@ -123,6 +123,13 @@ class RAGDOLLCONTROLLER_API UDeepSnapshotBase : public UActorComponent
 	 * 
 	 * An alternative solution would be to enhance the auto-matching logic so as to reject targets for which a better-matching snapshot class exists.
 	 * This would be probably trivial to implement without hard-coding a class tree if the UE reflection system were a bit better documented.
+	 * 
+	 * 
+	 * Note on SerializeTarget dispatching approach:
+	 * 
+	 * The SerializeTarget() method could be also a static non-virtual method (actually, a global function within some namespace). In this case, it could be
+	 * used to serialize a given component without having a corresponding snapshot component at hand. However, we do not have dynamic dispatch by argument type
+	 * in C++, so we would need to emulate it manually.
 	 */
 
 	GENERATED_BODY()
