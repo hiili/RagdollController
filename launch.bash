@@ -1,7 +1,7 @@
 #!/bin/bash
 
 declare -A ue4editor
-ue4editor_path="C:/Program Files/Unreal Engine/4.9/Engine/Binaries/Win64"
+ue4editor_path="C:/Program Files/Epic Games/UE_4.16/Engine/Binaries/Win64"
 ue4editor[debug]="$ue4editor_path/UE4Editor-Win64-Debug.exe"
 ue4editor[debuggame]="$ue4editor_path/UE4Editor.exe"
 ue4editor[development]="$ue4editor_path/UE4Editor.exe"
